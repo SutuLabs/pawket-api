@@ -15,7 +15,7 @@ namespace WalletServer.Controllers
         {
             this.logger = logger;
             // command: redir :8666 :8555
-            var cfg = new ChiaApiConfig("../../../../private_full_node.crt", "../../../../private_full_node.key", "10.179.0.196", 8666);
+            var cfg = new ChiaApiConfig("../private_full_node.crt", "../private_full_node.key", "10.179.0.196", 8666);
             this.client = new FullNodeApiClient(cfg);
         }
 
@@ -23,7 +23,7 @@ namespace WalletServer.Controllers
         public record GetRecordsResponse(ulong peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records);
 
-        [HttpGet]
+        [HttpPost("records")]
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
             if (request.puzzleHashes.Length > 20) return BadRequest("Valid puzzle hash number per request is 20");
