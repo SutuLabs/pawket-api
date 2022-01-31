@@ -15,7 +15,8 @@ namespace WalletServer.Controllers
         {
             this.logger = logger;
             // command: redir :8666 :8555
-            var cfg = new ChiaApiConfig("../private_full_node.crt", "../private_full_node.key", "10.179.0.196", 8666);
+            var path = "/home/sutu/.chia/mainnet/config/ssl/full_node/";
+            var cfg = new ChiaApiConfig(path + "private_full_node.crt", path + "private_full_node.key", "localhost", 8555);
             this.client = new FullNodeApiClient(cfg);
         }
 

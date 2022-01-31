@@ -12,9 +12,9 @@
     "WalletServer": {
       "commandName": "Project",
       "dotnetRunMessages": true,
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "swagger",
-      "applicationUrl": "https://0.0.0.0:5058",
+      "applicationUrl": "http://0.0.0.0:5057;https://0.0.0.0:5058",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
