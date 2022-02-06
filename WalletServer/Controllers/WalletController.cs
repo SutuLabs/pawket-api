@@ -27,7 +27,12 @@ namespace WalletServer.Controllers
         [HttpPost("records")]
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
-            if (request.puzzleHashes.Length > 20) return BadRequest("Valid puzzle hash number per request is 20");
+            if (request == null) return BadRequest("Invalid request");
+            if (request.puzzleHashes == null || request.puzzleHashes.Length > 20)
+                return BadRequest("Valid puzzle hash number per request is 20");
+            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+            this.logger.LogDebug($"From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
+                + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
 
             var bcstaResp = await this.client.GetBlockchainStateAsync();
             if (bcstaResp == null || !bcstaResp.Success || bcstaResp.BlockchainState?.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
