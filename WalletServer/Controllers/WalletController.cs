@@ -31,7 +31,7 @@ namespace WalletServer.Controllers
             if (request.puzzleHashes == null || request.puzzleHashes.Length > 20)
                 return BadRequest("Valid puzzle hash number per request is 20");
             var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
-            this.logger.LogDebug($"From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
+            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
 
             var bcstaResp = await this.client.GetBlockchainStateAsync();
