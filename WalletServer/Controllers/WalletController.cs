@@ -1,6 +1,7 @@
 using ChiaApi;
 using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace WalletServer.Controllers
 {
@@ -9,14 +10,16 @@ namespace WalletServer.Controllers
     public class WalletController : ControllerBase
     {
         private readonly ILogger<WalletController> logger;
+        private readonly AppSettings appSettings;
         private readonly FullNodeApiClient client;
 
-        public WalletController(ILogger<WalletController> logger)
+        public WalletController(ILogger<WalletController> logger, IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
+            this.appSettings = appSettings.Value;
             // command: redir :8666 :8555
-            var path = "/home/sutu/.chia/mainnet/config/ssl/full_node/";
-            var cfg = new ChiaApiConfig(path + "private_full_node.crt", path + "private_full_node.key", "localhost", 8555);
+            var path = this.appSettings.Path ?? "";
+            var cfg = new ChiaApiConfig(path + "private_full_node.crt", path + "private_full_node.key", this.appSettings.Host, this.appSettings.Port);
             this.client = new FullNodeApiClient(cfg);
         }
 
