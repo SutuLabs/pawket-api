@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization;
 using ChiaApi;
+using ChiaApi.Models.Request.FullNode;
 using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -49,6 +51,53 @@ namespace WalletServer.Controllers
             }
 
             return Ok(new GetRecordsResponse(bcstaResp.BlockchainState.Peak.Height, list.ToArray()));
+        }
+
+        public record PushTxRequest(SpendBundleReq? bundle);
+        public record SpendBundleReq
+        (
+            [property: JsonPropertyName("aggregated_signature")] string AggregatedSignature,
+            [property: JsonPropertyName("coin_spends")] CoinSpendReq[]? CoinSpends
+        );
+        public record CoinSpendReq
+        (
+            [property: JsonPropertyName("coin")] CoinItemReq? Coin,
+            [property: JsonPropertyName("puzzle_reveal")] string PuzzleReveal,
+            [property: JsonPropertyName("solution")] string Solution
+        );
+        public record CoinItemReq
+        (
+            [property: JsonPropertyName("amount")] ulong Amount,
+            [property: JsonPropertyName("parent_coin_info")] string ParentCoinInfo,
+            [property: JsonPropertyName("puzzle_hash")] string PuzzleHash
+        );
+
+        [HttpPost("pushtx")]
+        public async Task<ActionResult> PushTx(PushTxRequest request)
+        {
+            if (request == null || request.bundle == null) return BadRequest("Invalid request");
+
+            var bundle = new SpendBundle
+            {
+                AggregatedSignature = request.bundle.AggregatedSignature,
+                CoinSolutions = request.bundle.CoinSpends?
+                    .Select(cs => new ChiaApi.Models.Responses.Shared.CoinSpend
+                    {
+                        PuzzleReveal = cs.PuzzleReveal,
+                        Solution = cs.Solution,
+                        Coin = new ChiaApi.Models.Responses.Shared.CoinItem
+                        {
+                            Amount = cs.Coin.Amount,
+                            ParentCoinInfo = cs.Coin.ParentCoinInfo,
+                            PuzzleHash = cs.Coin.PuzzleHash,
+                        },
+                    })
+                    .ToList(),
+            };
+
+            var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
+
+            return Ok(result);
         }
     }
 }
