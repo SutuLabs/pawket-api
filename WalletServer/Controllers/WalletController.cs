@@ -33,8 +33,8 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
             if (request == null) return BadRequest("Invalid request");
-            if (request.puzzleHashes == null || request.puzzleHashes.Length > 20)
-                return BadRequest("Valid puzzle hash number per request is 20");
+            if (request.puzzleHashes == null || request.puzzleHashes.Length > 200)
+                return BadRequest("Valid puzzle hash number per request is 200");
             var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
