@@ -115,7 +115,7 @@ namespace WalletServer.Controllers
             if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
             if (!recResp.CoinRecord.Spent) return BadRequest("Coin not spend yet.");
 
-            var puzResp = await this.client.GetPuzzleAndSolutionAsync(recResp.CoinRecord.Coin.ParentCoinInfo, recResp.CoinRecord.ConfirmedBlockIndex);
+            var puzResp = await this.client.GetPuzzleAndSolutionAsync(request.parentCoinId, recResp.CoinRecord.SpentBlockIndex);
             if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.PuzzleReveal == null)
             {
                 this.logger.LogWarning($"failed to get puzzle for {recResp.CoinRecord.Coin.ParentCoinInfo} on {recResp.CoinRecord.ConfirmedBlockIndex}");
