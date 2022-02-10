@@ -46,7 +46,7 @@ namespace WalletServer.Controllers
             foreach (var hash in request.puzzleHashes)
             {
                 var recResp = await this.client.GetCoinRecordsByPuzzleHashAsync(hash, request.startHeight, request.endHeight, request.includeSpentCoins);
-                if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return StatusCode(503, "Cannot get records.");
+                if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot get records.");
                 list.Add(new CoinRecordInfo(hash, recResp.CoinRecords.ToArray()));
             }
 
@@ -98,6 +98,31 @@ namespace WalletServer.Controllers
             var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
 
             return Ok(result);
+        }
+
+        public record GetParentPuzzleRequest(string parentCoinId);
+        public record GetParentPuzzleResponse(string parentCoinId, ulong amount, string parentParentCoinId, string puzzleReveal);
+
+        [HttpPost("get-puzzle")]
+        public async Task<ActionResult> GetParentPuzzle(GetParentPuzzleRequest request)
+        {
+            if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
+
+            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
+
+            var recResp = await this.client.GetCoinRecordByNameAsync(request.parentCoinId);
+            if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
+            if (!recResp.CoinRecord.Spent) return BadRequest("Coin not spend yet.");
+
+            var puzResp = await this.client.GetPuzzleAndSolutionAsync(recResp.CoinRecord.Coin.ParentCoinInfo, recResp.CoinRecord.ConfirmedBlockIndex);
+            if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.PuzzleReveal == null)
+            {
+                this.logger.LogWarning($"failed to get puzzle for {recResp.CoinRecord.Coin.ParentCoinInfo} on {recResp.CoinRecord.ConfirmedBlockIndex}");
+                return BadRequest("Failed to get coin.");
+            }
+
+            return Ok(new GetParentPuzzleResponse(request.parentCoinId, recResp.CoinRecord.Coin.Amount, recResp.CoinRecord.Coin.ParentCoinInfo, puzResp.CoinSolution.PuzzleReveal));
         }
     }
 }
