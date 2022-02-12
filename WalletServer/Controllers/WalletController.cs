@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using ChiaApi;
 using ChiaApi.Models.Request.FullNode;
@@ -96,6 +97,10 @@ namespace WalletServer.Controllers
             };
 
             var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
+            if (!result.Success)
+            {
+                this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
+            }
 
             return Ok(result);
         }
