@@ -133,6 +133,33 @@ namespace WalletServer.Controllers
             return Ok(new GetParentPuzzleResponse(request.parentCoinId, recResp.CoinRecord.Coin.Amount, recResp.CoinRecord.Coin.ParentCoinInfo, puzResp.CoinSolution.PuzzleReveal));
         }
 
+        public record GetCoinSolutionRequest(string coinId);
+        public record GetCoinSolutionResponse(CoinSpendReq CoinSpend);
+
+        [HttpPost("get-coin-solution")]
+        public async Task<ActionResult> GetCoinSolution(GetCoinSolutionRequest request)
+        {
+            if (request == null || request.coinId == null) return BadRequest("Invalid request");
+
+            var remoteIpAddress = this.GetRealIp();
+            this.logger.LogInformation($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle[debug] {request.coinId}");
+
+            var recResp = await this.client.GetCoinRecordByNameAsync(request.coinId);
+            if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
+            if (!recResp.CoinRecord.Spent) return BadRequest("Coin not spend yet.");
+
+            var puzResp = await this.client.GetPuzzleAndSolutionAsync(request.coinId, recResp.CoinRecord.SpentBlockIndex);
+            if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.Coin == null)
+            {
+                this.logger.LogWarning($"failed to get puzzle for {recResp.CoinRecord.Coin.ParentCoinInfo} on {recResp.CoinRecord.ConfirmedBlockIndex}");
+                return BadRequest("Failed to get coin.");
+            }
+
+            var cs = puzResp.CoinSolution;
+            return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
+                new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution)));
+        }
+
         private string GetRealIp()
         {
             if (Request.Headers.TryGetValue("X-Real-IP", out var realIp) && !string.IsNullOrWhiteSpace(realIp))
