@@ -36,7 +36,7 @@ namespace WalletServer.Controllers
             if (request == null) return BadRequest("Invalid request");
             if (request.puzzleHashes == null || request.puzzleHashes.Length > 200)
                 return BadRequest("Valid puzzle hash number per request is 200");
-            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+            var remoteIpAddress = this.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
 
@@ -96,6 +96,9 @@ namespace WalletServer.Controllers
                     .ToList(),
             };
 
+            var remoteIpAddress = this.GetRealIp();
+            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends?.Length}]");
+
             var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
             if (!result.Success)
             {
@@ -113,7 +116,7 @@ namespace WalletServer.Controllers
         {
             if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
 
-            var remoteIpAddress = this.HttpContext.Connection.RemoteIpAddress;
+            var remoteIpAddress = this.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
 
             var recResp = await this.client.GetCoinRecordByNameAsync(request.parentCoinId);
@@ -128,6 +131,16 @@ namespace WalletServer.Controllers
             }
 
             return Ok(new GetParentPuzzleResponse(request.parentCoinId, recResp.CoinRecord.Coin.Amount, recResp.CoinRecord.Coin.ParentCoinInfo, puzResp.CoinSolution.PuzzleReveal));
+        }
+
+        private string GetRealIp()
+        {
+            if (Request.Headers.TryGetValue("X-Real-IP", out var realIp) && !string.IsNullOrWhiteSpace(realIp))
+            {
+                return realIp;
+            }
+
+            return this.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
         }
     }
 }
