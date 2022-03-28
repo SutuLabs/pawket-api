@@ -6,6 +6,7 @@ using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Prometheus;
 
 namespace WalletServer.Controllers
 {
@@ -15,6 +16,8 @@ namespace WalletServer.Controllers
     {
         private readonly ILogger<MiscController> logger;
         private readonly AppSettings appSettings;
+
+        private static readonly Counter RequestPriceCount = Metrics.CreateCounter("request_price_total", "Number of Price request.");
 
         public MiscController(ILogger<MiscController> logger, IOptions<AppSettings> appSettings)
         {
@@ -27,6 +30,7 @@ namespace WalletServer.Controllers
         [HttpGet("prices")]
         public async Task<IActionResult> GetPrice()
         {
+            RequestPriceCount.Inc();
             using var client = new HttpClient();
             try
             {

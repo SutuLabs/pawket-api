@@ -5,6 +5,7 @@ using ChiaApi.Models.Request.FullNode;
 using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Prometheus;
 
 namespace WalletServer.Controllers
 {
@@ -15,6 +16,12 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly AppSettings appSettings;
         private readonly FullNodeApiClient client;
+
+        private static readonly Counter RequestRecordCount = Metrics.CreateCounter("request_record_total", "Number of record request.");
+        private static readonly Counter PushTxCount = Metrics.CreateCounter("push_tx_total", "Number of pushtx request.");
+        private static readonly Counter PushTxSuccessCount = Metrics.CreateCounter("push_tx_success_total", "Number of successful pushtx request.");
+        private static readonly Counter RequestPuzzleCount = Metrics.CreateCounter("request_puzzle_total", "Number of puzzle request.");
+        private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.");
 
         public WalletController(ILogger<WalletController> logger, IOptions<AppSettings> appSettings)
         {
@@ -40,6 +47,7 @@ namespace WalletServer.Controllers
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
 
+            RequestRecordCount.Inc();
             var bcstaResp = await this.client.GetBlockchainStateAsync();
             if (bcstaResp == null || !bcstaResp.Success || bcstaResp.BlockchainState?.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
 
@@ -77,6 +85,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> PushTx(PushTxRequest request)
         {
             if (request == null || request.bundle == null) return BadRequest("Invalid request");
+            PushTxCount.Inc();
 
             var bundle = new SpendBundle
             {
@@ -104,6 +113,10 @@ namespace WalletServer.Controllers
             {
                 this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
             }
+            else
+            {
+                PushTxSuccessCount.Inc();
+            }
 
             return Ok(result);
         }
@@ -115,6 +128,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetParentPuzzle(GetParentPuzzleRequest request)
         {
             if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
+            RequestPuzzleCount.Inc();
 
             var remoteIpAddress = this.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
@@ -140,6 +154,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetCoinSolution(GetCoinSolutionRequest request)
         {
             if (request == null || request.coinId == null) return BadRequest("Invalid request");
+            RequestCoinSolutionCount.Inc();
 
             var remoteIpAddress = this.GetRealIp();
             this.logger.LogInformation($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle[debug] {request.coinId}");
