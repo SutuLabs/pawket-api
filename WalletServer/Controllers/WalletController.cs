@@ -37,11 +37,13 @@ namespace WalletServer.Controllers
         public record GetRecordsResponse(ulong peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records);
 
+        private const int MaxCoinCount = 100;
+
         [HttpPost("records")]
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
-            if (request == null) return BadRequest("Invalid request");
-            if (request.puzzleHashes == null || request.puzzleHashes.Length > 200)
+            if (request is null) return BadRequest("Invalid request");
+            if (request.puzzleHashes is null || request.puzzleHashes.Length > 200)
                 return BadRequest("Valid puzzle hash number per request is 200");
             var remoteIpAddress = this.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
@@ -51,15 +53,35 @@ namespace WalletServer.Controllers
             var bcstaResp = await this.client.GetBlockchainStateAsync();
             if (bcstaResp == null || !bcstaResp.Success || bcstaResp.BlockchainState?.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
 
-            var list = new List<CoinRecordInfo>();
-            foreach (var hash in request.puzzleHashes)
+            var records = new List<CoinRecord>();
+            if (request.startHeight == null && request.endHeight == null)
             {
-                var recResp = await this.client.GetCoinRecordsByPuzzleHashAsync(hash, request.startHeight, request.endHeight, request.includeSpentCoins);
-                if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot get records.");
-                list.Add(new CoinRecordInfo(hash, recResp.CoinRecords.ToArray()));
+                var recResp = await this.client.GetCoinRecordsByPuzzleHashesAsync(request.puzzleHashes, request.includeSpentCoins);
+                if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot bulk get records.");
+                records.AddRange(recResp.CoinRecords);
+            }
+            else
+            {
+                foreach (var hash in request.puzzleHashes)
+                {
+                    var recResp = await this.client.GetCoinRecordsByPuzzleHashAsync(hash, request.startHeight, request.endHeight, request.includeSpentCoins);
+                    if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot get records.");
+                    records.AddRange(recResp.CoinRecords);
+                }
             }
 
-            return Ok(new GetRecordsResponse(bcstaResp.BlockchainState.Peak.Height, list.ToArray()));
+            var list = records
+                .OrderByDescending(_ => _.Timestamp)
+                .Take(MaxCoinCount)
+                .GroupBy(_ => _.Coin.PuzzleHash)
+                .Select(g => new CoinRecordInfo(Unprefix0x(g.Key), g.ToArray()))
+                .ToArray();
+            return Ok(new GetRecordsResponse(bcstaResp.BlockchainState.Peak.Height, list));
+        }
+
+        private static string Unprefix0x(string hex)
+        {
+            return hex.StartsWith("0x") ? hex[2..] : hex;
         }
 
         public record PushTxRequest(SpendBundleReq? bundle);
