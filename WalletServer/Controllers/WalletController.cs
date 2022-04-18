@@ -183,7 +183,12 @@ namespace WalletServer.Controllers
 
             var recResp = await this.client.GetCoinRecordByNameAsync(request.coinId);
             if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
-            if (!recResp.CoinRecord.Spent) return BadRequest("Coin not spend yet.");
+            if (!recResp.CoinRecord.Spent)
+            {
+                var c = recResp.CoinRecord.Coin;
+                return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
+                    new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty)));
+            }
 
             var puzResp = await this.client.GetPuzzleAndSolutionAsync(request.coinId, recResp.CoinRecord.SpentBlockIndex);
             if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.Coin == null)
