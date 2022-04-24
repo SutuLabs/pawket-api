@@ -6,6 +6,7 @@ using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Prometheus;
+using WalletServer.Helpers;
 
 namespace WalletServer.Controllers
 {
@@ -45,7 +46,7 @@ namespace WalletServer.Controllers
             if (request is null) return BadRequest("Invalid request");
             if (request.puzzleHashes is null || request.puzzleHashes.Length > 200)
                 return BadRequest("Valid puzzle hash number per request is 200");
-            var remoteIpAddress = this.GetRealIp();
+            var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
 
@@ -74,14 +75,9 @@ namespace WalletServer.Controllers
                 .OrderByDescending(_ => _.Timestamp)
                 .Take(MaxCoinCount)
                 .GroupBy(_ => _.Coin.PuzzleHash)
-                .Select(g => new CoinRecordInfo(Unprefix0x(g.Key), g.ToArray()))
+                .Select(g => new CoinRecordInfo(g.Key.Unprefix0x(), g.ToArray()))
                 .ToArray();
             return Ok(new GetRecordsResponse(bcstaResp.BlockchainState.Peak.Height, list));
-        }
-
-        private static string Unprefix0x(string hex)
-        {
-            return hex.StartsWith("0x") ? hex[2..] : hex;
         }
 
         public record PushTxRequest(SpendBundleReq? bundle);
@@ -127,7 +123,7 @@ namespace WalletServer.Controllers
                     .ToList(),
             };
 
-            var remoteIpAddress = this.GetRealIp();
+            var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends?.Length}]");
 
             var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
@@ -152,7 +148,7 @@ namespace WalletServer.Controllers
             if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
             RequestPuzzleCount.Inc();
 
-            var remoteIpAddress = this.GetRealIp();
+            var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
 
             var recResp = await this.client.GetCoinRecordByNameAsync(request.parentCoinId);
@@ -178,7 +174,7 @@ namespace WalletServer.Controllers
             if (request == null || request.coinId == null) return BadRequest("Invalid request");
             RequestCoinSolutionCount.Inc();
 
-            var remoteIpAddress = this.GetRealIp();
+            var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogInformation($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle[debug] {request.coinId}");
 
             var recResp = await this.client.GetCoinRecordByNameAsync(request.coinId);
@@ -200,16 +196,6 @@ namespace WalletServer.Controllers
             var cs = puzResp.CoinSolution;
             return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
                 new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution)));
-        }
-
-        private string GetRealIp()
-        {
-            if (Request.Headers.TryGetValue("X-Real-IP", out var realIp) && !string.IsNullOrWhiteSpace(realIp))
-            {
-                return realIp;
-            }
-
-            return this.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "";
         }
     }
 }
