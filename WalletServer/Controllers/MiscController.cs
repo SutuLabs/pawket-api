@@ -1,8 +1,3 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using ChiaApi;
-using ChiaApi.Models.Request.FullNode;
-using ChiaApi.Models.Responses.FullNode;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;

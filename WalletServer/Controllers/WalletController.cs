@@ -1,9 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using ChiaApi;
-using ChiaApi.Models.Request.FullNode;
-using ChiaApi.Models.Responses.FullNode;
+using chia.dotnet;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using WalletServer.Helpers;
@@ -15,8 +14,10 @@ namespace WalletServer.Controllers
     public class WalletController : ControllerBase
     {
         private readonly ILogger<WalletController> logger;
+        private readonly IMemoryCache memoryCache;
         private readonly AppSettings appSettings;
-        private readonly FullNodeApiClient client;
+        private readonly HttpRpcClient rpcClient;
+        private readonly FullNodeProxy client;
 
         private static readonly Counter RequestRecordCount = Metrics.CreateCounter("request_record_total", "Number of record request.");
         private static readonly Counter PushTxCount = Metrics.CreateCounter("push_tx_total", "Number of pushtx request.");
@@ -24,17 +25,32 @@ namespace WalletServer.Controllers
         private static readonly Counter RequestPuzzleCount = Metrics.CreateCounter("request_puzzle_total", "Number of puzzle request.");
         private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.");
 
-        public WalletController(ILogger<WalletController> logger, IOptions<AppSettings> appSettings)
+        public WalletController(
+            ILogger<WalletController> logger,
+            IMemoryCache memoryCache,
+            IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
+            this.memoryCache = memoryCache;
             this.appSettings = appSettings.Value;
             // command: redir :8666 :8555
             var path = this.appSettings.Path ?? "";
-            var cfg = new ChiaApiConfig(path + "private_full_node.crt", path + "private_full_node.key", this.appSettings.Host, this.appSettings.Port);
-            this.client = new FullNodeApiClient(cfg);
+            var endpoint = new EndpointInfo
+            {
+                CertPath = path + "private_full_node.crt",
+                KeyPath = path + "private_full_node.key",
+                Uri = new Uri($"https://{this.appSettings.Host}:{this.appSettings.Port}/"),
+            };
+            this.rpcClient = new HttpRpcClient(endpoint);
+            this.client = new FullNodeProxy(this.rpcClient, "client");
         }
 
-        public record GetRecordsRequest(string[] puzzleHashes, ulong? startHeight = null, ulong? endHeight = null, bool includeSpentCoins = false);
+        public record GetRecordsRequest(
+            string[] puzzleHashes,
+            ulong? startHeight = null,
+            ulong? endHeight = null,
+            bool includeSpentCoins = false,
+            bool hint = false);
         public record GetRecordsResponse(ulong peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records);
 
@@ -43,31 +59,30 @@ namespace WalletServer.Controllers
         [HttpPost("records")]
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
-            if (request is null) return BadRequest("Invalid request");
-            if (request.puzzleHashes is null || request.puzzleHashes.Length > 200)
-                return BadRequest("Valid puzzle hash number per request is 200");
+            if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
+            if (request.puzzleHashes.Length > 50)
+                return BadRequest("Valid puzzle hash number per request is 50");
+
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
-                + $"[{request.puzzleHashes?.Length ?? -1}], includeSpent = {request.includeSpentCoins}");
+                + $"[{request.puzzleHashes.Length }], includeSpent = {request.includeSpentCoins}");
 
             RequestRecordCount.Inc();
-            var bcstaResp = await this.client.GetBlockchainStateAsync();
-            if (bcstaResp == null || !bcstaResp.Success || bcstaResp.BlockchainState?.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
+            var bcstate = await this.client.GetBlockchainState();
+            if (bcstate.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
 
             var records = new List<CoinRecord>();
-            if (request.startHeight == null && request.endHeight == null)
+            if (!request.hint)
             {
-                var recResp = await this.client.GetCoinRecordsByPuzzleHashesAsync(request.puzzleHashes, request.includeSpentCoins);
-                if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot bulk get records.");
-                records.AddRange(recResp.CoinRecords);
+                var coinRecords = await this.client.GetCoinRecordsByPuzzleHashes(request.puzzleHashes, request.includeSpentCoins, (int?)request.startHeight, (int?)request.endHeight);
+                records.AddRange(coinRecords);
             }
             else
             {
                 foreach (var hash in request.puzzleHashes)
                 {
-                    var recResp = await this.client.GetCoinRecordsByPuzzleHashAsync(hash, request.startHeight, request.endHeight, request.includeSpentCoins);
-                    if (recResp == null || !recResp.Success || recResp.CoinRecords == null) return BadRequest("Cannot get records.");
-                    records.AddRange(recResp.CoinRecords);
+                    var coinRecords = await this.client.GetCoinRecordsByHint(hash, request.includeSpentCoins, (uint?)request.startHeight, (uint?)request.endHeight);
+                    records.AddRange(coinRecords);
                 }
             }
 
@@ -77,7 +92,7 @@ namespace WalletServer.Controllers
                 .GroupBy(_ => _.Coin.PuzzleHash)
                 .Select(g => new CoinRecordInfo(g.Key.Unprefix0x(), g.ToArray()))
                 .ToArray();
-            return Ok(new GetRecordsResponse(bcstaResp.BlockchainState.Peak.Height, list));
+            return Ok(new GetRecordsResponse(bcstate.Peak.Height, list));
         }
 
         public record PushTxRequest(SpendBundleReq? bundle);
@@ -102,32 +117,32 @@ namespace WalletServer.Controllers
         [HttpPost("pushtx")]
         public async Task<ActionResult> PushTx(PushTxRequest request)
         {
-            if (request == null || request.bundle == null) return BadRequest("Invalid request");
+            if (request?.bundle?.CoinSpends == null) return BadRequest("Invalid request");
             PushTxCount.Inc();
 
             var bundle = new SpendBundle
             {
                 AggregatedSignature = request.bundle.AggregatedSignature,
-                CoinSolutions = request.bundle.CoinSpends?
-                    .Select(cs => new ChiaApi.Models.Responses.Shared.CoinSpend
+                CoinSpends = request.bundle.CoinSpends
+                    .Select(cs => new CoinSpend
                     {
                         PuzzleReveal = cs.PuzzleReveal,
                         Solution = cs.Solution,
-                        Coin = new ChiaApi.Models.Responses.Shared.CoinItem
+                        Coin = new Coin
                         {
-                            Amount = cs.Coin.Amount,
-                            ParentCoinInfo = cs.Coin.ParentCoinInfo,
-                            PuzzleHash = cs.Coin.PuzzleHash,
+                            Amount = cs?.Coin?.Amount ?? 0,
+                            ParentCoinInfo = cs?.Coin?.ParentCoinInfo ?? throw new Exception(""),
+                            PuzzleHash = cs?.Coin?.PuzzleHash ?? throw new Exception(""),
                         },
                     })
                     .ToList(),
             };
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
-            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends?.Length}]");
+            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends.Length}]");
 
-            var result = await this.client.PushTxAsync(new SpendBundleRequest { SpendBundle = bundle });
-            if (!result.Success)
+            var result = await this.client.PushTx(bundle);
+            if (!result)
             {
                 this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
             }
@@ -136,7 +151,7 @@ namespace WalletServer.Controllers
                 PushTxSuccessCount.Inc();
             }
 
-            return Ok(result);
+            return Ok(new { success = result });
         }
 
         public record GetParentPuzzleRequest(string parentCoinId);
@@ -151,18 +166,17 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
 
-            var recResp = await this.client.GetCoinRecordByNameAsync(request.parentCoinId);
-            if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
-            if (!recResp.CoinRecord.Spent) return BadRequest("Coin not spend yet.");
+            var parentCoin = await this.client.GetCoinRecordByName(request.parentCoinId);
+            if (!parentCoin.Spent) return BadRequest("Coin not spend yet.");
 
-            var puzResp = await this.client.GetPuzzleAndSolutionAsync(request.parentCoinId, recResp.CoinRecord.SpentBlockIndex);
-            if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.PuzzleReveal == null)
+            var spend = await this.client.GetPuzzleAndSolution(request.parentCoinId, parentCoin.SpentBlockIndex);
+            if (string.IsNullOrEmpty(spend.PuzzleReveal))
             {
-                this.logger.LogWarning($"failed to get puzzle for {recResp.CoinRecord.Coin.ParentCoinInfo} on {recResp.CoinRecord.ConfirmedBlockIndex}");
+                this.logger.LogWarning($"failed to get puzzle for {parentCoin.Coin.ParentCoinInfo} on {parentCoin.ConfirmedBlockIndex}");
                 return BadRequest("Failed to get coin.");
             }
 
-            return Ok(new GetParentPuzzleResponse(request.parentCoinId, recResp.CoinRecord.Coin.Amount, recResp.CoinRecord.Coin.ParentCoinInfo, puzResp.CoinSolution.PuzzleReveal));
+            return Ok(new GetParentPuzzleResponse(request.parentCoinId, parentCoin.Coin.Amount, parentCoin.Coin.ParentCoinInfo, spend.PuzzleReveal));
         }
 
         public record GetCoinSolutionRequest(string coinId);
@@ -177,25 +191,42 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogInformation($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle[debug] {request.coinId}");
 
-            var recResp = await this.client.GetCoinRecordByNameAsync(request.coinId);
-            if (recResp == null || !recResp.Success || recResp.CoinRecord?.Coin?.ParentCoinInfo == null) return BadRequest("Cannot get records.");
-            if (!recResp.CoinRecord.Spent)
+            var thisRecord = await this.client.GetCoinRecordByName(request.coinId);
+            if (!thisRecord.Spent)
             {
-                var c = recResp.CoinRecord.Coin;
+                var c = thisRecord.Coin;
                 return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
                     new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty)));
             }
 
-            var puzResp = await this.client.GetPuzzleAndSolutionAsync(request.coinId, recResp.CoinRecord.SpentBlockIndex);
-            if (puzResp == null || !puzResp.Success || puzResp.CoinSolution?.Coin == null)
+            var cs = await this.client.GetPuzzleAndSolution(request.coinId, thisRecord.SpentBlockIndex);
+            if (string.IsNullOrEmpty(cs.PuzzleReveal) || string.IsNullOrEmpty(cs.Solution))
             {
-                this.logger.LogWarning($"failed to get puzzle for {recResp.CoinRecord.Coin.ParentCoinInfo} on {recResp.CoinRecord.ConfirmedBlockIndex}");
+                this.logger.LogWarning($"failed to get puzzle for {thisRecord.Coin.ParentCoinInfo} on {thisRecord.ConfirmedBlockIndex}");
                 return BadRequest("Failed to get coin.");
             }
 
-            var cs = puzResp.CoinSolution;
             return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
                 new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution)));
+        }
+
+        public record GetNetworkInfoResponse(string name, string prefix);
+
+        [HttpGet("network")]
+        public async Task<ActionResult> GetNetworkInfo()
+        {
+            if (!this.memoryCache.TryGetValue(nameof(GetNetworkInfo), out GetNetworkInfoResponse cacheInfo))
+            {
+                var (name, prefix) = await this.client.GetNetworkInfo();
+                cacheInfo = new GetNetworkInfoResponse(name, prefix);
+
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+
+                this.memoryCache.Set(nameof(GetNetworkInfo), cacheInfo, cacheEntryOptions);
+            }
+
+            return Ok(cacheInfo);
         }
     }
 }

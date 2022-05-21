@@ -9,7 +9,10 @@
   <ItemGroup>
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
-    <PackageReference Include="ChiaApi" Version="1.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\chia-dotnet\src\chia-dotnet\chia-dotnet.csproj" />
   </ItemGroup>
 
 </Project>
