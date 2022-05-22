@@ -52,7 +52,7 @@ namespace WalletServer.Controllers
             bool includeSpentCoins = false,
             bool hint = false);
         public record GetRecordsResponse(ulong peekHeight, CoinRecordInfo[] coins);
-        public record CoinRecordInfo(string puzzleHash, CoinRecord[] records);
+        public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, string balance);
 
         private const int MaxCoinCount = 100;
 
@@ -88,9 +88,11 @@ namespace WalletServer.Controllers
 
             var list = records
                 .OrderByDescending(_ => _.Timestamp)
-                .Take(MaxCoinCount)
                 .GroupBy(_ => _.Coin.PuzzleHash)
-                .Select(g => new CoinRecordInfo(g.Key.Unprefix0x(), g.ToArray()))
+                .Select(g => new CoinRecordInfo(
+                    g.Key.Unprefix0x(),
+                    g.Take(MaxCoinCount).ToArray(),
+                    g.Where(_ => !_.Spent).Aggregate(0ul, (pv, cur) => pv + cur.Coin.Amount).ToString()))
                 .ToArray();
             return Ok(new GetRecordsResponse(bcstate.Peak.Height, list));
         }
