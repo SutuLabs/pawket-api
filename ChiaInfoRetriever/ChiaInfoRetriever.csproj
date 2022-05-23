@@ -9,7 +9,10 @@
 
   <ItemGroup>
     <PackageReference Include="ChiaApi" Version="1.0.2" />
-    <PackageReference Include="chia-dotnet" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\chia-dotnet\src\chia-dotnet\chia-dotnet.csproj" />
   </ItemGroup>
 
 </Project>
