@@ -53,6 +53,21 @@ namespace WalletServer.Controllers
             bool hint = false);
         public record GetRecordsResponse(ulong peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, string balance);
+        public record CoinRecordEx : CoinRecord
+        {
+            public CoinRecordEx(CoinRecord record, string hintPuzzle)
+            {
+                this.RequestPuzzle = hintPuzzle;
+                this.Coin = record.Coin;
+                this.ConfirmedBlockIndex = record.ConfirmedBlockIndex;
+                this.SpentBlockIndex = record.SpentBlockIndex;
+                this.Spent = record.Spent;
+                this.Coinbase = record.Coinbase;
+                this.Timestamp = record.Timestamp;
+            }
+
+            public string RequestPuzzle { get; init; }
+        }
 
         private const int MaxCoinCount = 100;
 
@@ -71,24 +86,24 @@ namespace WalletServer.Controllers
             var bcstate = await this.client.GetBlockchainState();
             if (bcstate.Peak == null) return StatusCode(503, "Cannot get blockchain status.");
 
-            var records = new List<CoinRecord>();
+            var records = new List<CoinRecordEx>();
             if (!request.hint)
             {
                 var coinRecords = await this.client.GetCoinRecordsByPuzzleHashes(request.puzzleHashes, request.includeSpentCoins, (int?)request.startHeight, (int?)request.endHeight);
-                records.AddRange(coinRecords);
+                records.AddRange(coinRecords.Select(_ => new CoinRecordEx(_, _.Coin.PuzzleHash)));
             }
             else
             {
                 foreach (var hash in request.puzzleHashes)
                 {
                     var coinRecords = await this.client.GetCoinRecordsByHint(hash, request.includeSpentCoins, (uint?)request.startHeight, (uint?)request.endHeight);
-                    records.AddRange(coinRecords);
+                    records.AddRange(coinRecords.Select(_ => new CoinRecordEx(_, hash)));
                 }
             }
 
             var list = records
                 .OrderByDescending(_ => _.Timestamp)
-                .GroupBy(_ => _.Coin.PuzzleHash)
+                .GroupBy(_ => _.RequestPuzzle)
                 .Select(g => new CoinRecordInfo(
                     g.Key.Unprefix0x(),
                     g.Take(MaxCoinCount).ToArray(),
