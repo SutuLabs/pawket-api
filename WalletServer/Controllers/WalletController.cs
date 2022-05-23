@@ -158,17 +158,26 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends.Length}]");
 
-            var result = await this.client.PushTx(bundle);
-            if (!result)
+            try
             {
-                this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
-            }
-            else
-            {
-                PushTxSuccessCount.Inc();
-            }
+                var result = await this.client.PushTx(bundle);
 
-            return Ok(new { success = result });
+                if (!result)
+                {
+                    this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
+                }
+                else
+                {
+                    PushTxSuccessCount.Inc();
+                }
+
+                return Ok(new { success = result });
+            }
+            catch (ResponseException re)
+            {
+                this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{re.Message}\n============\n{JsonSerializer.Serialize(bundle)}");
+                return BadRequest(new { success = false, error = re.Message });
+            }
         }
 
         public record GetParentPuzzleRequest(string parentCoinId);
