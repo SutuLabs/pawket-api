@@ -42,7 +42,7 @@ namespace WalletServer.Controllers
                 Uri = new Uri($"https://{this.appSettings.Host}:{this.appSettings.Port}/"),
             };
             this.rpcClient = new HttpRpcClient(endpoint);
-            this.client = new FullNodeProxy(this.rpcClient, "client");
+            this.client = new FullNodeProxy(this.rpcClient, "client") { MaxRetries = 2 };
         }
 
         public record GetRecordsRequest(
