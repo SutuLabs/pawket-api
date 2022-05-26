@@ -75,8 +75,8 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
             if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
-            if (request.puzzleHashes.Length > 50)
-                return BadRequest("Valid puzzle hash number per request is 50");
+            if (request.puzzleHashes.Length > 300)
+                return BadRequest("Valid puzzle hash number per request is 300");
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
