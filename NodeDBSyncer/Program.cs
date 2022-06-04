@@ -5,8 +5,11 @@ using NodeDBSyncer;
 
 var builder = Host.CreateDefaultBuilder(args);
 
+var environmentName = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+
 var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json")
+    .AddJsonFile($"appsettings.{environmentName}.json", true, true)
     .AddEnvironmentVariables()
     .Build();
 

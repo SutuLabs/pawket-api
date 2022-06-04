@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "NodeDBSyncer": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
