@@ -23,6 +23,45 @@ CREATE TABLE [dbo].[sync_coin_record](
 	[amount] [bigint] NOT NULL,
 	[timestamp] [bigint] NOT NULL
 ) ON [PRIMARY]
+
+
+CREATE TABLE public.sync_coin_record
+(
+    id bigint NOT NULL,
+    coin_name bytea NOT NULL,
+    confirmed_index bigint NOT NULL,
+    spent_index bigint NOT NULL,
+    coinbase boolean NOT NULL,
+    puzzle_hash bytea NOT NULL,
+    coin_parent bytea NOT NULL,
+    amount bigint NOT NULL,
+    timestamp bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_coin_record
+    OWNER to postgres;
+
+CREATE INDEX IF NOT EXISTS idx_confirmed_index
+    ON public.sync_coin_record USING btree
+    (confirmed_index DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_spent_index
+    ON public.sync_coin_record USING btree
+    (spent_index DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_coin_parent
+    ON public.sync_coin_record USING btree
+    (coin_parent ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_puzzle_hash
+    ON public.sync_coin_record USING btree
+    (puzzle_hash ASC NULLS LAST)
+	INCLUDE(amount);
+
+CREATE INDEX IF NOT EXISTS idx_coin_name
+    ON public.sync_coin_record USING btree
+    (coin_name ASC NULLS LAST);
  */
 
 public record HintRecord(
@@ -36,4 +75,21 @@ CREATE TABLE [dbo].[sync_hints](
 	[coin_id] [binary](32) NOT NULL,
 	[hint] [binary](32) NOT NULL
 ) ON [PRIMARY]
+
+CREATE TABLE public.sync_hint_record
+(
+    id bigint NOT NULL,
+    coin_id bytea NOT NULL,
+    hint bytea NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_hint_record
+    OWNER to postgres;
+
+CREATE INDEX IF NOT EXISTS idx_coin
+    ON public.sync_hint_record USING btree
+    (hint ASC NULLS LAST)
+    TABLESPACE pg_default;
+
  */

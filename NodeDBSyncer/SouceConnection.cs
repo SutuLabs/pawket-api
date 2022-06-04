@@ -10,6 +10,7 @@ public class SouceConnection : IDisposable
     private bool disposedValue;
 
     public const string CoinRecordTableName = "coin_record";
+    public const string HintRecordTableName = "hints";
 
     public SouceConnection(string connString)
     {
@@ -25,6 +26,15 @@ public class SouceConnection : IDisposable
     {
         var command = connection.CreateCommand();
         command.CommandText = @$"select max(rowid) from {CoinRecordTableName};";
+        var num = await command.ExecuteScalarAsync() as long?;
+        return num == null ? 0
+            : num.Value;
+    }
+
+    public async Task<long> GetTotalHintRecords()
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @$"select max(rowid) from {HintRecordTableName};";
         var num = await command.ExecuteScalarAsync() as long?;
         return num == null ? 0
             : num.Value;
@@ -66,6 +76,32 @@ WHERE rowid>$start and rowid<=$end;";
             var id = reader.GetFieldValue<long>(8);
 
             yield return new CoinRecord(id, coin_name, confirmed_index, spent_index, coinbase, puzzle_hash, coin_parent, amount, timestamp);
+        }
+    }
+
+    public IEnumerable<HintRecord> GetHintRecords(long start, int number)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+        @$"
+SELECT coin_id,
+       hint,
+       rowid
+FROM {HintRecordTableName}
+WHERE rowid>$start and rowid<=$end;";
+        command.Parameters.AddWithValue("$start", start);
+        var end = start + number;
+        command.Parameters.AddWithValue("$end", end);
+
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var coin_id = reader.GetFieldValue<byte[]>(0);
+            var hint = reader.GetFieldValue<byte[]>(1);
+            var id = reader.GetFieldValue<long>(2);
+
+            yield return new HintRecord(id, coin_id, hint);
         }
     }
 

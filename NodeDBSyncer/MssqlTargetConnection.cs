@@ -4,14 +4,14 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 
-public class TargetConnection : IDisposable
+public class MssqlTargetConnection : ITargetConnection
 {
     public const string CoinRecordTableName = "[dbo].[sync_coin_record]";
 
     private readonly SqlConnection connection;
     private bool disposedValue;
 
-    public TargetConnection(string connString)
+    public MssqlTargetConnection(string connString)
     {
         connection = new SqlConnection(connString);
     }
