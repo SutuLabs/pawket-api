@@ -35,7 +35,7 @@ internal class SyncDbService : BaseRefreshService
 
             var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
             if (max > 0)
-                this.logger.LogInformation($"sync coin records [{targetCount}]~[{sourceCount}] with {max} batches.");
+                this.logger.LogInformation($"sync coin records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
             for (int i = 0; i < max; i++)
             {
@@ -57,7 +57,7 @@ internal class SyncDbService : BaseRefreshService
 
             var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
             if (max > 0)
-                this.logger.LogInformation($"sync hint records [{targetCount}]~[{sourceCount}] with {max} batches.");
+                this.logger.LogInformation($"sync hint records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
             for (int i = 0; i < max; i++)
             {
