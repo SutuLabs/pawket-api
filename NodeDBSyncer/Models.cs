@@ -57,11 +57,14 @@ CREATE INDEX IF NOT EXISTS idx_coin_parent
 CREATE INDEX IF NOT EXISTS idx_puzzle_hash
     ON public.sync_coin_record USING btree
     (puzzle_hash ASC NULLS LAST)
-	INCLUDE(amount);
+	INCLUDE(amount, spent_index);
 
 CREATE INDEX IF NOT EXISTS idx_coin_name
     ON public.sync_coin_record USING btree
     (coin_name ASC NULLS LAST);
+
+
+select pg_table_size('idx_puzzle_hash'), pg_table_size('idx_coin_parent'), pg_table_size('idx_spent_index'), pg_table_size('idx_confirmed_index'), pg_table_size('idx_coin_name')
  */
 
 public record HintRecord(
@@ -89,7 +92,6 @@ ALTER TABLE IF EXISTS public.sync_hint_record
 
 CREATE INDEX IF NOT EXISTS idx_coin
     ON public.sync_hint_record USING btree
-    (hint ASC NULLS LAST)
-    TABLESPACE pg_default;
+    (hint ASC NULLS LAST);
 
  */
