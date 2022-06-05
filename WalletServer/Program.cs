@@ -25,6 +25,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddScoped<DataAccess>();
+builder.Services.AddSingleton<OnlineCounter>();
 
 var app = builder.Build();
 

@@ -16,6 +16,7 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
         private readonly DataAccess dataAccess;
+        private readonly OnlineCounter onlineCounter;
         private readonly AppSettings appSettings;
         private readonly HttpRpcClient rpcClient;
         private readonly FullNodeProxy client;
@@ -30,11 +31,13 @@ namespace WalletServer.Controllers
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
             DataAccess dataAccess,
+            OnlineCounter onlineCounter,
             IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
             this.memoryCache = memoryCache;
             this.dataAccess = dataAccess;
+            this.onlineCounter = onlineCounter;
             this.appSettings = appSettings.Value;
             // command: redir :8666 :8555
             var path = this.appSettings.Path ?? "";
@@ -69,6 +72,7 @@ namespace WalletServer.Controllers
                 return BadRequest("Valid puzzle hash number per request is 300");
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
+            this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes.Length }], includeSpent = {request.includeSpentCoins}");
 
