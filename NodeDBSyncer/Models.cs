@@ -95,3 +95,23 @@ CREATE INDEX IF NOT EXISTS idx_coin
     (hint ASC NULLS LAST);
 
  */
+
+public record SyncState(long spentHeight);
+
+/*
+CREATE TABLE public.sync_state
+(
+    id bigint NOT NULL,
+    spent_height bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_state
+    OWNER to postgres;
+
+INSERT INTO public.sync_state (id, spent_height) VALUES (1, 1);
+ */
+
+public record SpentHeightChange(
+    long id,
+    long spent_height);

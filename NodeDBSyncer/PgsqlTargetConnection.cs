@@ -1,5 +1,6 @@
 ﻿namespace NodeDBSyncer;
 
+using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ public class PgsqlTargetConnection : ITargetConnection
 {
     public const string CoinRecordTableName = "sync_coin_record";
     public const string HintRecordTableName = "sync_hint_record";
+    public const string SyncStateTableName = "sync_state";
 
     private readonly NpgsqlConnection connection;
     private bool disposedValue;
@@ -41,10 +43,53 @@ public class PgsqlTargetConnection : ITargetConnection
             : 0;
     }
 
+    public async Task<long> GetLastSyncSpentHeight()
+    {
+        using var cmd = new NpgsqlCommand(@$"select spent_height from {SyncStateTableName} where id=1;", connection);
+        var o = await cmd.ExecuteScalarAsync();
+        return o is DBNull ? 0
+            : o is long lo ? lo
+            : 0;
+    }
+
+    public async Task WriteLastSyncSpentHeight(long height)
+    {
+        using var cmd = new NpgsqlCommand(@$"UPDATE {SyncStateTableName} SET spent_height=(@spent_height) WHERE id=1;", connection)
+        {
+            Parameters = { new("spent_height", height), }
+        };
+        await cmd.ExecuteNonQueryAsync();
+    }
+
     public async Task WriteCoinRecords(DataTable dataTable)
     {
+        await Import(dataTable, CoinRecordTableName);
+    }
+
+    public async Task WriteHintRecords(DataTable dataTable)
+    {
+        await Import(dataTable, HintRecordTableName);
+    }
+
+    public async Task WriteSpentHeight(SpentHeightChange[] changes)
+    {
+        var tmpTable = "_tmp_import_spent_height_table";
+
+        using var cmd = new NpgsqlCommand(@$"CREATE TEMPORARY TABLE {tmpTable}(id bigint NOT NULL, spent_height bigint NOT NULL, PRIMARY KEY (id));"
+            + $"CREATE INDEX IF NOT EXISTS idx_id ON {tmpTable} USING btree (id ASC NULLS LAST);", connection);
+        await cmd.ExecuteNonQueryAsync();
+
+        var dataTable = ConvertToDataTable(changes);
+        await Import(dataTable, tmpTable);
+
+        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_height FROM {tmpTable} as t WHERE t.id = {CoinRecordTableName}.id; DROP TABLE {tmpTable};", connection);
+        await cmd2.ExecuteNonQueryAsync();
+    }
+
+    private async Task Import(DataTable dataTable, string tableName)
+    {
         var fields = string.Join(",", dataTable.Columns.OfType<DataColumn>().Select(_ => _.ColumnName));
-        using var writer = connection.BeginBinaryImport($"COPY {CoinRecordTableName} ({fields}) FROM STDIN (FORMAT BINARY)");
+        using var writer = connection.BeginBinaryImport($"COPY {tableName} ({fields}) FROM STDIN (FORMAT BINARY)");
 
         foreach (DataRow row in dataTable.Rows)
         {
@@ -54,17 +99,20 @@ public class PgsqlTargetConnection : ITargetConnection
         writer.Complete();
     }
 
-    public async Task WriteHintRecords(DataTable dataTable)
+    private static DataTable ConvertToDataTable<T>(IEnumerable<T> data)
     {
-        var fields = string.Join(",", dataTable.Columns.OfType<DataColumn>().Select(_ => _.ColumnName));
-        using var writer = connection.BeginBinaryImport($"COPY {HintRecordTableName} ({fields}) FROM STDIN (FORMAT BINARY)");
-
-        foreach (DataRow row in dataTable.Rows)
+        var properties = TypeDescriptor.GetProperties(typeof(T));
+        DataTable table = new DataTable();
+        foreach (PropertyDescriptor prop in properties)
+            table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+        foreach (T item in data)
         {
-            writer.WriteRow(row.ItemArray);
+            DataRow row = table.NewRow();
+            foreach (PropertyDescriptor prop in properties)
+                row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+            table.Rows.Add(row);
         }
-
-        writer.Complete();
+        return table;
     }
 
     protected virtual void Dispose(bool disposing)

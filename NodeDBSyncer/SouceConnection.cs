@@ -40,6 +40,15 @@ public class SouceConnection : IDisposable
             : num.Value;
     }
 
+    public async Task<long> GetPeakSpentHeight()
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @$"select max(spent_index) from {CoinRecordTableName};";
+        var num = await command.ExecuteScalarAsync() as long?;
+        return num == null ? 0
+            : num.Value;
+    }
+
     public IEnumerable<CoinRecord> GetCoinRecords(long start, int number)
     {
         var command = connection.CreateCommand();
@@ -102,6 +111,30 @@ WHERE rowid>$start and rowid<=$end;";
             var id = reader.GetFieldValue<long>(2);
 
             yield return new HintRecord(id, coin_id, hint);
+        }
+    }
+
+    public IEnumerable<SpentHeightChange> GetSpentHeightChange(long start, int number)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+        @$"
+SELECT rowid,
+       spent_index
+FROM {CoinRecordTableName}
+WHERE spent_index > $start
+LIMIT $number;";
+        command.Parameters.AddWithValue("$start", start);
+        command.Parameters.AddWithValue("$number", number);
+
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var id = reader.GetFieldValue<long>(0);
+            var spent_index = reader.GetFieldValue<long>(1);
+
+            yield return new SpentHeightChange(id, spent_index);
         }
     }
 

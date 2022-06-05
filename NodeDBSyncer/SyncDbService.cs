@@ -72,6 +72,32 @@ internal class SyncDbService : BaseRefreshService
                 this.logger.LogInformation($"batch processed hint records [{targetCount + i * batch}]~[{targetCount + i * batch + batch}], {tget} ms, {sw.ElapsedMilliseconds} ms");
             }
         }
+
+        {
+            var sourceCount = await source.GetPeakSpentHeight() - 1;
+            var targetCount = await target.GetLastSyncSpentHeight();
+
+            var number = sourceCount - targetCount;
+            if (number > 0)
+                this.logger.LogInformation($"sync spent records [{targetCount}]~[{sourceCount}](+{number}).");
+
+            var current = targetCount;
+            while (current < sourceCount)
+            {
+                var sw = new Stopwatch();
+                sw.Start();
+                var records = source.GetSpentHeightChange(current, batch).ToArray();
+                var tget = sw.ElapsedMilliseconds;
+                sw.Restart();
+                await target.WriteSpentHeight(records);
+                sw.Stop();
+                var tc = current;
+                current = records.Max(_ => _.spent_height) - 1;
+                if (current > sourceCount) current = sourceCount;
+                await target.WriteLastSyncSpentHeight(current);
+                this.logger.LogInformation($"batch processed spent records [{tc}]~[{current}], {tget} ms, {sw.ElapsedMilliseconds} ms");
+            }
+        }
     }
 
     private DataTable ConvertRecordsToTable(IEnumerable<CoinRecord> records)
