@@ -76,13 +76,14 @@ public class PgsqlTargetConnection : ITargetConnection
         var tmpTable = "_tmp_import_spent_height_table";
 
         using var cmd = new NpgsqlCommand(@$"CREATE TEMPORARY TABLE {tmpTable}(id bigint NOT NULL, spent_height bigint NOT NULL, PRIMARY KEY (id));"
-            + $"CREATE INDEX IF NOT EXISTS idx_id ON {tmpTable} USING btree (id ASC NULLS LAST);", connection);
+            + $"CREATE INDEX IF NOT EXISTS idx_id ON {tmpTable} USING btree (id ASC NULLS LAST);"
+            + $"CREATE INDEX IF NOT EXISTS idx_spent_height ON {tmpTable} USING btree (spent_height ASC NULLS LAST);", connection);
         await cmd.ExecuteNonQueryAsync();
 
         var dataTable = ConvertToDataTable(changes);
         await Import(dataTable, tmpTable);
 
-        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_height FROM {tmpTable} as t WHERE t.id = {CoinRecordTableName}.id; DROP TABLE {tmpTable};", connection);
+        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_height FROM {tmpTable} as t WHERE t.id = {CoinRecordTableName}.id AND t.spent_height <> {CoinRecordTableName}.spent_index; DROP TABLE {tmpTable};", connection);
         await cmd2.ExecuteNonQueryAsync();
     }
 
