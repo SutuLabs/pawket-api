@@ -15,7 +15,7 @@ internal class SyncDbService : BaseRefreshService
     public SyncDbService(
         ILogger<SyncDbService> logger,
         IOptions<AppSettings> appSettings)
-        : base(logger, nameof(SyncDbService), 2, 15, 30000)
+        : base(logger, nameof(SyncDbService), 2, 15, 3000)
     {
         this.appSettings = appSettings.Value;
     }
@@ -27,13 +27,13 @@ internal class SyncDbService : BaseRefreshService
         using var target = new PgsqlTargetConnection(this.appSettings.OnlineDbConnString);
         target.Open();
 
-        var batch = 10000;
+        var batch = this.appSettings.SyncBatchSize;
 
         {
             var sourceCount = await source.GetTotalCoinRecords();
             var targetCount = await target.GetTotalCoinRecords();
 
-            var max = Math.Ceiling((double)Math.Min(sourceCount - targetCount, 5000000) / batch);
+            var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
             if (max > 0)
                 this.logger.LogInformation($"sync coin records [{targetCount}]~[{sourceCount}] with {max} batches.");
 
@@ -55,7 +55,7 @@ internal class SyncDbService : BaseRefreshService
             var sourceCount = await source.GetTotalHintRecords();
             var targetCount = await target.GetTotalHintRecords();
 
-            var max = Math.Ceiling((double)Math.Min(sourceCount - targetCount, 5000000) / batch);
+            var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
             if (max > 0)
                 this.logger.LogInformation($"sync hint records [{targetCount}]~[{sourceCount}] with {max} batches.");
 
