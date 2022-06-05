@@ -16,5 +16,17 @@
 
             return httpContext.Connection.RemoteIpAddress?.ToString() ?? "";
         }
+
+        public static string Prefix0x(this string hex)
+        {
+            return hex.StartsWith("0x") ? hex : $"0x{hex}";
+        }
+
+        public static string ToHexWithPrefix0x(this byte[]? buff)
+        {
+            var hex = HexMate.Convert.ToHexString(buff ?? Array.Empty<byte>(), HexMate.HexFormattingOptions.Lowercase);
+            return $"0x{hex}";
+        }
+
     }
 }

@@ -1,4 +1,5 @@
 using Prometheus;
+using WalletServer.Helpers;
 
 var metricServer = new KestrelMetricServer(port: 5888);
 metricServer.Start();
@@ -23,6 +24,7 @@ builder.Services.AddCors(options =>
     });
 });
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
+builder.Services.AddScoped<DataAccess>();
 
 var app = builder.Build();
 
