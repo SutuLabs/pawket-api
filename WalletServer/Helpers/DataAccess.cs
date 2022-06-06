@@ -115,7 +115,7 @@ GROUP BY puzzle_hash, spent";
         8000000000000	8	0
         538045426319383	177120	1
          */
-        var hex = HexMate.Convert.FromHexString(puzzleHash.AsSpan());
+        var hex = HexMate.Convert.FromHexString(puzzleHash.Unprefix0x().AsSpan());
         using var cmd = new NpgsqlCommand(sql, this.connection)
         {
             Parameters = { new("puzzle_hash", NpgsqlTypes.NpgsqlDbType.Bytea) { Value = hex }, }
