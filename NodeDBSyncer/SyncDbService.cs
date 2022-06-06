@@ -27,9 +27,9 @@ internal class SyncDbService : BaseRefreshService
         using var target = new PgsqlTargetConnection(this.appSettings.OnlineDbConnString);
         target.Open();
 
-        var batch = this.appSettings.SyncBatchSize;
-
+        if (this.appSettings.SyncInsertBatchSize > 0)
         {
+            var batch = this.appSettings.SyncInsertBatchSize;
             var sourceCount = await source.GetTotalCoinRecords();
             var targetCount = await target.GetTotalCoinRecords();
 
@@ -51,7 +51,9 @@ internal class SyncDbService : BaseRefreshService
             }
         }
 
+        if (this.appSettings.SyncInsertBatchSize > 0)
         {
+            var batch = this.appSettings.SyncInsertBatchSize;
             var sourceCount = await source.GetTotalHintRecords();
             var targetCount = await target.GetTotalHintRecords();
 
@@ -73,7 +75,9 @@ internal class SyncDbService : BaseRefreshService
             }
         }
 
+        if (this.appSettings.SyncUpdateBatchSize > 0)
         {
+            var batch = this.appSettings.SyncUpdateBatchSize;
             var sourceCount = await source.GetPeakSpentHeight() - 1;
             var targetCount = await target.GetLastSyncSpentHeight();
 

@@ -1,0 +1,66 @@
+﻿CREATE TABLE public.sync_coin_record
+(
+    id bigint NOT NULL,
+    coin_name bytea NOT NULL,
+    confirmed_index bigint NOT NULL,
+    spent_index bigint NOT NULL,
+    coinbase boolean NOT NULL,
+    puzzle_hash bytea NOT NULL,
+    coin_parent bytea NOT NULL,
+    amount bigint NOT NULL,
+    timestamp bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_coin_record
+    OWNER to postgres;
+
+CREATE TABLE public.sync_hint_record
+(
+    id bigint NOT NULL,
+    coin_id bytea NOT NULL,
+    hint bytea NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_hint_record
+    OWNER to postgres;
+
+CREATE TABLE public.sync_state
+(
+    id bigint NOT NULL,
+    spent_height bigint NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.sync_state
+    OWNER to postgres;
+
+INSERT INTO public.sync_state (id, spent_height) VALUES (1, 2000000);
+
+-- create index after first initialization
+
+CREATE INDEX IF NOT EXISTS idx_confirmed_index
+    ON public.sync_coin_record USING btree
+    (confirmed_index DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_spent_index
+    ON public.sync_coin_record USING btree
+    (spent_index DESC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_coin_parent
+    ON public.sync_coin_record USING btree
+    (coin_parent ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_puzzle_hash
+    ON public.sync_coin_record USING btree
+    (puzzle_hash ASC NULLS LAST)
+	INCLUDE(amount, spent_index);
+
+CREATE INDEX IF NOT EXISTS idx_coin_name
+    ON public.sync_coin_record USING btree
+    (coin_name ASC NULLS LAST);
+
+CREATE INDEX IF NOT EXISTS idx_coin
+    ON public.sync_hint_record USING btree
+    (hint ASC NULLS LAST);
