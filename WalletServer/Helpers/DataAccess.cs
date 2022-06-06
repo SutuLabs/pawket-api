@@ -73,7 +73,7 @@ public class DataAccess : IDisposable
         using var cmd = new NpgsqlCommand(sql, this.connection)
         {
             Parameters = {
-                new("puzzle_hash", HexMate.Convert.FromHexString(puzzleHash.AsSpan())),
+                new("puzzle_hash", HexMate.Convert.FromHexString(puzzleHash.Unprefix0x().AsSpan())),
                 new("limit", pageLength),
                 new("offset", pageStart),
                 new("start", startIndex),
