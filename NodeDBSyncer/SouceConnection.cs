@@ -122,7 +122,7 @@ WHERE rowid>$start and rowid<=$end;";
 SELECT rowid,
        spent_index
 FROM {CoinRecordTableName}
-WHERE spent_index > $start
+WHERE spent_index >= $start
 LIMIT $number;";
         command.Parameters.AddWithValue("$start", start);
         command.Parameters.AddWithValue("$number", number);

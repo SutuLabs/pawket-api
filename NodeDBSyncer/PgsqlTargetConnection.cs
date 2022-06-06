@@ -71,11 +71,12 @@ public class PgsqlTargetConnection : ITargetConnection
         await Import(dataTable, HintRecordTableName);
     }
 
-    public async Task WriteSpentHeight(SpentHeightChange[] changes)
+    public async Task<int> WriteSpentHeight(SpentHeightChange[] changes)
     {
         var tmpTable = "_tmp_import_spent_height_table";
 
         using var cmd = new NpgsqlCommand(@$"CREATE TEMPORARY TABLE {tmpTable}(id bigint NOT NULL, spent_height bigint NOT NULL, PRIMARY KEY (id));"
+        //using var cmd = new NpgsqlCommand(@$"CREATE TABLE IF NOT EXISTS {tmpTable}(id bigint NOT NULL, spent_height bigint NOT NULL, PRIMARY KEY (id));"
             + $"CREATE INDEX IF NOT EXISTS idx_id ON {tmpTable} USING btree (id ASC NULLS LAST);"
             + $"CREATE INDEX IF NOT EXISTS idx_spent_height ON {tmpTable} USING btree (spent_height ASC NULLS LAST);", connection);
         await cmd.ExecuteNonQueryAsync();
@@ -83,8 +84,11 @@ public class PgsqlTargetConnection : ITargetConnection
         var dataTable = ConvertToDataTable(changes);
         await Import(dataTable, tmpTable);
 
-        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_height FROM {tmpTable} as t WHERE t.id = {CoinRecordTableName}.id AND t.spent_height <> {CoinRecordTableName}.spent_index; DROP TABLE {tmpTable};", connection);
-        await cmd2.ExecuteNonQueryAsync();
+        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_height FROM {tmpTable} as t WHERE t.id = {CoinRecordTableName}.id AND t.spent_height <> {CoinRecordTableName}.spent_index;" +
+            //$"TRUNCATE TABLE {tmpTable};",
+            $"DROP TABLE {tmpTable};",
+            connection);
+        return await cmd2.ExecuteNonQueryAsync();
     }
 
     private async Task Import(DataTable dataTable, string tableName)

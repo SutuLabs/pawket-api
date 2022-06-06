@@ -89,13 +89,13 @@ internal class SyncDbService : BaseRefreshService
                 var records = source.GetSpentHeightChange(current, batch).ToArray();
                 var tget = sw.ElapsedMilliseconds;
                 sw.Restart();
-                await target.WriteSpentHeight(records);
+                var affectedRow = await target.WriteSpentHeight(records);
                 sw.Stop();
                 var tc = current;
                 current = records.Max(_ => _.spent_height) - 1;
                 if (current > sourceCount) current = sourceCount;
                 await target.WriteLastSyncSpentHeight(current);
-                this.logger.LogInformation($"batch processed spent records [{tc}]~[{current}], {tget} ms, {sw.ElapsedMilliseconds} ms");
+                this.logger.LogInformation($"batch processed spent records [{tc}]~[{current}], {tget} ms, {sw.ElapsedMilliseconds} ms, affected {affectedRow} row(s).");
             }
         }
     }
