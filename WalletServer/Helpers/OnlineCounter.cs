@@ -11,10 +11,12 @@ public class OnlineCounter : IDisposable
     private readonly IMemoryCache memoryCache;
     private readonly AppSettings appSettings;
     private readonly Timer timer;
-    private static readonly Gauge OnlineUser = Metrics.CreateGauge("online_user", "Number of online user according to latest interactive.");
+    private static readonly Gauge OnlineUser = Metrics.CreateGauge("online_user", "Number of online user account according to latest interactive.");
+    private static readonly Gauge DailyActiveUser = Metrics.CreateGauge("active_user", "Number of active user account in recent 24h.");
 
     private bool disposedValue;
     private ConcurrentDictionary<string, DateTime> dictUsers = new();
+    private ConcurrentDictionary<string, DateTime> dictDailyUsers = new();
 
     public OnlineCounter(
         ILogger<OnlineCounter> logger,
@@ -31,29 +33,37 @@ public class OnlineCounter : IDisposable
     {
         var key = string.Join(":", new[] { ip, firstPuzzle, puzzleCount.ToString() });
         dictUsers.AddOrUpdate(key, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
+        var dailyKey = firstPuzzle;
+        dictDailyUsers.AddOrUpdate(dailyKey, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
     }
 
     private void DoWork(object? state)
     {
         try
         {
-            var count = 0;
-            foreach (var user in dictUsers)
-            {
-                count++;
-                if ((DateTime.UtcNow - user.Value).TotalSeconds > this.appSettings.OnlineUserStaySeconds)
-                {
-                    this.dictUsers.Remove(user.Key, out var _);
-                    count--;
-                }
-            }
-
-            OnlineUser.Set(count);
+            Count(this.dictUsers, TimeSpan.FromSeconds(this.appSettings.OnlineUserStaySeconds), OnlineUser);
+            Count(this.dictDailyUsers, TimeSpan.FromHours(24), DailyActiveUser);
         }
         catch (Exception ex)
         {
             this.logger.LogWarning(ex, "failed when count online user");
         }
+    }
+
+    private static void Count(ConcurrentDictionary<string, DateTime> dict, TimeSpan duration, Gauge metric)
+    {
+        var count = 0;
+        foreach (var user in dict)
+        {
+            count++;
+            if ((DateTime.UtcNow - user.Value) > duration)
+            {
+                dict.Remove(user.Key, out var _);
+                count--;
+            }
+        }
+
+        metric.Set(count);
     }
 
     protected virtual void Dispose(bool disposing)
