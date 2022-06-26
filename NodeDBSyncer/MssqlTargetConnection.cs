@@ -16,9 +16,10 @@ public class MssqlTargetConnection : ITargetConnection
         connection = new SqlConnection(connString);
     }
 
-    public void Open()
+    public Task Open()
     {
         connection.Open();
+        return Task.CompletedTask;
     }
 
     public async Task<long> GetTotalCoinRecords()

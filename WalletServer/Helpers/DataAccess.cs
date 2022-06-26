@@ -53,7 +53,7 @@ public class DataAccess : IDisposable
             (method switch
             {
                 GetCoinMethod.PuzzleHash => "SELECT * FROM sync_coin_record WHERE puzzle_hash=(@puzzle_hash)",
-                GetCoinMethod.Hint => "SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_id WHERE hint=(@puzzle_hash)",
+                GetCoinMethod.Hint => "SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name WHERE hint=(@puzzle_hash)",
                 _ => throw new NotImplementedException(),
             })
             + " AND amount>0 AND (confirmed_index >= (@start) or spent_index >= (@start))"

@@ -69,20 +69,20 @@ select pg_table_size('idx_puzzle_hash'), pg_table_size('idx_coin_parent'), pg_ta
 
 public record HintRecord(
     long id,
-    byte[] coin_id,
+    byte[] coin_name,
     byte[] hint);
 
 /*
 CREATE TABLE [dbo].[sync_hints](
 	[id] [bigint] IDENTITY(1,1) NOT NULL,
-	[coin_id] [binary](32) NOT NULL,
+	[coin_name] [binary](32) NOT NULL,
 	[hint] [binary](32) NOT NULL
 ) ON [PRIMARY]
 
 CREATE TABLE public.sync_hint_record
 (
     id bigint NOT NULL,
-    coin_id bytea NOT NULL,
+    coin_name bytea NOT NULL,
     hint bytea NOT NULL,
     PRIMARY KEY (id)
 );
@@ -112,6 +112,22 @@ ALTER TABLE IF EXISTS public.sync_state
 INSERT INTO public.sync_state (id, spent_height) VALUES (1, 1);
  */
 
-public record SpentHeightChange(
-    long id,
-    long spent_height);
+public record CoinSpentRecord(
+    byte[] coin_name,
+    long spent_index);
+
+/*
+CREATE TABLE public.sync_coin_spent
+(
+    id serial PRIMARY KEY,
+    coin_name bytea NOT NULL,
+    spent_index bigint NOT NULL
+);
+
+ALTER TABLE IF EXISTS public.sync_coin_spent
+    OWNER to postgres;
+
+CREATE INDEX IF NOT EXISTS idx_coin
+    ON public.sync_coin_spent USING btree
+    (coin_name ASC NULLS LAST);
+ */

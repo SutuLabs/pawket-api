@@ -106,20 +106,20 @@ WHERE rowid>$start and rowid<=$end;";
 
         while (reader.Read())
         {
-            var coin_id = reader.GetFieldValue<byte[]>(0);
+            var coin_name = reader.GetFieldValue<byte[]>(0);
             var hint = reader.GetFieldValue<byte[]>(1);
             var id = reader.GetFieldValue<long>(2);
 
-            yield return new HintRecord(id, coin_id, hint);
+            yield return new HintRecord(id, coin_name, hint);
         }
     }
 
-    public IEnumerable<SpentHeightChange> GetSpentHeightChange(long start, int number)
+    public IEnumerable<CoinSpentRecord> GetSpentHeightChange(long start, int number)
     {
         var command = connection.CreateCommand();
         command.CommandText =
         @$"
-SELECT rowid,
+SELECT coin_name,
        spent_index
 FROM {CoinRecordTableName}
 WHERE spent_index >= $start
@@ -131,10 +131,10 @@ LIMIT $number;";
 
         while (reader.Read())
         {
-            var id = reader.GetFieldValue<long>(0);
+            var coin_name = reader.GetFieldValue<byte[]>(0);
             var spent_index = reader.GetFieldValue<long>(1);
 
-            yield return new SpentHeightChange(id, spent_index);
+            yield return new CoinSpentRecord(coin_name, spent_index);
         }
     }
 

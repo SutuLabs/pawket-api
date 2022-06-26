@@ -25,15 +25,41 @@ internal class SyncDbService : BaseRefreshService
         using var source = new SouceConnection(this.appSettings.LocalSqliteConnString);
         source.Open();
         using var target = new PgsqlTargetConnection(this.appSettings.OnlineDbConnString);
-        target.Open();
+        await target.Open();
 
-        if (this.appSettings.SyncInsertBatchSize > 0)
+        var complete = await SyncTables(source, target);
+        if (!complete) return;
+
+        // for first time finish initialize, initialize the index
+        if (!await target.CheckIndexExistence())
         {
-            var batch = this.appSettings.SyncInsertBatchSize;
+            this.logger.LogInformation($"First finish initialization, starting index initialization");
+            await target.InitializeIndex();
+        }
+
+        await UpdateSpentIndex(source, target);
+    }
+
+    private async Task<bool> SyncTables(SouceConnection source, PgsqlTargetConnection target)
+    {
+        var batch = this.appSettings.SyncInsertBatchSize;
+        if (batch == 0) return true;
+
+        var exist = await target.GetLastSyncSpentHeight();
+        if (exist == 0)
+        {
+            var peak = await source.GetPeakSpentHeight() - 1;
+            await target.WriteLastSyncSpentHeight(peak);
+        }
+
+        var complete = true;
+
+        {
             var sourceCount = await source.GetTotalCoinRecords();
             var targetCount = await target.GetTotalCoinRecords();
-
-            var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
+            var totalBatch = Math.Ceiling((double)(sourceCount - targetCount) / batch);
+            var max = Math.Min(totalBatch, this.appSettings.SyncBatchCount);
+            if (totalBatch != max) complete = false;
             if (max > 0)
                 this.logger.LogInformation($"sync coin records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
@@ -51,13 +77,13 @@ internal class SyncDbService : BaseRefreshService
             }
         }
 
-        if (this.appSettings.SyncInsertBatchSize > 0)
         {
-            var batch = this.appSettings.SyncInsertBatchSize;
             var sourceCount = await source.GetTotalHintRecords();
             var targetCount = await target.GetTotalHintRecords();
 
-            var max = Math.Min(Math.Ceiling((double)(sourceCount - targetCount) / batch), this.appSettings.SyncBatchCount);
+            var totalBatch = Math.Ceiling((double)(sourceCount - targetCount) / batch);
+            var max = Math.Min(totalBatch, this.appSettings.SyncBatchCount);
+            if (totalBatch != max) complete = false;
             if (max > 0)
                 this.logger.LogInformation($"sync hint records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
@@ -75,32 +101,39 @@ internal class SyncDbService : BaseRefreshService
             }
         }
 
-        if (this.appSettings.SyncUpdateBatchSize > 0)
+        return complete;
+    }
+
+    private async Task UpdateSpentIndex(SouceConnection source, PgsqlTargetConnection target)
+    {
+        var batch = this.appSettings.SyncUpdateBatchSize;
+        var sourcePeak = await source.GetPeakSpentHeight() - 1; // ignore last block as it may be during writing phase
+        var targetPeak = await target.GetLastSyncSpentHeight() + 1; // saved state is processed peak, we start from next one
+
+        var number = sourcePeak - targetPeak;
+        if (number > 0)
+            this.logger.LogInformation($"sync spent records [{targetPeak}]~[{sourcePeak}](+{number}).");
+
+        var current = targetPeak;
+        while (current < sourcePeak)
         {
-            var batch = this.appSettings.SyncUpdateBatchSize;
-            var sourceCount = await source.GetPeakSpentHeight() - 1;
-            var targetCount = await target.GetLastSyncSpentHeight();
+            var sw = new Stopwatch();
+            sw.Start();
+            var records = source.GetSpentHeightChange(current, batch).ToArray();
 
-            var number = sourceCount - targetCount;
-            if (number > 0)
-                this.logger.LogInformation($"sync spent records [{targetCount}]~[{sourceCount}](+{number}).");
+            var tc = current;
+            current = records.Max(_ => _.spent_index) - 1;// ignore records from last block in this batch, as it may not be complete
+            if (current > sourcePeak) current = sourcePeak;
+            records = records.Where(_ => _.spent_index <= current).ToArray();
 
-            var current = targetCount;
-            while (current < sourceCount)
-            {
-                var sw = new Stopwatch();
-                sw.Start();
-                var records = source.GetSpentHeightChange(current, batch).ToArray();
-                var tget = sw.ElapsedMilliseconds;
-                sw.Restart();
-                var affectedRow = await target.WriteSpentHeight(records);
-                sw.Stop();
-                var tc = current;
-                current = records.Max(_ => _.spent_height) - 1;
-                if (current > sourceCount) current = sourceCount;
-                await target.WriteLastSyncSpentHeight(current);
-                this.logger.LogInformation($"batch processed spent records [{tc}]~[{current}], {tget} ms, {sw.ElapsedMilliseconds} ms, affected {affectedRow} row(s).");
-            }
+            var tget = sw.ElapsedMilliseconds;
+            sw.Restart();
+            var affectedRow = await target.WriteSpentHeight(records);
+            sw.Stop();
+            await target.WriteLastSyncSpentHeight(current);
+            this.logger.LogInformation($"batch processed spent records [{tc}]~[{current}], {tget} ms, {sw.ElapsedMilliseconds} ms, affected {affectedRow} row(s).");
+
+            current++;// saved state is processed block, next loop process from next block
         }
     }
 
@@ -136,12 +169,25 @@ internal class SyncDbService : BaseRefreshService
     {
         var dt = new DataTable();
         dt.Columns.Add(nameof(HintRecord.id), typeof(long));
-        dt.Columns.Add(nameof(HintRecord.coin_id), typeof(byte[]));
+        dt.Columns.Add(nameof(HintRecord.coin_name), typeof(byte[]));
         dt.Columns.Add(nameof(HintRecord.hint), typeof(byte[]));
 
         foreach (var r in records)
         {
-            dt.Rows.Add(r.id, r.coin_id, r.hint);
+            dt.Rows.Add(r.id, r.coin_name, r.hint);
+        }
+        return dt;
+    }
+
+    private DataTable ConvertSpentRecordsToTable(IEnumerable<CoinSpentRecord> records)
+    {
+        var dt = new DataTable();
+        dt.Columns.Add(nameof(CoinSpentRecord.coin_name), typeof(byte[]));
+        dt.Columns.Add(nameof(CoinSpentRecord.spent_index), typeof(long));
+
+        foreach (var r in records)
+        {
+            dt.Rows.Add(r.coin_name, r.spent_index);
         }
         return dt;
     }
