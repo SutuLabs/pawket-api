@@ -13,10 +13,12 @@ public class OnlineCounter : IDisposable
     private readonly Timer timer;
     private static readonly Gauge OnlineUser = Metrics.CreateGauge("online_user", "Number of online user account according to latest interactive.");
     private static readonly Gauge DailyActiveUser = Metrics.CreateGauge("active_user", "Number of active user account in recent 24h.");
+    private static readonly Gauge DailyActiveIp = Metrics.CreateGauge("active_ip", "Number of active ip in recent 24h.");
 
     private bool disposedValue;
     private ConcurrentDictionary<string, DateTime> dictUsers = new();
     private ConcurrentDictionary<string, DateTime> dictDailyUsers = new();
+    private ConcurrentDictionary<string, DateTime> dictDailyIps = new();
 
     public OnlineCounter(
         ILogger<OnlineCounter> logger,
@@ -33,8 +35,12 @@ public class OnlineCounter : IDisposable
     {
         var key = string.Join(":", new[] { ip, firstPuzzle, puzzleCount.ToString() });
         dictUsers.AddOrUpdate(key, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
-        var dailyKey = firstPuzzle;
-        dictDailyUsers.AddOrUpdate(dailyKey, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
+
+        var dailyUserKey = firstPuzzle;
+        dictDailyUsers.AddOrUpdate(dailyUserKey, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
+
+        var dailyIpKey = ip;
+        dictDailyIps.AddOrUpdate(dailyIpKey, DateTime.UtcNow, (_, __) => DateTime.UtcNow);
     }
 
     private void DoWork(object? state)
@@ -43,6 +49,7 @@ public class OnlineCounter : IDisposable
         {
             Count(this.dictUsers, TimeSpan.FromSeconds(this.appSettings.OnlineUserStaySeconds), OnlineUser);
             Count(this.dictDailyUsers, TimeSpan.FromHours(24), DailyActiveUser);
+            Count(this.dictDailyIps, TimeSpan.FromHours(24), DailyActiveIp);
         }
         catch (Exception ex)
         {
