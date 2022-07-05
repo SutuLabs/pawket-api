@@ -9,6 +9,9 @@ namespace WalletServer.Helpers;
 
 public class DataAccess : IDisposable
 {
+    private const string SqlLastIndexLateral = ", LATERAL (SELECT spent_index AS last_index FROM sync_state WHERE id=1) AS t";
+    private const string SqlIndexConstraint = " AND (confirmed_index <= last_index) AND (spent_index <= last_index)";
+
     private readonly ILogger<DataAccess> logger;
     private readonly IMemoryCache memoryCache;
     private readonly AppSettings appSettings;
@@ -52,11 +55,11 @@ public class DataAccess : IDisposable
         var sql =
             (method switch
             {
-                GetCoinMethod.PuzzleHash => "SELECT * FROM sync_coin_record WHERE puzzle_hash=(@puzzle_hash)",
-                GetCoinMethod.Hint => "SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name WHERE hint=(@puzzle_hash)",
+                GetCoinMethod.PuzzleHash => $"SELECT r.* FROM sync_coin_record r{SqlLastIndexLateral} WHERE puzzle_hash=(@puzzle_hash)",
+                GetCoinMethod.Hint => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name{SqlLastIndexLateral} WHERE hint=(@puzzle_hash)",
                 _ => throw new NotImplementedException(),
             })
-            + " AND amount>0 AND (confirmed_index >= (@start) or spent_index >= (@start))"
+            + SqlIndexConstraint
             + (includeSpent ? "" : " AND spent_index=0")
             + (order switch
             {
@@ -106,10 +109,12 @@ public class DataAccess : IDisposable
     public async Task<FullBalanceInfo> GetBalance(string puzzleHash)
     {
         GetBalanceCount.Inc();
-        var sql = @"SELECT sum(amount)::bigint, count(*), CASE WHEN spent_index = 0 THEN 0 ELSE 1 END AS spent FROM sync_coin_record
-WHERE puzzle_hash=(@puzzle_hash)
-AND amount > 0
-GROUP BY puzzle_hash, spent";
+        var sql = "SELECT sum(amount)::bigint, count(*), CASE WHEN spent_index = 0 THEN 0 ELSE 1 END AS spent FROM sync_coin_record"
+            + SqlLastIndexLateral
+            + " WHERE puzzle_hash=(@puzzle_hash)"
+            + "AND amount > 0"
+            + SqlIndexConstraint
+            + " GROUP BY puzzle_hash, spent";
         /*
         "sum"	"count"	"spent"
         8000000000000	8	0
