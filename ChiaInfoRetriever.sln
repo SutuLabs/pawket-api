@@ -12,11 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatServer", "ChatServer\ChatServer.csproj", "{FC2BA47F-8139-4F57-9B4C-57574F864BD0}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "chia-dotnet", "chia-dotnet\src\chia-dotnet\chia-dotnet.csproj", "{8F9BB408-3374-491E-8B37-D4F41B481DCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NodeDBSyncer", "NodeDBSyncer\NodeDBSyncer.csproj", "{46F96E13-5EEA-40A9-873F-FA9B98463063}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeDBSyncer", "NodeDBSyncer\NodeDBSyncer.csproj", "{46F96E13-5EEA-40A9-873F-FA9B98463063}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +30,6 @@ Global
 		{48086F6F-0017-49A5-A23E-FE9985EF887F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48086F6F-0017-49A5-A23E-FE9985EF887F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48086F6F-0017-49A5-A23E-FE9985EF887F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FC2BA47F-8139-4F57-9B4C-57574F864BD0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC2BA47F-8139-4F57-9B4C-57574F864BD0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC2BA47F-8139-4F57-9B4C-57574F864BD0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC2BA47F-8139-4F57-9B4C-57574F864BD0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F9BB408-3374-491E-8B37-D4F41B481DCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F9BB408-3374-491E-8B37-D4F41B481DCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F9BB408-3374-491E-8B37-D4F41B481DCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
