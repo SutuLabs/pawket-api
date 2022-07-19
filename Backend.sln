@@ -10,6 +10,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ACE195F7-573F-4249-8375-F1D15699DD72}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "chia-dotnet", "chia-dotnet\src\chia-dotnet\chia-dotnet.csproj", "{8F9BB408-3374-491E-8B37-D4F41B481DCD}"

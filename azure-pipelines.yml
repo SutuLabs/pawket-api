@@ -1,0 +1,112 @@
+name: '$(BuildID).$(DayOfYear)$(Year:yy)'
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - README.md
+    - ChiaInfoRetriever/
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  solution: 'Backend.sln'
+  buildConfiguration: 'Release'
+  versionNumber: '0.1.$(Build.BuildNumber)'
+  devEnvironment: 'pawket-api-dev'
+  artifactName: 'PawketApi'
+
+stages:
+- stage: build
+  displayName: Build
+  jobs:
+  - job: Build
+    steps:
+    - task: CmdLine@2
+      inputs:
+        workingDirectory: '$(Build.SourcesDirectory)'
+        script: |
+          git clone --depth=1 -b chore_retry https://github.com/Chiabee/chia-dotnet.git
+          rm -rf chia-dotnet/.git
+      displayName: 'clone chia-dotnet'
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '$(solution)'
+
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        command: 'build'
+        projects: '$(solution)'
+        arguments: '--configuration $(buildConfiguration) /p:Version=$(versionNumber)'
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'test'
+        projects: '**/*Test*.csproj'
+        arguments: '-o "$(Build.BinariesDirectory)"'
+        workingDirectory: '$(Build.BinariesDirectory)'
+      displayName: test
+
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'publish'
+        publishWebProjects: true
+        arguments: '-o "$(Build.ArtifactStagingDirectory)" /p:Version=$(versionNumber)'
+      displayName: publish
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: '$(artifactName)'
+        publishLocation: 'Container'
+
+
+#- stage: dev
+#  displayName: dev
+#  condition: and(succeeded(), eq(variables['build.sourceBranch'], 'refs/heads/master'))
+#  dependsOn:
+#  - build
+#  jobs:
+#  - deployment: devdeploy
+#    displayName: devDeploy
+#    timeoutInMinutes: 10
+#    cancelTimeoutInMinutes: 1
+#    environment: $(devEnvironment)
+#    strategy:
+#      runOnce:
+#        deploy:
+#          steps:
+#          - task: DownloadBuildArtifacts@0
+#            inputs:
+#              buildType: 'current'
+#              downloadType: 'single'
+#              artifactName: '$(artifactName)'
+#              downloadPath: '$(System.ArtifactsDirectory)'
+
+#          - task: CopyFilesOverSSH@0
+#            inputs:
+#              sshEndpoint: 'gateway'
+#              sourceFolder: '$(System.ArtifactsDirectory)'
+#              contents: '**'
+#              targetFolder: 'opsplatform'
+#              readyTimeout: '20000'
+#              failOnEmptySource: true
+
+#          - task: SSH@0
+#            inputs:
+#              sshEndpoint: 'gateway'
+#              runOptions: 'inline'
+#              inline: |
+#                cd ~/opsplatform/DecOpsPlatform
+#                unzip -o Web.zip && source ~/.bashrc
+#                daemon --name=decops --restart
+#                if [ $? -ne 0 ]; then nohup daemon --name="decops" -v --respawn -f --output=daemon.log dotnet Web.dll >/dev/null 2>&1 & fi
+#              readyTimeout: '20000'
