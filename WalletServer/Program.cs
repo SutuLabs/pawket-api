@@ -11,7 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+#if DEBUG
 builder.Services.AddSwaggerGen();
+#endif
 builder.Services.AddMemoryCache();
 builder.Services.AddCors(options =>
 {
@@ -29,13 +31,15 @@ builder.Services.AddSingleton<OnlineCounter>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+#if DEBUG
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+#endif
 
+// Configure the HTTP request pipeline.
 app.UseAuthorization();
 app.UseCors();
 
