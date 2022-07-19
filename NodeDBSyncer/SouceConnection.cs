@@ -11,6 +11,7 @@ public class SouceConnection : IDisposable
 
     public const string CoinRecordTableName = "coin_record";
     public const string HintRecordTableName = "hints";
+    public const string BlockRecordTableName = "full_blocks";
 
     public SouceConnection(string connString)
     {
@@ -135,6 +136,34 @@ LIMIT $number;";
             var spent_index = reader.GetFieldValue<long>(1);
 
             yield return new CoinSpentRecord(coin_name, spent_index);
+        }
+    }
+
+    public IEnumerable<FullBlockRecord> GetBlockRecords(long start, int number)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText =
+        @$"
+SELECT header_hash, prev_hash, height, sub_epoch_summary, is_fully_compactified, block, block_record
+FROM {BlockRecordTableName}
+WHERE in_main_chain=true and height>$start and height<=$end;";
+        command.Parameters.AddWithValue("$start", start);
+        var end = start + number;
+        command.Parameters.AddWithValue("$end", end);
+
+        using var reader = command.ExecuteReader();
+
+        while (reader.Read())
+        {
+            var header_hash = reader.GetFieldValue<byte[]>(0);
+            var prev_hash = reader.GetFieldValue<byte[]>(1);
+            var height = reader.GetFieldValue<long>(2);
+            var sub_epoch_summary = reader.IsDBNull(3) ? null : reader.GetFieldValue<byte[]>(3);
+            var is_fully_compactified = reader.GetFieldValue<bool>(4);
+            var block = reader.GetFieldValue<byte[]>(5);
+            var block_record = reader.GetFieldValue<byte[]>(6);
+
+            yield return new FullBlockRecord(header_hash, prev_hash, height, sub_epoch_summary, is_fully_compactified, block, block_record);
         }
     }
 

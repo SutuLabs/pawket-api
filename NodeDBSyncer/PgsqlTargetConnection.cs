@@ -12,13 +12,18 @@ public class PgsqlTargetConnection : ITargetConnection
     public const string HintRecordTableName = "sync_hint_record";
     public const string SpentRecordTableName = "sync_coin_spent";
     public const string SyncStateTableName = "sync_state";
+    public const string FullBlockTableName = "sync_block";
+    public const string CoinClassTableName = "sync_coin_class";
+    public const string FullBlockSyncStateField = "block_index";
 
     private readonly NpgsqlConnection connection;
+    private readonly string connString;
     private bool disposedValue;
 
     public PgsqlTargetConnection(string connString)
     {
         connection = new NpgsqlConnection(connString);
+        this.connString = connString;
     }
 
     public async Task Open()
@@ -28,6 +33,10 @@ public class PgsqlTargetConnection : ITargetConnection
         {
             await this.InitializeDatabase();
         }
+        //if (!await this.CheckTableExistenceV2())
+        //{
+        //    await this.UpgradeDatabaseV2();
+        //}
     }
 
     public async Task<long> GetTotalCoinRecords()
@@ -48,13 +57,38 @@ public class PgsqlTargetConnection : ITargetConnection
             : 0;
     }
 
+    public async Task<CoinRemovalIndex[]> GetCoinRemovalIndex(long spent_index)
+    {
+        // for parallel
+        using var tconn = new NpgsqlConnection(connString);
+        tconn.Open();
+        await using var cmd = new NpgsqlCommand($"SELECT coin_name FROM {CoinRecordTableName} WHERE spent_index=@spent_index", tconn)
+        {
+            Parameters = { new("spent_index", spent_index), }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var list = new List<CoinRemovalIndex>();
+        while (await reader.ReadAsync())
+        {
+            var coin_name = reader.GetFieldValue<byte[]>(0);
+            list.Add(new CoinRemovalIndex(coin_name, spent_index));
+        }
+
+        return list.ToArray();
+    }
+
     public async Task<long> GetLastSyncSpentHeight() => await GetSyncState("spent_index");
 
     public async Task<long> GetLastCoinSyncHeight() => await GetSyncState("coin_index");
 
+    public async Task<long> GetLastBlockSyncHeight() => await GetSyncState(FullBlockSyncStateField);
+
     public async Task WriteLastSyncSpentHeight(long height) => await WriteSyncState("spent_index", height);
 
     public async Task WriteLastCoinSyncHeight(long height) => await WriteSyncState("coin_index", height);
+
+    public async Task WriteLastBlockSyncHeight(long height) => await WriteSyncState(FullBlockSyncStateField, height);
 
     private async Task<long> GetSyncState(string stateName)
     {
@@ -82,6 +116,16 @@ public class PgsqlTargetConnection : ITargetConnection
     public async Task WriteHintRecords(DataTable dataTable)
     {
         await Import(dataTable, HintRecordTableName);
+    }
+
+    public async Task WriteCoinClassRecords(DataTable dataTable)
+    {
+        await Import(dataTable, CoinClassTableName);
+    }
+
+    public async Task WriteBlockRecords(DataTable dataTable)
+    {
+        await Import(dataTable, FullBlockTableName);
     }
 
     [Obsolete]
@@ -134,6 +178,7 @@ public class PgsqlTargetConnection : ITargetConnection
     }
 
     private async Task<bool> CheckTableExistence() => await this.CheckExistence(CoinRecordTableName);
+    private async Task<bool> CheckTableExistenceV2() => await this.CheckExistence(FullBlockTableName);
     internal async Task<bool> CheckIndexExistence() => await this.CheckExistence($"idx_{HintRecordTableName}_coin");
 
     private async Task<bool> CheckExistence(string objName)
@@ -206,6 +251,56 @@ INSERT INTO public.{SyncStateTableName} (id, spent_index) VALUES (1, 0);
         catch (PostgresException pex)
         {
             Console.WriteLine($"Failed to execute table creation script due to [{pex.Message}], you may want to execute it yourself, here it is:");
+            Console.WriteLine(cmd.CommandText);
+        }
+    }
+
+    private async Task UpgradeDatabaseV2()
+    {
+        using var cmd = new NpgsqlCommand(@$"
+CREATE TABLE public.{FullBlockTableName}
+(
+    id serial NOT NULL,
+    is_tx_block boolean NOT NULL,
+    index bigint NOT NULL UNIQUE,
+    weight bigint NOT NULL,
+    iterations bigint NOT NULL,
+    cost bigint NOT NULL,
+    fee bigint NOT NULL,
+    generator bytea NOT NULL,
+    generator_ref_list bytea NOT NULL,
+    block_info json NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.{FullBlockTableName}
+    OWNER to postgres;
+
+CREATE TABLE public.{CoinClassTableName}
+(
+    id serial NOT NULL,
+    coin_name bytea NOT NULL UNIQUE,
+    puzzle json NOT NULL,
+    solution bytea NOT NULL,
+    PRIMARY KEY (id)
+);
+
+ALTER TABLE IF EXISTS public.{CoinClassTableName}
+    OWNER to postgres;
+
+ALTER TABLE public.{SyncStateTableName}
+    ADD COLUMN IF NOT EXISTS {FullBlockSyncStateField} bigint;
+
+UPDATE public.{SyncStateTableName} SET {FullBlockSyncStateField}=0;
+", connection);
+
+        try
+        {
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (PostgresException pex)
+        {
+            Console.WriteLine($"Failed to upgrade v2 script due to [{pex.Message}], you may want to execute it yourself, here it is:");
             Console.WriteLine(cmd.CommandText);
         }
     }

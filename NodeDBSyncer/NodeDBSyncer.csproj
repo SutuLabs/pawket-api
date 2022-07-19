@@ -8,10 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\WalletServer\Helpers\HexHelper.cs" Link="HexHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="K4os.Compression.LZ4" Version="1.2.16" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
     <PackageReference Include="Npgsql" Version="6.0.4" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\chia-dotnet\src\chia-dotnet\chia-dotnet.csproj" />
   </ItemGroup>
 
   <ItemGroup>

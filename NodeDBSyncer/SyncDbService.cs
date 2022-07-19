@@ -22,6 +22,8 @@ internal class SyncDbService : BaseRefreshService
 
     protected override async Task DoWorkAsync(CancellationToken token)
     {
+        if (this.appSettings.SyncInsertBatchSize == 0 && this.appSettings.SyncUpdateBatchSize == 0) return;
+
         using var source = new SouceConnection(this.appSettings.LocalSqliteConnString);
         source.Open();
         using var target = new PgsqlTargetConnection(this.appSettings.OnlineDbConnString);

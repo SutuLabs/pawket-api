@@ -18,6 +18,7 @@ builder.ConfigureServices(services =>
 {
     services.Configure<AppSettings>(config.GetSection(nameof(AppSettings)));
     services.AddHostedService<SyncDbService>();
+    //services.AddHostedService<ParseBlockTxService>();
 });
 
 var app = builder.Build();

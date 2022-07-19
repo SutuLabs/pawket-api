@@ -1,4 +1,6 @@
-﻿namespace NodeDBSyncer;
+﻿using System.Numerics;
+
+namespace NodeDBSyncer;
 
 public record CoinRecord(
     long id,
@@ -131,3 +133,33 @@ CREATE INDEX IF NOT EXISTS idx_coin
     ON public.sync_coin_spent USING btree
     (coin_name ASC NULLS LAST);
  */
+
+public record FullBlockRecord(
+    byte[] header_hash,
+    byte[] prev_hash,
+    long height,
+    byte[]? sub_epoch_summary,
+    bool is_fully_compactified,
+    byte[] block,
+    byte[] block_record);
+
+public record CoinRemovalIndex(
+    byte[] coin_name,
+    long spent_index);
+
+public record CoinInfo(string parent, PuzzleArg puzzle, ulong amount, string solution, string coinname);
+public record CoinInfoJson(string parent, PuzzleArg puzzle, string amount, string solution, string coinname);
+
+public record PuzzleArg(string? mod, PuzzleArg[]? args, string? raw);
+
+public record BlockInfo(
+    bool is_tx_block,
+    ulong index,
+    BigInteger weight,
+    BigInteger iterations,
+    BigInteger cost,
+    BigInteger fee,
+    byte[] generator,
+    byte[] generator_ref_list,
+    chia.dotnet.FullBlock block_info);
+
