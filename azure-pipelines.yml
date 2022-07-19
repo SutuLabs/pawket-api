@@ -18,7 +18,6 @@ variables:
   buildConfiguration: 'Release'
   versionNumber: '0.1.$(Build.BuildNumber)'
   devEnvironment: 'pawket-api-dev'
-  artifactName: 'PawketApi'
 
 stages:
 - stage: build
@@ -59,7 +58,7 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'publish'
-        arguments: '-o "$(Build.ArtifactStagingDirectory)/WalletServer" /p:Version=$(versionNumber) -c $(buildConfiguration)'
+        arguments: '-o "$(Build.ArtifactStagingDirectory)" /p:Version=$(versionNumber) -c $(buildConfiguration)'
         workingDirectory: '$(Build.SourcesDirectory)/WalletServer'
       displayName: publish
 
@@ -95,8 +94,14 @@ stages:
 
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: '$(artifactName)'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/NodeDBSyncer.zip'
+        ArtifactName: 'NodeDBSyncer'
+        publishLocation: 'Container'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/WalletServer.zip'
+        ArtifactName: 'WalletServer'
         publishLocation: 'Container'
 
 
