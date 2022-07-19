@@ -59,22 +59,28 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'publish'
-        arguments: '-o "$(Build.ArtifactStagingDirectory)" /p:Version=$(versionNumber) -c $(buildConfiguration)'
+        arguments: '-o "$(Build.ArtifactStagingDirectory)/WalletServer" /p:Version=$(versionNumber) -c $(buildConfiguration)'
         workingDirectory: '$(Build.SourcesDirectory)/WalletServer'
       displayName: publish
 
     - task: DotNetCoreCLI@2
       inputs:
         command: 'publish'
-        arguments: '-o "$(Build.ArtifactStagingDirectory)" /p:Version=$(versionNumber) -c $(buildConfiguration)'
+        arguments: '-o "$(Build.ArtifactStagingDirectory)/NodeDBSyncer" /p:Version=$(versionNumber) -c $(buildConfiguration)'
         workingDirectory: '$(Build.SourcesDirectory)/NodeDBSyncer'
         publishWebProjects: false
       displayName: publish
 
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: '$(artifactName)'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/WalletServer'
+        ArtifactName: '$(artifactName)-WalletServer'
+        publishLocation: 'Container'
+
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/NodeDBSyncer'
+        ArtifactName: '$(artifactName)-NodeDBSyncer'
         publishLocation: 'Container'
 
 
