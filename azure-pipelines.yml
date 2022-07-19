@@ -68,19 +68,33 @@ stages:
         command: 'publish'
         arguments: '-o "$(Build.ArtifactStagingDirectory)/NodeDBSyncer" /p:Version=$(versionNumber) -c $(buildConfiguration)'
         workingDirectory: '$(Build.SourcesDirectory)/NodeDBSyncer'
+        zipAfterPublish: false
         publishWebProjects: false
       displayName: publish
+
+    - task: CmdLine@2
+      inputs:
+        workingDirectory: '$(Build.SourcesDirectory)/NodeDBSyncer'
+        script: |
+          mv runtimes legacy
+          mkdir runtimes
+          mv legacy/unix runtimes/
+          mv legacy/win runtimes/
+          mv legacy/win-x64 runtimes/
+          mv legacy/linux-x64 runtimes/
+          rm -rf legacy
+      displayName: 'clone chia-dotnet'
 
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/WalletServer'
-        ArtifactName: '$(artifactName)-WalletServer'
+        ArtifactName: 'WalletServer'
         publishLocation: 'Container'
 
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)/NodeDBSyncer'
-        ArtifactName: '$(artifactName)-NodeDBSyncer'
+        ArtifactName: 'NodeDBSyncer'
         publishLocation: 'Container'
 
 
