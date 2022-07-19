@@ -68,6 +68,7 @@ stages:
         command: 'publish'
         arguments: '-o "$(Build.ArtifactStagingDirectory)" /p:Version=$(versionNumber) -c $(buildConfiguration)'
         workingDirectory: '$(Build.SourcesDirectory)/NodeDBSyncer'
+        publishWebProjects: false
       displayName: publish
 
     - task: PublishBuildArtifacts@1
