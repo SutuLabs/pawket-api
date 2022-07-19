@@ -11,6 +11,7 @@ public class DataAccess : IDisposable
 {
     private const string SqlLastIndexLateral = ", LATERAL (SELECT spent_index AS last_index FROM sync_state WHERE id=1) AS t";
     private const string SqlIndexConstraint = " AND (confirmed_index <= last_index) AND (spent_index <= last_index)";
+    private const string PriceTableName = "series_price";
 
     private readonly ILogger<DataAccess> logger;
     private readonly IMemoryCache memoryCache;
@@ -166,6 +167,39 @@ public class DataAccess : IDisposable
             : 0;
     }
 
+    public async Task<PriceEntity[]> GetLatestPrices(string from)
+    {
+        // example: from is XCH, while to is USDT/CNY
+        using var cmd = new NpgsqlCommand(
+            $"SELECT DISTINCT on (\"{nameof(PriceEntity.to)}\")" +
+            $" \"{nameof(PriceEntity.source)}\",\"{nameof(PriceEntity.to)}\",\"{nameof(PriceEntity.price)}\",\"{nameof(PriceEntity.time)}\"" +
+            $" FROM {PriceTableName}" +
+            $" WHERE \"{nameof(PriceEntity.from)}\"=@{nameof(PriceEntity.from)}" +
+            $" ORDER BY 2, 4 DESC;", connection)
+        {
+            Parameters =
+            {
+                new (nameof(PriceEntity.from),from),
+                //new (nameof(PriceEntity.to),to),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new PriceEntity(
+                _[nameof(PriceEntity.source)] as string ?? "UNKNOWN",
+                from,
+                _[nameof(PriceEntity.to)] as string ?? "UNKNOWN",
+                (decimal)_[nameof(PriceEntity.price)],
+                (DateTime)_[nameof(PriceEntity.time)]))
+            .ToArray();
+
+        return rows;
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
@@ -201,3 +235,4 @@ public enum GetCoinMethod
 }
 
 public record FullBalanceInfo(long Amount, int CoinCount, long SpentAmount, int SpentCount);
+public record PriceEntity(string source, string from, string to, decimal price, DateTime time);

@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
+using NodeDBSyncer.Helpers;
 using Npgsql;
 
 public class PgsqlTargetConnection : ITargetConnection
@@ -110,28 +111,28 @@ public class PgsqlTargetConnection : ITargetConnection
 
     public async Task WriteCoinRecords(DataTable dataTable)
     {
-        await Import(dataTable, CoinRecordTableName);
+        await this.connection.Import(dataTable, CoinRecordTableName);
     }
 
     public async Task WriteHintRecords(DataTable dataTable)
     {
-        await Import(dataTable, HintRecordTableName);
+        await this.connection.Import(dataTable, HintRecordTableName);
     }
 
     public async Task WriteCoinClassRecords(DataTable dataTable)
     {
-        await Import(dataTable, CoinClassTableName);
+        await this.connection.Import(dataTable, CoinClassTableName);
     }
 
     public async Task WriteBlockRecords(DataTable dataTable)
     {
-        await Import(dataTable, FullBlockTableName);
+        await this.connection.Import(dataTable, FullBlockTableName);
     }
 
     [Obsolete]
     public async Task WriteSpentHeight(DataTable dataTable)
     {
-        await Import(dataTable, SpentRecordTableName);
+        await this.connection.Import(dataTable, SpentRecordTableName);
     }
 
     public async Task<int> WriteSpentHeight(CoinSpentRecord[] changes)
@@ -144,8 +145,8 @@ public class PgsqlTargetConnection : ITargetConnection
             + $"CREATE INDEX IF NOT EXISTS idx_tmp_spent_height ON {tmpTable} USING btree (spent_index ASC NULLS LAST);", connection);
         await cmd.ExecuteNonQueryAsync();
 
-        var dataTable = ConvertToDataTable(changes);
-        await Import(dataTable, tmpTable);
+        var dataTable = changes.ConvertToDataTable();
+        await this.connection.Import(dataTable, tmpTable);
 
         using var cmd2 = new NpgsqlCommand($"UPDATE {CoinRecordTableName} SET spent_index = t.spent_index" +
             $" FROM {tmpTable} as t WHERE t.coin_name = {CoinRecordTableName}.coin_name AND t.spent_index <> {CoinRecordTableName}.spent_index;" +
@@ -164,30 +165,9 @@ public class PgsqlTargetConnection : ITargetConnection
             : 0;
     }
 
-    private async Task Import(DataTable dataTable, string tableName)
-    {
-        var fields = string.Join(",", dataTable.Columns.OfType<DataColumn>().Select(_ => _.ColumnName));
-        using var writer = connection.BeginBinaryImport($"COPY {tableName} ({fields}) FROM STDIN (FORMAT BINARY)");
-
-        foreach (DataRow row in dataTable.Rows)
-        {
-            writer.WriteRow(row.ItemArray);
-        }
-
-        writer.Complete();
-    }
-
-    private async Task<bool> CheckTableExistence() => await this.CheckExistence(CoinRecordTableName);
-    private async Task<bool> CheckTableExistenceV2() => await this.CheckExistence(FullBlockTableName);
-    internal async Task<bool> CheckIndexExistence() => await this.CheckExistence($"idx_{HintRecordTableName}_coin");
-
-    private async Task<bool> CheckExistence(string objName)
-    {
-        using var cmd = new NpgsqlCommand(@$"SELECT to_regclass('public.{objName}')", connection);
-        cmd.AllResultTypesAreUnknown = true;
-        var o = await cmd.ExecuteScalarAsync();
-        return o is not DBNull;
-    }
+    private async Task<bool> CheckTableExistence() => await this.connection.CheckExistence(CoinRecordTableName);
+    private async Task<bool> CheckTableExistenceV2() => await this.connection.CheckExistence(FullBlockTableName);
+    internal async Task<bool> CheckIndexExistence() => await this.connection.CheckExistence($"idx_{HintRecordTableName}_coin");
 
     private async Task InitializeDatabase()
     {
@@ -343,22 +323,6 @@ CREATE INDEX IF NOT EXISTS idx_{HintRecordTableName}_coin
             Console.WriteLine($"Failed to execute table creation script due to [{pex.Message}], you may want to execute it yourself, here it is:");
             Console.WriteLine(cmd.CommandText);
         }
-    }
-
-    private static DataTable ConvertToDataTable<T>(IEnumerable<T> data)
-    {
-        var properties = TypeDescriptor.GetProperties(typeof(T));
-        DataTable table = new DataTable();
-        foreach (PropertyDescriptor prop in properties)
-            table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
-        foreach (T item in data)
-        {
-            DataRow row = table.NewRow();
-            foreach (PropertyDescriptor prop in properties)
-                row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
-            table.Rows.Add(row);
-        }
-        return table;
     }
 
     protected virtual void Dispose(bool disposing)

@@ -1,0 +1,55 @@
+﻿namespace NodeDBSyncer.Helpers;
+
+using System.ComponentModel;
+using System.Data;
+using System.Threading.Tasks;
+using Npgsql;
+
+public static class DbHelper
+{
+    public static async Task<bool> CheckExistence(this NpgsqlConnection connection, string objName)
+    {
+        using var cmd = new NpgsqlCommand(@$"SELECT to_regclass('public.{objName}')", connection);
+        cmd.AllResultTypesAreUnknown = true;
+        var o = await cmd.ExecuteScalarAsync();
+        return o is not DBNull;
+    }
+
+    public static string Join(this IEnumerable<NpgsqlParameter> pars, string prefix = "")
+        => string.Join(",", pars.Select(_ => prefix + _.ParameterName));
+
+    public static async Task Import(this NpgsqlConnection connection, DataTable dataTable, string tableName, CancellationToken ct = default)
+    {
+        var fields = string.Join(",", dataTable.Columns.OfType<DataColumn>().Select(_ => $"\"{_.ColumnName}\""));
+        using var writer = connection.BeginBinaryImport($"COPY {tableName} ({fields}) FROM STDIN (FORMAT BINARY)");
+
+        foreach (DataRow row in dataTable.Rows)
+        {
+            writer.WriteRow(row.ItemArray);
+            //writer.StartRow();
+            //writer.Write(row.ItemArray[0], NpgsqlTypes.NpgsqlDbType.Varchar);
+            //writer.Write(row.ItemArray[1], NpgsqlTypes.NpgsqlDbType.Varchar);
+            //writer.Write(row.ItemArray[2], NpgsqlTypes.NpgsqlDbType.Varchar);
+            //writer.Write(row.ItemArray[3], NpgsqlTypes.NpgsqlDbType.Numeric);
+            //writer.Write(row.ItemArray[4], NpgsqlTypes.NpgsqlDbType.Timestamp);
+        }
+
+        writer.Complete();
+    }
+
+    public static DataTable ConvertToDataTable<T>(this IEnumerable<T> data)
+    {
+        var properties = TypeDescriptor.GetProperties(typeof(T));
+        DataTable table = new DataTable();
+        foreach (PropertyDescriptor prop in properties)
+            table.Columns.Add(prop.Name, Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType);
+        foreach (T item in data)
+        {
+            DataRow row = table.NewRow();
+            foreach (PropertyDescriptor prop in properties)
+                row[prop.Name] = prop.GetValue(item) ?? DBNull.Value;
+            table.Rows.Add(row);
+        }
+        return table;
+    }
+}

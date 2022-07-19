@@ -5,4 +5,5 @@
     public uint Port { get; set; }
     public string? ConnString { get; set; }
     public uint OnlineUserStaySeconds { get; set; } = 90;
+    public string? PriceSourceUrl { get; set; }
 }
