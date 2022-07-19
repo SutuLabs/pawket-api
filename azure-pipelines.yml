@@ -33,7 +33,6 @@ stages:
           git clone --depth=1 -b chore_retry https://github.com/Chiabee/chia-dotnet.git
           rm -rf chia-dotnet/.git
           rm -rf ChatServer
-          rm -rf ChiaInfoRetriever
       displayName: 'clone chia-dotnet'
 
     - task: DotNetCoreCLI@2
