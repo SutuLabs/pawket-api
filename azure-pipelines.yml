@@ -84,6 +84,12 @@ stages:
           rm -rf legacy
       displayName: 'clone chia-dotnet'
 
+    - task: CopyFiles@2
+      inputs:
+        SourceFolder: '$(build.SourcesDirectory)'
+        Contents: 'deploy.sh'
+        TargetFolder: '$(build.ArtifactStagingDirectory))'
+
     - task: ArchiveFiles@2
       inputs:
         rootFolderOrFile: '$(Build.BinariesDirectory)/nodetemp'
@@ -94,14 +100,8 @@ stages:
 
     - task: PublishBuildArtifacts@1
       inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/NodeDBSyncer.zip'
-        ArtifactName: 'NodeDBSyncer'
-        publishLocation: 'Container'
-
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)/WalletServer.zip'
-        ArtifactName: 'WalletServer'
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'Pawket-Server'
         publishLocation: 'Container'
 
 
