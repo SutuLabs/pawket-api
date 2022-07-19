@@ -88,7 +88,7 @@ stages:
       inputs:
         SourceFolder: '$(build.SourcesDirectory)'
         Contents: 'deploy.sh'
-        TargetFolder: '$(build.ArtifactStagingDirectory))'
+        TargetFolder: '$(build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
       inputs:
