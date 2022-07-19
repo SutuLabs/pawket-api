@@ -77,9 +77,9 @@ stages:
         script: |
           mv runtimes legacy
           mkdir runtimes
-          mv legacy/unix runtimes/
-          mv legacy/win runtimes/
-          mv legacy/win-x64 runtimes/
+          #mv legacy/unix runtimes/
+          #mv legacy/win runtimes/
+          #mv legacy/win-x64 runtimes/
           mv legacy/linux-x64 runtimes/
           rm -rf legacy
       displayName: 'clone chia-dotnet'
