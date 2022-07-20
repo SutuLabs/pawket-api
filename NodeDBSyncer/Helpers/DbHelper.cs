@@ -3,6 +3,7 @@
 using System.ComponentModel;
 using System.Data;
 using System.Threading.Tasks;
+using K4os.Compression.LZ4;
 using Npgsql;
 
 public static class DbHelper
@@ -51,5 +52,17 @@ public static class DbHelper
             table.Rows.Add(row);
         }
         return table;
+    }
+
+    public static byte[] Compress(this byte[] input)
+    {
+        if (input.Length == 0) return input;
+        var output = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
+        var encodedLength = LZ4Codec.Encode(
+            input, 0, input.Length,
+            output, 0, output.Length);
+        if (new Random(DateTime.Now.Millisecond).NextDouble() < 0.05)
+            Console.WriteLine($"compressed {(double)encodedLength / input.Length * 100:00.0}%, before: {input.Length}, after: {encodedLength}");
+        return output;
     }
 }

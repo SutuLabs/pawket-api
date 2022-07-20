@@ -1,6 +1,5 @@
 ﻿namespace NodeDBSyncer;
 
-using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Diagnostics;
@@ -9,9 +8,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using chia.dotnet.bech32;
-using K4os.Compression.LZ4;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NodeDBSyncer.Helpers;
 using WalletServer.Helpers;
 
 internal class ParseBlockTxService : BaseRefreshService
@@ -194,7 +193,7 @@ internal class ParseBlockTxService : BaseRefreshService
             var puz = JsonSerializer.Serialize(r.puzzle);
             //var puzbytes = Encoding.UTF8.GetBytes(puz);
 
-            dt.Rows.Add(r.coinname.ToHexBytes(), puz, Compress(r.solution.ToHexBytes()));
+            dt.Rows.Add(r.coinname.ToHexBytes(), puz, r.solution.ToHexBytes().Compress());
         }
 
         return dt;
@@ -228,7 +227,7 @@ internal class ParseBlockTxService : BaseRefreshService
                 (long)r.iterations,
                 (long)r.cost,
                 (long)r.fee,
-                Compress(r.generator),
+                r.generator.Compress(),
                 r.generator_ref_list,
                 bi);
         }
@@ -247,17 +246,5 @@ internal class ParseBlockTxService : BaseRefreshService
             block.TransactionsGenerator?.ToHexBytes() ?? Array.Empty<byte>(),
             Encoding.UTF8.GetBytes(JsonSerializer.Serialize(block.TransactionsGeneratorRefList)),
             block);
-    }
-
-    private byte[] Compress(byte[] input)
-    {
-        if (input.Length == 0) return input;
-        var output = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
-        var encodedLength = LZ4Codec.Encode(
-            input, 0, input.Length,
-            output, 0, output.Length);
-        if (new Random(DateTime.Now.Millisecond).NextDouble() < 0.05)
-            Console.WriteLine($"compressed {(double)encodedLength / input.Length * 100:00.0}%, before: {input.Length}, after: {encodedLength}");
-        return output;
     }
 }

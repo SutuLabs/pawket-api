@@ -179,7 +179,7 @@ namespace WalletServer.Controllers
                 try
                 {
                     await this.pushLogHelper.LogPushes(new PushLogEntity(
-                        JsonSerializer.SerializeToUtf8Bytes(request.bundle),
+                        JsonSerializer.SerializeToUtf8Bytes(request.bundle).Compress(),
                         System.Net.IPAddress.Parse(remoteIpAddress),
                         txid,
                         status,
