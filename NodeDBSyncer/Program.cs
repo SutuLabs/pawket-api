@@ -20,19 +20,31 @@ builder.ConfigureServices(services =>
     services.Configure<AppSettings>(config.GetSection(nameof(AppSettings)));
     services.AddHostedService<SyncDbService>();
     services.AddSingleton<PersistentHelper>();
+    services.AddSingleton<PushLogHelper>();
     services.AddHostedService<RefreshPriceService>();
     //services.AddHostedService<ParseBlockTxService>();
 });
 
 var app = builder.Build();
 
-var ph = app.Services.GetService(typeof(PersistentHelper)) as PersistentHelper;
-if (ph == null)
+T GetService<T>() where T : class
 {
-    Console.Error.WriteLine("abnormal state, cannot get service");
-    return;
+    if (app == null)
+    {
+        Console.Error.WriteLine("abnormal state, cannot get app");
+        throw new SystemException("abnormal state, cannot get app");
+    }
+
+    if (app.Services.GetService(typeof(T)) is not T ph)
+    {
+        Console.Error.WriteLine("abnormal state, cannot get service");
+        throw new SystemException("abnormal state, cannot get service");
+    }
+
+    return ph;
 }
 
-await ph.Open();
+await GetService<PersistentHelper>().Open();
+await GetService<PushLogHelper>().Open();
 
 await app.RunAsync();

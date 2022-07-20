@@ -7,8 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\NodeDBSyncer\Helpers\DbHelper.cs" Link="Helpers\DbHelper.cs" />
+    <Compile Include="..\NodeDBSyncer\Helpers\PushLogHelper.cs" Link="Helpers\PushLogHelper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="prometheus-net.AspNetCore" Version="6.0.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" Condition=" '$(Configuration)'=='Debug' "/>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" Condition=" '$(Configuration)'=='Debug' " />
     <PackageReference Include="Npgsql" Version="6.0.4" />
     <PackageReference Include="HexMate" Version="0.0.3" />
   </ItemGroup>

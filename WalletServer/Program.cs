@@ -1,3 +1,4 @@
+using NodeDBSyncer.Helpers;
 using Prometheus;
 using WalletServer.Helpers;
 
@@ -27,6 +28,8 @@ builder.Services.AddCors(options =>
 });
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddScoped<DataAccess>();
+builder.Services.AddScoped<PushLogHelper>();
+builder.Services.AddSingleton<OnlineCounter>();
 builder.Services.AddSingleton<OnlineCounter>();
 
 var app = builder.Build();

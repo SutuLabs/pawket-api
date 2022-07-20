@@ -4,6 +4,7 @@ using chia.dotnet;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using NodeDBSyncer.Helpers;
 using Prometheus;
 using WalletServer.Helpers;
 
@@ -16,6 +17,7 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
         private readonly DataAccess dataAccess;
+        private readonly PushLogHelper pushLogHelper;
         private readonly OnlineCounter onlineCounter;
         private readonly AppSettings appSettings;
         private readonly HttpRpcClient rpcClient;
@@ -31,12 +33,14 @@ namespace WalletServer.Controllers
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
             DataAccess dataAccess,
+            PushLogHelper pushLogHelper,
             OnlineCounter onlineCounter,
             IOptions<AppSettings> appSettings)
         {
             this.logger = logger;
             this.memoryCache = memoryCache;
             this.dataAccess = dataAccess;
+            this.pushLogHelper = pushLogHelper;
             this.onlineCounter = onlineCounter;
             this.appSettings = appSettings.Value;
             // command: redir :8666 :8555
@@ -142,6 +146,9 @@ namespace WalletServer.Controllers
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} pushtx using coins[{request.bundle.CoinSpends.Length}]");
+            var txid = (string?)null;
+            var error = (string?)null;
+            var status = 0;
 
             try
             {
@@ -150,10 +157,12 @@ namespace WalletServer.Controllers
                 if (!result)
                 {
                     this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
+                    status = 2;
                 }
                 else
                 {
                     PushTxSuccessCount.Inc();
+                    status = 1;
                 }
 
                 return Ok(new { success = result });
@@ -161,7 +170,27 @@ namespace WalletServer.Controllers
             catch (ResponseException re)
             {
                 this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{re.Message}\n============\n{JsonSerializer.Serialize(bundle)}");
+                status = 3;
+                error = re.Message;
                 return BadRequest(new { success = false, error = re.Message });
+            }
+            finally
+            {
+                try
+                {
+                    await this.pushLogHelper.LogPushes(new PushLogEntity(
+                        JsonSerializer.SerializeToUtf8Bytes(request.bundle),
+                        System.Net.IPAddress.Parse(remoteIpAddress),
+                        txid,
+                        status,
+                        DateTime.UtcNow,
+                        error));
+                }
+                catch (Exception ex)
+                {
+                    // ignore all exceptions
+                    this.logger.LogWarning(ex, $"push log failed");
+                }
             }
         }
 

@@ -33,7 +33,7 @@ public class DataAccess : IDisposable
         this.logger = logger;
         this.memoryCache = memoryCache;
         this.appSettings = appSettings.Value;
-        this.connection = new NpgsqlConnection(this.appSettings.ConnString);
+        this.connection = new NpgsqlConnection(this.appSettings.OnlineDbConnString);
         this.connection.Open();
     }
 
