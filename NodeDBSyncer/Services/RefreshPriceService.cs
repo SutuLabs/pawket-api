@@ -20,7 +20,7 @@ internal class RefreshPriceService : BaseRefreshService
         ILogger<RefreshPriceService> logger,
         PersistentHelper persistentHelper,
         IOptions<AppSettings> appSettings)
-        : base(logger, nameof(RefreshPriceService), 2, 60, 180)
+        : base(logger, nameof(RefreshPriceService), 2, 60, 10)
     {
         this.appSettings = appSettings.Value;
         this.persistentHelper = persistentHelper;
