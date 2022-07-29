@@ -1,4 +1,5 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.ParseTx;
+
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -43,7 +44,7 @@ public class LocalNodeProcessor
 
         var coins = JsonSerializer.Deserialize<CoinInfoJson[]>(body);
         ulong ParseAmount(string amount)
-            => (string.IsNullOrWhiteSpace(amount) || amount == "()") ? 0
+            => string.IsNullOrWhiteSpace(amount) || amount == "()" ? 0
             : amount.StartsWith("0x") ? Convert.ToUInt64(amount.Unprefix0x(), 16)
             : ulong.Parse(amount);
         return coins

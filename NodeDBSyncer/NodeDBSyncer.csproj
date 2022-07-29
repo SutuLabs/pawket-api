@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\WalletServer\Helpers\HexHelper.cs" Link="HexHelper.cs" />
+    <Compile Include="..\WalletServer\Helpers\HexHelper.cs" Link="Helpers\HexHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

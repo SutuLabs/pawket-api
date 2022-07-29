@@ -1,4 +1,4 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.SyncCoin;
 
 using System.Buffers.Binary;
 using System.Data;
@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NodeDBSyncer.Services;
 
 internal class SyncDbService : BaseRefreshService
 {
@@ -65,7 +66,7 @@ internal class SyncDbService : BaseRefreshService
             if (max > 0)
                 this.logger.LogInformation($"sync coin records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
-            for (int i = 0; i < max; i++)
+            for (var i = 0; i < max; i++)
             {
                 var sw = new Stopwatch();
                 sw.Start();
@@ -89,7 +90,7 @@ internal class SyncDbService : BaseRefreshService
             if (max > 0)
                 this.logger.LogInformation($"sync hint records [{targetCount}]~[{sourceCount}](+{sourceCount - targetCount}) with {max} batches.");
 
-            for (int i = 0; i < max; i++)
+            for (var i = 0; i < max; i++)
             {
                 var sw = new Stopwatch();
                 sw.Start();

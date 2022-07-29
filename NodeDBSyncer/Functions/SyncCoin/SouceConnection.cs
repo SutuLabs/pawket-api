@@ -1,4 +1,4 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.SyncCoin;
 
 using System.Buffers.Binary;
 using System.Threading.Tasks;

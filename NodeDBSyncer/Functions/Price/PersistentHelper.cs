@@ -1,27 +1,26 @@
-﻿namespace NodeDBSyncer.Helpers;
+﻿namespace NodeDBSyncer.Functions.Price;
 
 using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using Npgsql;
+using NodeDBSyncer.Helpers;
 
-public class PersistentHelper : IDisposable
+public class PersistentHelper : PgsqlConnection
 {
     private const string PriceTableName = "series_price";
 
-    private readonly NpgsqlConnection connection;
     private readonly AppSettings appSettings;
-    private bool disposedValue;
 
     public PersistentHelper(IOptions<AppSettings> appSettings)
+        : base(appSettings.Value.OnlineDbConnString ?? throw new ArgumentNullException("db connection cannot be null"))
     {
         this.appSettings = appSettings.Value;
-        connection = new NpgsqlConnection(this.appSettings.OnlineDbConnString);
     }
 
-    public async Task Open()
+    public override async Task Open()
     {
-        connection.Open();
+        await base.Open();
         if (!await this.CheckTableExistence())
         {
             await this.InitializeDatabase();
@@ -82,24 +81,5 @@ ALTER TABLE IF EXISTS public.{PriceTableName}
             Console.WriteLine($"Failed to execute table creation script due to [{pex.Message}], you may want to execute it yourself, here it is:");
             Console.WriteLine(cmd.CommandText);
         }
-    }
-
-    protected virtual void Dispose(bool disposing)
-    {
-        if (!disposedValue)
-        {
-            if (disposing)
-            {
-                this.connection.Dispose();
-            }
-
-            disposedValue = true;
-        }
-    }
-
-    public void Dispose()
-    {
-        Dispose(disposing: true);
-        GC.SuppressFinalize(this);
     }
 }

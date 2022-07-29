@@ -1,4 +1,4 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.ParseTx;
 
 using System.Buffers.Binary;
 using System.Threading.Tasks;
@@ -25,19 +25,19 @@ public class SourceChain : IDisposable
         return state;
     }
 
-    public async Task<chia.dotnet.FullBlock[]> GetBlocks(
+    public async Task<FullBlock[]> GetBlocks(
         uint start, uint number, bool excludeHeaderhash = false, CancellationToken cancellationToken = default)
     {
         return (await nodeClient.GetBlocks(start, start + number, excludeHeaderhash, cancellationToken)).ToArray();
     }
 
-    public async Task<chia.dotnet.CoinRecord[]> GetCoins(
+    public async Task<CoinRecord[]> GetCoins(
         string headerhash, CancellationToken cancellationToken = default)
     {
         return (await nodeClient.GetAdditionsAndRemovals(headerhash, cancellationToken)).Removals.ToArray();
     }
 
-    public async Task<chia.dotnet.CoinSpend> GetCoinPuzzleAndSolution(
+    public async Task<CoinSpend> GetCoinPuzzleAndSolution(
         string coinId, uint height, CancellationToken cancellationToken = default)
     {
         return await nodeClient.GetPuzzleAndSolution(coinId, height, cancellationToken);

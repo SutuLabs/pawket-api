@@ -1,7 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NodeDBSyncer;
+using NodeDBSyncer.Functions.Price;
+using NodeDBSyncer.Functions.SyncCoin;
 using NodeDBSyncer.Helpers;
 
 var builder = Host.CreateDefaultBuilder(args);

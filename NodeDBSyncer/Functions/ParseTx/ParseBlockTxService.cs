@@ -1,4 +1,4 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.ParseTx;
 
 using System.Collections.Concurrent;
 using System.Data;
@@ -11,6 +11,7 @@ using chia.dotnet.bech32;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NodeDBSyncer.Helpers;
+using NodeDBSyncer.Services;
 using WalletServer.Helpers;
 
 internal class ParseBlockTxService : BaseRefreshService
@@ -60,9 +61,7 @@ internal class ParseBlockTxService : BaseRefreshService
             return;
         }
 
-        using var source = new SouceConnection(this.appSettings.LocalSqliteConnString);
-        source.Open();
-        using var target = new PgsqlTargetConnection(this.appSettings.OnlineDbConnString);
+        using var target = new ParseTxDbConnection(this.appSettings.OnlineDbConnString);
         await target.Open();
         var nodeProcessor = new LocalNodeProcessor(this.appSettings.LocalNodeProcessor);
 
@@ -70,7 +69,7 @@ internal class ParseBlockTxService : BaseRefreshService
 
     }
 
-    private async Task SyncBlock(SourceChain source, PgsqlTargetConnection target, LocalNodeProcessor nodeProcessor)
+    private async Task SyncBlock(SourceChain source, ParseTxDbConnection target, LocalNodeProcessor nodeProcessor)
     {
         var batch = (uint)this.appSettings.SyncBlockBatchSize;
         var sourcePeak = (await source.GetChainState()).Peak.Height - 1; // ignore last block as it may be during writing phase
@@ -133,7 +132,7 @@ internal class ParseBlockTxService : BaseRefreshService
         }
     }
 
-    private static async Task<CoinInfo[]> GetCoinsFromBlock(SourceChain source, PgsqlTargetConnection target, LocalNodeProcessor nodeProcessor,
+    private static async Task<CoinInfo[]> GetCoinsFromBlock(SourceChain source, ParseTxDbConnection target, LocalNodeProcessor nodeProcessor,
         chia.dotnet.FullBlock block,
         Stopwatch? sw3 = null)
     {
@@ -156,7 +155,7 @@ internal class ParseBlockTxService : BaseRefreshService
         return lstCoins.ToArray();
     }
 
-    private static async Task<CoinInfo[]> GetCoinsByApi(SourceChain source, PgsqlTargetConnection target,
+    private static async Task<CoinInfo[]> GetCoinsByApi(SourceChain source, ParseTxDbConnection target,
         LocalNodeProcessor nodeProcessor, chia.dotnet.FullBlock block, ILogger logger, Stopwatch? sw1, Stopwatch? sw2)
     {
         List<CoinInfo> lstCoins = new();

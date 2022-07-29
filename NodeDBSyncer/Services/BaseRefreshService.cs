@@ -1,4 +1,5 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Services;
+
 using System;
 using System.Diagnostics;
 using System.Threading;

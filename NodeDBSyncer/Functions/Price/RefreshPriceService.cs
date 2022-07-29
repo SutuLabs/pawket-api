@@ -1,4 +1,4 @@
-﻿namespace NodeDBSyncer;
+﻿namespace NodeDBSyncer.Functions.Price;
 
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NodeDBSyncer.Helpers;
+using NodeDBSyncer.Services;
 
 internal class RefreshPriceService : BaseRefreshService
 {
@@ -49,7 +49,7 @@ internal class RefreshPriceService : BaseRefreshService
                 "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=USDT",
                 "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=CNY",
             };
-        using WebClient wc = new WebClient();
+        using var wc = new WebClient();
         if (!string.IsNullOrWhiteSpace(this.appSettings.PriceProxy))
         {
             wc.Proxy = new WebProxy(this.appSettings.PriceProxy);
@@ -125,14 +125,3 @@ internal class RefreshPriceService : BaseRefreshService
         }
     }
 }
-
-public record PriceEntity(string source, string from, string to, decimal price, DateTime time);
-
-public record CoinBasePriceBase(CoinBasePriceData data);
-public record CoinBasePriceData(string @base, string currency, CoinBasePriceDataPrices prices);
-public record CoinBasePriceDataPrices(decimal latest, CoinBasePriceDataPrice latest_price);
-public record CoinBasePriceDataPrice(CoinBasePriceDataPriceAmount amount, DateTime timestamp);
-public record CoinBasePriceDataPriceAmount(decimal amount, string currency);
-
-public record FtftxPriceData(long code, string info, decimal[][] data);
-public record FtftxCurrencyRateData(long code, string info, Dictionary<string, decimal> data);

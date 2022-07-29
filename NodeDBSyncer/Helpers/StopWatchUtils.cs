@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace NodeDBSyncer;
+namespace NodeDBSyncer.Helpers;
 
 static class StopWatchUtils
 {
@@ -23,9 +23,9 @@ static class StopWatchUtils
          * pulled from http://stackoverflow.com/questions/473355/calculate-time-remaining/473369#473369
          */
         if (counter == 0) return TimeSpan.Zero;
-        float elapsedMin = ((float)sw.ElapsedMilliseconds / 1000) / 60;
-        float minLeft = (elapsedMin / counter) * (counterGoal - counter); //see comment a
-        TimeSpan ret = TimeSpan.FromMinutes(minLeft);
+        var elapsedMin = (float)sw.ElapsedMilliseconds / 1000 / 60;
+        var minLeft = elapsedMin / counter * (counterGoal - counter); //see comment a
+        var ret = TimeSpan.FromMinutes(minLeft);
         return ret;
     }
 }
