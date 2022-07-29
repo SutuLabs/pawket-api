@@ -117,7 +117,7 @@ internal class ParseBlockTxService : BaseRefreshService
                 await target.WriteCoinClassRecords(ConvertRecordsToTable(lstCoins));
 
             var bis = blocks.Select(_ => GetBlockInfo(_)).ToArray();
-            await target.WriteBlockRecords(ConvertRecordsToTable(bis));
+            await target.WriteBlockRecords(bis);
 
             sw.Stop();
             current = blocks.Max(_ => _.RewardChainBlock.Height);
@@ -193,42 +193,6 @@ internal class ParseBlockTxService : BaseRefreshService
             //var puzbytes = Encoding.UTF8.GetBytes(puz);
 
             dt.Rows.Add(r.coinname.ToHexBytes(), puz, r.solution.ToHexBytes().Compress());
-        }
-
-        return dt;
-    }
-
-    private DataTable ConvertRecordsToTable(IEnumerable<BlockInfo> records)
-    {
-        var dt = new DataTable();
-        dt.Columns.Add(nameof(BlockInfo.is_tx_block), typeof(bool));
-        dt.Columns.Add(nameof(BlockInfo.index), typeof(long));
-        dt.Columns.Add(nameof(BlockInfo.weight), typeof(long));
-        dt.Columns.Add(nameof(BlockInfo.iterations), typeof(long));
-        dt.Columns.Add(nameof(BlockInfo.cost), typeof(long));
-        dt.Columns.Add(nameof(BlockInfo.fee), typeof(long));
-        dt.Columns.Add(nameof(BlockInfo.generator), typeof(byte[]));
-        dt.Columns.Add(nameof(BlockInfo.generator_ref_list), typeof(byte[]));
-        //dt.Columns.Add(nameof(BlockInfo.block_info), typeof(byte[]));
-        dt.Columns.Add(nameof(BlockInfo.block_info), typeof(string));
-
-        foreach (var r in records)
-        {
-            //var bi = Compress(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(
-            //    r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() })));
-            var bi = JsonSerializer.Serialize(
-                r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() });
-
-            dt.Rows.Add(
-                r.is_tx_block,
-                r.index,
-                (long)r.weight,
-                (long)r.iterations,
-                (long)r.cost,
-                (long)r.fee,
-                r.generator.Compress(),
-                r.generator_ref_list,
-                bi);
         }
 
         return dt;

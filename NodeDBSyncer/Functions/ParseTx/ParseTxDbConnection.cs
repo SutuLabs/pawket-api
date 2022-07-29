@@ -3,6 +3,7 @@
 using System.ComponentModel;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.Json;
 using System.Threading.Tasks;
 using NodeDBSyncer.Helpers;
 using Npgsql;
@@ -12,7 +13,7 @@ public class ParseTxDbConnection : PgsqlConnection
 {
 
     public ParseTxDbConnection(string connString)
-        :base(connString)
+        : base(connString)
     {
     }
 
@@ -56,9 +57,45 @@ public class ParseTxDbConnection : PgsqlConnection
         await this.connection.Import(dataTable, CoinClassTableName);
     }
 
-    public async Task WriteBlockRecords(DataTable dataTable)
+    public async Task WriteBlockRecords(IEnumerable<BlockInfo> records)
     {
-        await this.connection.Import(dataTable, FullBlockTableName);
+        await this.connection.Import(ConvertRecordsToTable(records), FullBlockTableName);
+    }
+
+    private DataTable ConvertRecordsToTable(IEnumerable<BlockInfo> records)
+    {
+        var dt = new DataTable();
+        dt.Columns.Add(nameof(BlockInfo.is_tx_block), typeof(bool));
+        dt.Columns.Add(nameof(BlockInfo.index), typeof(long));
+        dt.Columns.Add(nameof(BlockInfo.weight), typeof(long));
+        dt.Columns.Add(nameof(BlockInfo.iterations), typeof(long));
+        dt.Columns.Add(nameof(BlockInfo.cost), typeof(long));
+        dt.Columns.Add(nameof(BlockInfo.fee), typeof(long));
+        dt.Columns.Add(nameof(BlockInfo.generator), typeof(byte[]));
+        dt.Columns.Add(nameof(BlockInfo.generator_ref_list), typeof(byte[]));
+        //dt.Columns.Add(nameof(BlockInfo.block_info), typeof(byte[]));
+        dt.Columns.Add(nameof(BlockInfo.block_info), typeof(string));
+
+        foreach (var r in records)
+        {
+            //var bi = Compress(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(
+            //    r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() })));
+            var bi = JsonSerializer.Serialize(
+                r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() });
+
+            dt.Rows.Add(
+                r.is_tx_block,
+                r.index,
+                (long)r.weight,
+                (long)r.iterations,
+                (long)r.cost,
+                (long)r.fee,
+                r.generator.Compress(),
+                r.generator_ref_list,
+                bi);
+        }
+
+        return dt;
     }
 
     private async Task<bool> CheckTableExistenceV2() => await this.connection.CheckExistence(FullBlockTableName);
