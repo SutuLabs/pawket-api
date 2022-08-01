@@ -25,6 +25,15 @@ public abstract class PgsqlConnection : IDisposable
         return Task.CompletedTask;
     }
 
+    protected async Task<long> GetMaxId(string tableName, string columnName = "id")
+    {
+        using var cmd = new NpgsqlCommand(@$"select max({columnName}) from {tableName};", connection);
+        var o = await cmd.ExecuteScalarAsync();
+        return o is DBNull ? 0
+            : o is long lo ? lo
+            : 0;
+    }
+
     protected async Task<long> GetSyncState(string stateName)
     {
         using var cmd = new NpgsqlCommand(@$"select {stateName} from {SyncStateTableName} where id=1;", connection);

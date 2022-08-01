@@ -11,7 +11,7 @@ using static NodeDBSyncer.Helpers.DbReference;
 public class PgsqlTargetConnection : PgsqlConnection
 {
     public PgsqlTargetConnection(string connString)
-        :base(connString)
+        : base(connString)
     {
     }
 
@@ -24,23 +24,9 @@ public class PgsqlTargetConnection : PgsqlConnection
         }
     }
 
-    public async Task<long> GetTotalCoinRecords()
-    {
-        using var cmd = new NpgsqlCommand(@$"select max(id) from {CoinRecordTableName};", connection);
-        var o = await cmd.ExecuteScalarAsync();
-        return o is DBNull ? 0
-            : o is long lo ? lo
-            : 0;
-    }
+    public async Task<long> GetTotalCoinRecords() => await GetMaxId(CoinRecordTableName);
 
-    public async Task<long> GetTotalHintRecords()
-    {
-        using var cmd = new NpgsqlCommand(@$"select max(id) from {HintRecordTableName};", connection);
-        var o = await cmd.ExecuteScalarAsync();
-        return o is DBNull ? 0
-            : o is long lo ? lo
-            : 0;
-    }
+    public async Task<long> GetTotalHintRecords() => await GetMaxId(HintRecordTableName);
 
     public async Task<long> GetLastSyncSpentHeight() => await GetSyncState("spent_index");
 

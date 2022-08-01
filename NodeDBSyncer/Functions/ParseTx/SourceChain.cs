@@ -26,9 +26,9 @@ public class SourceChain : IDisposable
     }
 
     public async Task<FullBlock[]> GetBlocks(
-        uint start, uint number, bool excludeHeaderhash = false, CancellationToken cancellationToken = default)
+        uint start, uint number, bool excludeHeaderhash = false, bool excludeReorged = false, CancellationToken cancellationToken = default)
     {
-        return (await nodeClient.GetBlocks(start, start + number, excludeHeaderhash, cancellationToken)).ToArray();
+        return (await nodeClient.GetBlocks(start, start + number, excludeHeaderhash, excludeReorged, cancellationToken)).ToArray();
     }
 
     public async Task<CoinRecord[]> GetCoins(

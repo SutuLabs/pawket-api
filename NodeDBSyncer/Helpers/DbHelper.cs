@@ -57,12 +57,17 @@ public static class DbHelper
     public static byte[] Compress(this byte[] input)
     {
         if (input.Length == 0) return input;
-        var output = new byte[LZ4Codec.MaximumOutputSize(input.Length)];
-        var encodedLength = LZ4Codec.Encode(
-            input, 0, input.Length,
-            output, 0, output.Length);
-        if (new Random(DateTime.Now.Millisecond).NextDouble() < 0.05)
-            Console.WriteLine($"compressed {(double)encodedLength / input.Length * 100:00.0}%, before: {input.Length}, after: {encodedLength}");
+
+        var output = LZ4Pickler.Pickle(input);
+        ////if (new Random(DateTime.Now.Millisecond).NextDouble() < 0.01)
+        ////    Console.WriteLine($"compressed {(double)output.Length / input.Length * 100:00.0}%, before: {input.Length}, after: {output.Length}");
+        return output;
+    }
+
+    public static byte[] Decompress(this byte[] input)
+    {
+        if (input.Length == 0) return input;
+        var output = LZ4Pickler.Unpickle(input);
         return output;
     }
 }

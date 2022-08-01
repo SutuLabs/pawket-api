@@ -1,9 +1,7 @@
 ﻿namespace NodeDBSyncer.Functions.ParseTx;
 
-using System.ComponentModel;
 using System.Data;
-using System.Data.SqlClient;
-using System.Text.Json;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NodeDBSyncer.Helpers;
 using Npgsql;
@@ -11,7 +9,6 @@ using static NodeDBSyncer.Helpers.DbReference;
 
 public class ParseTxDbConnection : PgsqlConnection
 {
-
     public ParseTxDbConnection(string connString)
         : base(connString)
     {
@@ -47,14 +44,91 @@ public class ParseTxDbConnection : PgsqlConnection
         return list.ToArray();
     }
 
+    public record GetUnparsedBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, BlockTransactionGeneratorRetrieval[] RefBlocks);
+    public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);
 
-    public async Task<long> GetLastBlockSyncHeight() => await GetSyncState(FullBlockSyncStateField);
-
-    public async Task WriteLastBlockSyncHeight(long height) => await WriteSyncState(FullBlockSyncStateField, height);
-
-    public async Task WriteCoinClassRecords(DataTable dataTable)
+    public async Task<GetUnparsedBlockResponse> GetUnparsedBlock(int number)
     {
-        await this.connection.Import(dataTable, CoinClassTableName);
+        var sql = $"SELECT index,generator,generator_ref_list FROM {FullBlockTableName}" +
+            $" WHERE tx_parsed=FALSE AND is_tx_block=TRUE" +
+            $" ORDER BY index DESC" +
+            $" LIMIT @limit";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("limit", number),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var list = await ReadBlocks(reader);
+        var refIndexes = list.SelectMany(_ => _.generator_ref_list ?? Array.Empty<uint>()).Distinct().ToArray();
+
+        await reader.CloseAsync();
+        await cmd.DisposeAsync();
+        var refs = await GetRelativeBlocks(refIndexes);
+
+        return new GetUnparsedBlockResponse(list, refs);
+    }
+
+    private async Task<BlockTransactionGeneratorRetrieval[]> GetRelativeBlocks(uint[] blockIndexes)
+    {
+        if (blockIndexes.Length == 0) return Array.Empty<BlockTransactionGeneratorRetrieval>();
+
+        var sql = $"SELECT index,generator,generator_ref_list FROM {FullBlockTableName}" +
+            $" WHERE index = ANY(@list)" +
+            $" ORDER BY index";
+        var idxs = blockIndexes.Select(_ => (long)_).ToArray();
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("list", idxs),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+        return await ReadBlocks(reader);
+    }
+
+    private static async Task<BlockTransactionGeneratorRetrieval[]> ReadBlocks(NpgsqlDataReader reader)
+    {
+        var list = new List<BlockTransactionGeneratorRetrieval>();
+        while (await reader.ReadAsync())
+        {
+            var index = reader.GetFieldValue<long>(0);
+            var generator = reader.GetFieldValue<byte[]>(1);
+            var generator_ref_list_buff = reader.GetFieldValue<byte[]>(2);
+            var generator_ref_list = MemoryMarshal.Cast<byte, uint>(generator_ref_list_buff).ToArray();
+            list.Add(new BlockTransactionGeneratorRetrieval((ulong)index, generator.Decompress(), generator_ref_list));
+        }
+
+        return list.ToArray();
+    }
+
+    public async Task UpdateParsedBlock(ulong[] blockIndexes)
+    {
+        var sql = $"UPDATE {FullBlockTableName}" +
+            $" SET tx_parsed=TRUE" +
+            $" WHERE index = ANY(@list)";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("list", blockIndexes.Select(_=>(long)_).ToArray()),
+            }
+        };
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task<long> GetLatestBlockSynced() => await GetMaxId(FullBlockTableName, "index");
+
+    internal async Task<bool> CheckIndexExistence() => await this.connection.CheckExistence($"idx_{FullBlockTableName}_index");
+
+    public async Task WriteCoinClassRecords(IEnumerable<CoinInfoForStorage> records)
+    {
+        await this.connection.Import(ConvertRecordsToTable(records), CoinClassTableName);
     }
 
     public async Task WriteBlockRecords(IEnumerable<BlockInfo> records)
@@ -78,10 +152,10 @@ public class ParseTxDbConnection : PgsqlConnection
 
         foreach (var r in records)
         {
-            //var bi = Compress(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(
-            //    r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() })));
-            var bi = JsonSerializer.Serialize(
-                r.block_info with { TransactionsGenerator = "", TransactionsGeneratorRefList = Array.Empty<uint>() });
+            // don't use JsonSerializer as they are slow and generate wrong json due to BigInteger
+            var bi = Newtonsoft.Json.JsonConvert.SerializeObject(
+                r.block_info with { TransactionsGenerator = null, TransactionsGeneratorRefList = Array.Empty<uint>() },
+                new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
 
             dt.Rows.Add(
                 r.is_tx_block,
@@ -91,15 +165,38 @@ public class ParseTxDbConnection : PgsqlConnection
                 (long)r.cost,
                 (long)r.fee,
                 r.generator.Compress(),
-                r.generator_ref_list,
+                MemoryMarshal.AsBytes<uint>(r.generator_ref_list.ToArray()).ToArray(),
                 bi);
         }
 
         return dt;
     }
 
-    private async Task<bool> CheckTableExistenceV2() => await this.connection.CheckExistence(FullBlockTableName);
+    private DataTable ConvertRecordsToTable(IEnumerable<CoinInfoForStorage> records)
+    {
+        var dt = new DataTable();
+        dt.Columns.Add(nameof(CoinInfo.coin_name), typeof(byte[]));
+        dt.Columns.Add(nameof(CoinInfo.puzzle), typeof(byte[]));
+        dt.Columns.Add(nameof(CoinInfo.parsed_puzzle), typeof(string));
+        dt.Columns.Add(nameof(CoinInfo.solution), typeof(byte[]));
+        dt.Columns.Add(nameof(CoinInfo.mods), typeof(string));
+        dt.Columns.Add(nameof(CoinInfo.key_param), typeof(string));
 
+        foreach (var r in records)
+        {
+            dt.Rows.Add(
+                r.coin_name,
+                r.puzzle,
+                r.parsed_puzzle,
+                r.solution,
+                r.mods,
+                r.key_param);
+        }
+
+        return dt;
+    }
+
+    private async Task<bool> CheckTableExistenceV2() => await this.connection.CheckExistence(FullBlockTableName);
 
     private async Task UpgradeDatabaseV2()
     {
@@ -116,6 +213,7 @@ CREATE TABLE public.{FullBlockTableName}
     generator bytea NOT NULL,
     generator_ref_list bytea NOT NULL,
     block_info json NOT NULL,
+    tx_parsed boolean DEFAULT false,
     PRIMARY KEY (id)
 );
 
@@ -126,18 +224,16 @@ CREATE TABLE public.{CoinClassTableName}
 (
     id serial NOT NULL,
     coin_name bytea NOT NULL UNIQUE,
-    puzzle json NOT NULL,
+    puzzle bytea NOT NULL,
+    parsed_puzzle json NOT NULL,
     solution bytea NOT NULL,
+    mods text,
+    key_param text,
     PRIMARY KEY (id)
 );
 
 ALTER TABLE IF EXISTS public.{CoinClassTableName}
     OWNER to postgres;
-
-ALTER TABLE public.{SyncStateTableName}
-    ADD COLUMN IF NOT EXISTS {FullBlockSyncStateField} bigint;
-
-UPDATE public.{SyncStateTableName} SET {FullBlockSyncStateField}=0;
 ", connection);
 
         try
@@ -146,7 +242,26 @@ UPDATE public.{SyncStateTableName} SET {FullBlockSyncStateField}=0;
         }
         catch (PostgresException pex)
         {
-            Console.WriteLine($"Failed to upgrade v2 script due to [{pex.Message}], you may want to execute it yourself, here it is:");
+            Console.WriteLine($"Failed to create db for block/coin-class due to [{pex.Message}], you may want to execute it yourself, here it is:");
+            Console.WriteLine(cmd.CommandText);
+        }
+    }
+
+    internal async Task InitializeIndex()
+    {
+        using var cmd = new NpgsqlCommand(@$"
+CREATE INDEX IF NOT EXISTS idx_{FullBlockTableName}_index
+    ON public.{FullBlockTableName} USING btree
+    (index DESC NULLS LAST);
+", connection);
+        try
+        {
+            cmd.CommandTimeout = 600;
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (PostgresException pex)
+        {
+            Console.WriteLine($"Failed to execute index creation script due to [{pex.Message}], you may want to execute it yourself, here it is:");
             Console.WriteLine(cmd.CommandText);
         }
     }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using NodeDBSyncer.Functions.ParseTx;
 using NodeDBSyncer.Functions.Price;
 using NodeDBSyncer.Functions.SyncCoin;
 using NodeDBSyncer.Helpers;
@@ -23,7 +24,8 @@ builder.ConfigureServices(services =>
     services.AddSingleton<PersistentHelper>();
     services.AddSingleton<PushLogHelper>();
     services.AddHostedService<RefreshPriceService>();
-    //services.AddHostedService<ParseBlockTxService>();
+    services.AddHostedService<SyncBlockService>();
+    services.AddHostedService<ParseBlockTxService>();
 });
 
 var app = builder.Build();

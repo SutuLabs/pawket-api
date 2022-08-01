@@ -13,7 +13,7 @@ public class LocalNodeProcessor
         this.TargetAddress = targetAddress;
     }
 
-    public async Task<PuzzleArg> ParsePuzzle(string puzzleHex)
+    public async Task<PuzzleArg?> ParsePuzzle(string puzzleHex)
     {
         using var client = new HttpClient();
         var content = new StringContent(@$"{{""puzzle"":""{puzzleHex}""}}", Encoding.UTF8, "application/json");
@@ -26,12 +26,14 @@ public class LocalNodeProcessor
         return puz;
     }
 
-    public async Task<CoinInfo[]> ParseBlock(string generatorHex, string[] ref_generaters)
+    public async Task<CoinInfo[]> ParseBlock(byte[] generator, byte[][] refGenerators)
     {
+        var generatorHex = generator.ToHexWithPrefix0x();
+        var refGeneratorsHex = refGenerators.Select(_ => _.ToHexWithPrefix0x()).ToArray();
         using var client = new HttpClient();
         var json = JsonSerializer.Serialize(new
         {
-            ref_list = ref_generaters,
+            ref_list = refGeneratorsHex,
             generator = generatorHex,
         });
         var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -43,12 +45,9 @@ public class LocalNodeProcessor
         response.EnsureSuccessStatusCode();
 
         var coins = JsonSerializer.Deserialize<CoinInfoJson[]>(body);
-        ulong ParseAmount(string amount)
-            => string.IsNullOrWhiteSpace(amount) || amount == "()" ? 0
-            : amount.StartsWith("0x") ? Convert.ToUInt64(amount.Unprefix0x(), 16)
-            : ulong.Parse(amount);
+        if (coins == null) return Array.Empty<CoinInfo>();
         return coins
-            .Select(_ => new CoinInfo(_.parent, _.puzzle, ParseAmount(_.amount), _.solution, _.coinname))
+            .Select(_ => new CoinInfo(_.coin_name, _.puzzle, _.parsed_puzzle, _.solution, _.mods, _.key_param))
             .ToArray();
     }
 }
