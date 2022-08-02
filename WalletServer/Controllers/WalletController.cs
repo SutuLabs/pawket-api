@@ -253,7 +253,7 @@ namespace WalletServer.Controllers
             var coins = await dataAccess.GetCoinDetails(coinIds);
             if (request.coinId != null)
             {
-                if (coins.Length != 1) return BadRequest("Unknown situation");
+                if (coins.Length != 1) return BadRequest("Cannot find corresponding coin.");
                 return Ok(new GetCoinSolutionLegacyResponse(ConvertCoin(coins.First())));
             }
 
