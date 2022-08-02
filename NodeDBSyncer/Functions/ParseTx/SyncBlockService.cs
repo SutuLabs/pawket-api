@@ -86,7 +86,6 @@ internal class SyncBlockService : BaseRefreshService
         var current = (uint)targetPeak;
         while (current < sourcePeak)
         {
-            Console.WriteLine($"[{Thread.CurrentThread.ManagedThreadId}]current: {current}");
             var sw = new Stopwatch();
             sw.Start();
             var tc = current;
