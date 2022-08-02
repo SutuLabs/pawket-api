@@ -62,7 +62,8 @@ namespace WalletServer.Controllers
             long? pageStart = null,
             int? pageLength = null,
             bool includeSpentCoins = false,
-            bool hint = false);
+            bool hint = false,
+            string? coinType = null);
         public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, long balance, FullBalanceInfo balanceInfo);
 
@@ -74,6 +75,13 @@ namespace WalletServer.Controllers
             if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
             if (request.puzzleHashes.Length > 300)
                 return BadRequest("Valid puzzle hash number per request is 300");
+            var coinType = (CoinClassType?)null;
+            if (request.coinType != null)
+            {
+                if (!Enum.TryParse<CoinClassType>(request.coinType, out var ct))
+                    return BadRequest("Coin type cannot be recognized.");
+                coinType = ct;
+            }
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
@@ -88,13 +96,14 @@ namespace WalletServer.Controllers
             {
                 var balance = await this.dataAccess.GetBalance(hash);
                 var coinRecords = await this.dataAccess.GetCoins(
-                    hash,
+                    new[] { hash },
                     request.includeSpentCoins,
                     GetCoinOrder.AnyIndexDesc,
-                    request.hint ? GetCoinMethod.Hint : GetCoinMethod.PuzzleHash,
+                    request.coinType != null ? GetCoinMethod.Class : request.hint ? GetCoinMethod.Hint : GetCoinMethod.PuzzleHash,
                     request.startHeight,
                     request.pageStart,
-                    request.pageLength);
+                    request.pageLength,
+                    coinType);
                 infos.Add(new CoinRecordInfo(hash, coinRecords, balance.Amount, balance));
             }
 
@@ -219,35 +228,71 @@ namespace WalletServer.Controllers
             return Ok(new GetParentPuzzleResponse(request.parentCoinId, parentCoin.Coin.Amount, parentCoin.Coin.ParentCoinInfo, spend.PuzzleReveal));
         }
 
-        public record GetCoinSolutionRequest(string coinId);
-        public record GetCoinSolutionResponse(CoinSpendReq CoinSpend);
+        public record GetCoinSolutionRequest(
+            [property: Obsolete("legacy compatibility api")] string? coinId,
+            string[]? coinIds,
+            int? pageStart = null,
+            int? pageLength = null);
+        [Obsolete("legacy compatibility api")]
+        public record GetCoinSolutionLegacyResponse(CoinSpendReq CoinSpend);
+        public record GetCoinSolutionResponse(CoinSpendReq[] CoinSpends);
 
         [HttpPost("get-coin-solution")]
         public async Task<ActionResult> GetCoinSolution(GetCoinSolutionRequest request)
         {
-            if (request == null || request.coinId == null) return BadRequest("Invalid request");
+            if (request == null) return BadRequest("Malformat request");
+            var coinIds = request.coinId != null ? new[] { request.coinId } : request.coinIds != null ? request.coinIds : null;
+            if (coinIds == null) return BadRequest("Invalid request");
+
             RequestCoinSolutionCount.Inc();
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogInformation($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle[debug] {request.coinId}");
 
-            var thisRecord = await this.client.GetCoinRecordByName(request.coinId);
+
+            var coins = await dataAccess.GetCoinDetails(coinIds);
+            if (request.coinId != null)
+            {
+                if (coins.Length != 1) return BadRequest("Unknown situation");
+                return Ok(new GetCoinSolutionLegacyResponse(ConvertCoin(coins.First())));
+            }
+
+            return Ok(new GetCoinSolutionResponse(coins.Select(_ => ConvertCoin(_)).ToArray()));
+
+            //if (request.coinId != null)
+            //{
+            //    var cs = await GetCoinSolutionByApi(request.coinId);
+            //    if (cs == null) return BadRequest("Failed to get coin.");
+            //    return Ok(new GetCoinSolutionResponse(cs));
+            //}
+        }
+
+        private CoinSpendReq ConvertCoin(CoinDetail coin)
+        {
+            return new CoinSpendReq(new CoinItemReq(coin.Amount, coin.ParentCoinInfo, coin.PuzzleHash),
+                coin.PuzzleReveal ?? string.Empty,
+                coin.Solution ?? string.Empty);
+        }
+
+        private async Task<CoinSpendReq?> GetCoinSolutionByApi(string coinId)
+        {
+            var thisRecord = await this.client.GetCoinRecordByName(coinId);
             if (!thisRecord.Spent)
             {
                 var c = thisRecord.Coin;
-                return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
-                    new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty)));
+                return new CoinSpendReq(
+                    new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty);
             }
 
-            var cs = await this.client.GetPuzzleAndSolution(request.coinId, thisRecord.SpentBlockIndex);
+            var cs = await this.client.GetPuzzleAndSolution(coinId, thisRecord.SpentBlockIndex);
             if (string.IsNullOrEmpty(cs.PuzzleReveal) || string.IsNullOrEmpty(cs.Solution))
             {
                 this.logger.LogWarning($"failed to get puzzle for {thisRecord.Coin.ParentCoinInfo} on {thisRecord.ConfirmedBlockIndex}");
-                return BadRequest("Failed to get coin.");
+                return null;
             }
 
-            return Ok(new GetCoinSolutionResponse(new CoinSpendReq(
-                new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution)));
+            return new CoinSpendReq(
+                new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution);
         }
 
         public record GetNetworkInfoResponse(string name, string prefix);

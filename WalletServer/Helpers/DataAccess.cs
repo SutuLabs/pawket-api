@@ -2,6 +2,7 @@
 using chia.dotnet;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using NodeDBSyncer.Helpers;
 using Npgsql;
 using Prometheus;
 
@@ -10,7 +11,7 @@ namespace WalletServer.Helpers;
 public class DataAccess : IDisposable
 {
     private const string SqlLastIndexLateral = ", LATERAL (SELECT spent_index AS last_index FROM sync_state WHERE id=1) AS t";
-    private const string SqlIndexConstraint = " AND (confirmed_index <= last_index) AND (spent_index <= last_index)";
+    private const string SqlIndexConstraint = " AND (c.confirmed_index <= last_index) AND (c.spent_index <= last_index)";
     private const string PriceTableName = "series_price";
 
     private readonly ILogger<DataAccess> logger;
@@ -38,13 +39,14 @@ public class DataAccess : IDisposable
     }
 
     public async Task<CoinRecord[]> GetCoins(
-        string puzzleHash,
+        string[] puzzleHashes,
         bool includeSpent = true,
         GetCoinOrder order = GetCoinOrder.ConfirmedIndexAsc,
         GetCoinMethod method = GetCoinMethod.PuzzleHash,
         long? startIndex = 0,
         long? pageStart = 0,
-        int? pageLength = 100)
+        int? pageLength = 100,
+        CoinClassType? coinClassType = null)
     {
         if (method == GetCoinMethod.PuzzleHash) GetCoinByPuzzleHashCount.Inc();
         if (method == GetCoinMethod.Hint) GetCoinByHintCount.Inc();
@@ -56,17 +58,21 @@ public class DataAccess : IDisposable
         var sql =
             (method switch
             {
-                GetCoinMethod.PuzzleHash => $"SELECT r.* FROM sync_coin_record r{SqlLastIndexLateral} WHERE puzzle_hash=(@puzzle_hash)",
-                GetCoinMethod.Hint => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name{SqlLastIndexLateral} WHERE hint=(@puzzle_hash)",
+                GetCoinMethod.PuzzleHash => $"SELECT c.* FROM sync_coin_record c{SqlLastIndexLateral} WHERE puzzle_hash=ANY(@puzzle_hash)",
+                GetCoinMethod.Hint => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name{SqlLastIndexLateral} WHERE hint=ANY(@puzzle_hash)",
+                GetCoinMethod.Class => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name" +
+                $" JOIN sync_coin_record pc ON pc.coin_name = c.coin_parent" +
+                $" FULL JOIN sync_coin_class cc ON cc.coin_name = pc.coin_name{SqlLastIndexLateral} WHERE hint=ANY(@puzzle_hash)",
                 _ => throw new NotImplementedException(),
             })
             + SqlIndexConstraint
-            + (includeSpent ? "" : " AND spent_index=0")
+            + (includeSpent ? "" : " AND c.spent_index=0")
+            + (coinClassType == null ? "" : " AND mods = ANY(@mods)")
             + (order switch
             {
-                GetCoinOrder.AmountDesc => " ORDER BY amount DESC",
-                GetCoinOrder.ConfirmedIndexAsc => " ORDER BY confirmed_index",
-                GetCoinOrder.AnyIndexDesc => " ORDER BY GREATEST(spent_index, confirmed_index) DESC",
+                GetCoinOrder.AmountDesc => " ORDER BY c.amount DESC",
+                GetCoinOrder.ConfirmedIndexAsc => " ORDER BY c.confirmed_index",
+                GetCoinOrder.AnyIndexDesc => " ORDER BY GREATEST(c.spent_index, c.confirmed_index) DESC",
                 _ => throw new NotImplementedException(),
             })
             + " LIMIT (@limit) OFFSET (@offset)";
@@ -77,12 +83,13 @@ public class DataAccess : IDisposable
         using var cmd = new NpgsqlCommand(sql, this.connection)
         {
             Parameters = {
-                new("puzzle_hash", HexMate.Convert.FromHexString(puzzleHash.Unprefix0x().AsSpan())),
+                new("puzzle_hash", puzzleHashes.Select(_=> HexMate.Convert.FromHexString(_.Unprefix0x().AsSpan())).ToArray()),
                 new("limit", pageLength),
                 new("offset", pageStart),
                 new("start", startIndex),
             }
         };
+        if (coinClassType is CoinClassType cct) cmd.Parameters.AddWithValue("mods", GetTypeStringArrayByType(cct));
         var reader = await cmd.ExecuteReaderAsync();
         var dt = new DataTable();
         dt.Load(reader);
@@ -110,7 +117,7 @@ public class DataAccess : IDisposable
     public async Task<FullBalanceInfo> GetBalance(string puzzleHash)
     {
         GetBalanceCount.Inc();
-        var sql = "SELECT sum(amount)::bigint, count(*), CASE WHEN spent_index = 0 THEN 0 ELSE 1 END AS spent FROM sync_coin_record"
+        var sql = "SELECT sum(amount)::bigint, count(*), CASE WHEN spent_index = 0 THEN 0 ELSE 1 END AS spent FROM sync_coin_record c"
             + SqlLastIndexLateral
             + " WHERE puzzle_hash=(@puzzle_hash)"
             + "AND amount > 0"
@@ -153,6 +160,51 @@ public class DataAccess : IDisposable
         }
 
         return new FullBalanceInfo(unspentAmount, unspentCount, spentAmount, spentCount);
+    }
+
+    public async Task<CoinDetail[]> GetCoinDetails(string[] coinIds, long? pageStart = 0, int? pageLength = 100)
+    {
+        using var cmd = new NpgsqlCommand(
+            $"SELECT c.amount, c.coin_parent, c.puzzle_hash, cc.puzzle, cc.solution FROM sync_coin_record c"
+            + $" LEFT JOIN sync_coin_class cc ON c.coin_name = cc.coin_name"
+            + SqlLastIndexLateral
+            + $" WHERE c.coin_name = ANY(@coin_name)"
+            + SqlIndexConstraint
+            + $" ORDER BY GREATEST(c.spent_index, c.confirmed_index) DESC"
+            + $" LIMIT (@limit) OFFSET (@offset)"
+            , connection)
+        {
+            Parameters =
+            {
+                new("coin_name", coinIds.Select(_=> HexMate.Convert.FromHexString(_.Unprefix0x().AsSpan())).ToArray()),
+                new("limit", pageLength),
+                new("offset", pageStart),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new
+            {
+                amount = _["amount"] as long?,
+                parent = _["coin_parent"] as byte[],
+                hash = _["puzzle_hash"] as byte[],
+                puzzle = _["puzzle"] as byte[],
+                solution = _["solution"] as byte[],
+            })
+            .Select(_ => (_.amount == null || _.parent == null || _.hash == null) ? null : new CoinDetail(
+                Convert.ToUInt64(_.amount),
+                _.parent.ToHexWithPrefix0x(),
+                _.hash.ToHexWithPrefix0x(),
+                _.puzzle?.Decompress().ToHexWithPrefix0x(),
+                _.solution?.Decompress().ToHexWithPrefix0x()))
+            .WhereNotNull()
+            .ToArray();
+
+        return rows;
     }
 
 
@@ -200,6 +252,30 @@ public class DataAccess : IDisposable
         return rows;
     }
 
+    private string[] GetTypeStringArrayByType(CoinClassType type)
+    {
+        switch (type)
+        {
+            case CoinClassType.CatV2:
+                return new[] {
+                    "cat_v2()",
+                    "cat_v2(p2_delegated_puzzle_or_hidden_puzzle())",
+                    "cat_v2(settlement_payments())",
+                };
+            case CoinClassType.DidV1:
+                return new[] {
+                    "singleton_top_layer_v1_1(did_innerpuz(p2_delegated_puzzle_or_hidden_puzzle()))",
+                };
+            case CoinClassType.NftV1:
+                return new[] {
+                    "singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),p2_delegated_puzzle_or_hidden_puzzle())))",
+                    "singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments())))",
+                };
+            default:
+                throw new NotImplementedException($"Unrecognize class type: {type}");
+        }
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
@@ -232,7 +308,24 @@ public enum GetCoinMethod
 {
     PuzzleHash,
     Hint,
+    Class,
+}
+
+public enum CoinClassType
+{
+    CatV2,
+    DidV1,
+    NftV1,
 }
 
 public record FullBalanceInfo(long Amount, int CoinCount, long SpentAmount, int SpentCount);
 public record PriceEntity(string source, string from, string to, decimal price, DateTime time);
+
+public record CoinDetail
+(
+     ulong Amount,
+     string ParentCoinInfo,
+     string PuzzleHash,
+     string? PuzzleReveal,
+     string? Solution
+);
