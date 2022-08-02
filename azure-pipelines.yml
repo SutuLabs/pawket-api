@@ -87,7 +87,9 @@ stages:
     - task: CopyFiles@2
       inputs:
         SourceFolder: '$(build.SourcesDirectory)'
-        Contents: 'deploy.sh'
+        Contents: |
+            deploy.sh
+            control.sh
         TargetFolder: '$(build.ArtifactStagingDirectory)'
 
     - task: ArchiveFiles@2
