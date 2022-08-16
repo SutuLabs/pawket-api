@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using chia.dotnet;
@@ -28,6 +29,7 @@ namespace WalletServer.Controllers
         private static readonly Counter PushTxSuccessCount = Metrics.CreateCounter("push_tx_success_total", "Number of successful pushtx request.");
         private static readonly Counter RequestPuzzleCount = Metrics.CreateCounter("request_puzzle_total", "Number of puzzle request.");
         private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.");
+        private static readonly Counter RequestOfferUploadCount = Metrics.CreateCounter("request_offer_upload_total", "Number of offer upload request.");
 
         public WalletController(
             ILogger<WalletController> logger,
@@ -86,7 +88,7 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
-                + $"[{request.puzzleHashes.Length }], includeSpent = {request.includeSpentCoins}");
+                + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
 
             RequestRecordCount.Inc();
             var peak = await this.dataAccess.GetPeakHeight();
@@ -265,6 +267,42 @@ namespace WalletServer.Controllers
             //    if (cs == null) return BadRequest("Failed to get coin.");
             //    return Ok(new GetCoinSolutionResponse(cs));
             //}
+        }
+
+        public record UploadOfferRequest(string offer);
+        public record DexieErrorResponse(bool success, string error_message);
+
+        [HttpPost("offers")]
+        public async Task<ActionResult> UploadOffer(UploadOfferRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.offer)) return BadRequest("Malformat request");
+            RequestOfferUploadCount.Inc();
+
+            using var client = new HttpClient();
+            var resp = await client.PostAsJsonAsync("https://api.dexie.space/v1/offers", request);
+            if (resp.IsSuccessStatusCode)
+            {
+                return Ok();
+            }
+            else
+            {
+                using var sr = new StreamReader(resp.Content.ReadAsStream());
+                var content = await sr.ReadToEndAsync();
+                try
+                {
+                    var err = JsonSerializer.Deserialize<DexieErrorResponse>(content);
+                    this.logger.LogWarning($"failed to push to dexie, response: {content}");
+                    var code = resp.StatusCode == HttpStatusCode.BadRequest
+                        ? HttpStatusCode.BadRequest
+                        : HttpStatusCode.BadGateway;
+                    return StatusCode((int)code, "Unable to finish your request: " + err?.error_message);
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogWarning(ex, $"failed to deserialize and response, response: {content}");
+                    return StatusCode((int)HttpStatusCode.BadGateway, "Unable to send your request");
+                }
+            }
         }
 
         private CoinSpendReq ConvertCoin(CoinDetail coin)
