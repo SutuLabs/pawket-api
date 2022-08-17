@@ -278,8 +278,12 @@ namespace WalletServer.Controllers
             if (request == null || string.IsNullOrEmpty(request.offer)) return BadRequest("Malformat request");
             RequestOfferUploadCount.Inc();
 
+            var url = this.appSettings.Network == NetworkEnum.testnet
+                ? "https://api-testnet.dexie.space/v1/offers"
+                : "https://api.dexie.space/v1/offers";
+
             using var client = new HttpClient();
-            var resp = await client.PostAsJsonAsync("https://api.dexie.space/v1/offers", request);
+            var resp = await client.PostAsJsonAsync(url, request);
             if (resp.IsSuccessStatusCode)
             {
                 return Ok();
