@@ -58,6 +58,7 @@ public abstract class PgsqlConnection : IDisposable
         {
             if (disposing)
             {
+                this.connection.Close();
                 this.connection.Dispose();
             }
 

@@ -109,7 +109,26 @@ internal class ParseBlockTxService : BaseRefreshService
 
         if (!lstCoins.IsEmpty)
         {
-            await db.WriteCoinClassRecords(lstCoins);
+            try
+            {
+                await db.WriteCoinClassRecords(lstCoins);
+            }
+            catch (Npgsql.PostgresException pgex)
+            {
+                if (pgex.SqlState == "23505"
+                    && pgex.ConstraintName == $"{DbReference.CoinClassTableName}_coin_name_key"
+                    && pgex.Routine == "_bt_check_unique"
+                    && pgex.TableName == DbReference.CoinClassTableName)
+                {
+                    this.logger.LogWarning($"duplicate coin name found, maybe fork happened, clean related coins");
+                    await db.CleanCoinClassByBlock((long)begin, (long)Math.Min(end, begin + 3000));
+                }
+                else
+                {
+                    this.logger.LogWarning(pgex, $"Unknown postgres exception");
+                }
+                return false;
+            }
         }
 
         await db.UpdateParsedBlock(blocks.Select(_ => _.index).Except(lstBadBlocks).ToArray());

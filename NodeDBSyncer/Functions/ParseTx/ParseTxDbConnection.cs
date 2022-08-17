@@ -136,6 +136,31 @@ public class ParseTxDbConnection : PgsqlConnection
         await this.connection.Import(ConvertRecordsToTable(records), FullBlockTableName);
     }
 
+    public async Task CleanCoinClassByBlock(long begin, long end)
+    {
+        var sql = @$"DELETE FROM {CoinClassTableName}
+WHERE id in
+		(SELECT cc.id FROM {CoinClassTableName} cc
+			JOIN {CoinRecordTableName} c ON c.coin_name = cc.coin_name
+			WHERE c.spent_index in
+					(SELECT index FROM {FullBlockTableName}
+						WHERE index BETWEEN @begin AND @end
+							AND is_tx_block = TRUE
+							AND tx_parsed = FALSE ))
+";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("begin", begin),
+                new("end", end),
+            }
+        };
+        cmd.CommandTimeout = 1000;
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+
     private DataTable ConvertRecordsToTable(IEnumerable<BlockInfo> records)
     {
         var dt = new DataTable();
