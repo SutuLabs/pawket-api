@@ -16,6 +16,24 @@ public static class DbHelper
         return o is not DBNull;
     }
 
+    public static async Task<bool> CheckColumnExistence(
+        this NpgsqlConnection connection, string tableName, string columnName)
+    {
+
+        using var cmd = new NpgsqlCommand(
+            @"SELECT count(*) FROM information_schema.columns WHERE table_name = @table AND column_name = @column", connection)
+        {
+            Parameters =
+            {
+                new("table", tableName),
+                new("column", columnName),
+            },
+            AllResultTypesAreUnknown = true,
+        };
+        var o = await cmd.ExecuteScalarAsync();
+        return o is long l && l == 1;
+    }
+
     public static string Join(this IEnumerable<NpgsqlParameter> pars, string prefix = "")
         => string.Join(",", pars.Select(_ => prefix + _.ParameterName));
 

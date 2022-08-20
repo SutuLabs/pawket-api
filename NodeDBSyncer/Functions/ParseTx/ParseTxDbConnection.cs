@@ -17,7 +17,11 @@ public class ParseTxDbConnection : PgsqlConnection
     public override async Task Open()
     {
         await base.Open();
-        if (!await this.CheckTableExistenceV2())
+        if (!await this.CheckTableExistence())
+        {
+            await this.UpgradeDatabase();
+        }
+        else if (!await this.CheckColumnExistence())
         {
             await this.UpgradeDatabaseV2();
         }
@@ -205,7 +209,7 @@ WHERE id in
         dt.Columns.Add(nameof(CoinInfo.parsed_puzzle), typeof(string));
         dt.Columns.Add(nameof(CoinInfo.solution), typeof(byte[]));
         dt.Columns.Add(nameof(CoinInfo.mods), typeof(string));
-        dt.Columns.Add(nameof(CoinInfo.key_param), typeof(string));
+        dt.Columns.Add(nameof(CoinInfo.analysis), typeof(string));
 
         foreach (var r in records)
         {
@@ -215,15 +219,17 @@ WHERE id in
                 r.parsed_puzzle,
                 r.solution,
                 r.mods,
-                r.key_param);
+                r.analysis);
         }
 
         return dt;
     }
 
-    private async Task<bool> CheckTableExistenceV2() => await this.connection.CheckExistence(FullBlockTableName);
+    private async Task<bool> CheckTableExistence() => await this.connection.CheckExistence(FullBlockTableName);
+    private async Task<bool> CheckColumnExistence()
+        => await this.connection.CheckColumnExistence(CoinClassTableName, nameof(CoinInfo.analysis));
 
-    private async Task UpgradeDatabaseV2()
+    private async Task UpgradeDatabase()
     {
         using var cmd = new NpgsqlCommand(@$"
 CREATE TABLE public.{FullBlockTableName}
@@ -248,12 +254,12 @@ ALTER TABLE IF EXISTS public.{FullBlockTableName}
 CREATE TABLE public.{CoinClassTableName}
 (
     id serial NOT NULL,
-    coin_name bytea NOT NULL UNIQUE,
-    puzzle bytea NOT NULL,
-    parsed_puzzle json NOT NULL,
-    solution bytea NOT NULL,
-    mods text,
-    key_param text,
+    {nameof(CoinInfo.coin_name)} bytea NOT NULL UNIQUE,
+    {nameof(CoinInfo.puzzle)} bytea NOT NULL,
+    {nameof(CoinInfo.parsed_puzzle)} json NOT NULL,
+    {nameof(CoinInfo.solution)} bytea NOT NULL,
+    {nameof(CoinInfo.mods)} text,
+    {nameof(CoinInfo.analysis)} json,
     PRIMARY KEY (id)
 );
 
@@ -268,6 +274,22 @@ ALTER TABLE IF EXISTS public.{CoinClassTableName}
         catch (PostgresException pex)
         {
             Console.WriteLine($"Failed to create db for block/coin-class due to [{pex.Message}], you may want to execute it yourself, here it is:");
+            Console.WriteLine(cmd.CommandText);
+        }
+    }
+
+    private async Task UpgradeDatabaseV2()
+    {
+        using var cmd = new NpgsqlCommand(
+            $"ALTER TABLE public.{CoinClassTableName} ADD COLUMN IF NOT EXISTS {nameof(CoinInfo.analysis)} json;", connection);
+
+        try
+        {
+            await cmd.ExecuteNonQueryAsync();
+        }
+        catch (PostgresException pex)
+        {
+            Console.WriteLine($"Failed to upgrade v2 db for block/coin-class due to [{pex.Message}], you may want to execute it yourself, here it is:");
             Console.WriteLine(cmd.CommandText);
         }
     }

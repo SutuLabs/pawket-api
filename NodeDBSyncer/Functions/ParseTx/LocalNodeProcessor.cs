@@ -47,7 +47,7 @@ public class LocalNodeProcessor
         var coins = JsonSerializer.Deserialize<CoinInfoJson[]>(body);
         if (coins == null) return Array.Empty<CoinInfo>();
         return coins
-            .Select(_ => new CoinInfo(_.coin_name, _.puzzle, _.parsed_puzzle, _.solution, _.mods, _.key_param))
+            .Select(_ => new CoinInfo(_.coin_name, _.puzzle, _.parsed_puzzle, _.solution, _.mods, _.analysis))
             .ToArray();
     }
 }

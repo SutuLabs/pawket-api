@@ -91,7 +91,7 @@ internal class ParseBlockTxService : BaseRefreshService
                     pp,
                     r.solution.ToHexBytes().Compress(),
                     r.mods,
-                    r.key_param);
+                    r.analysis);
                     lstBlockCoins.Add(coin);
                 }
 
