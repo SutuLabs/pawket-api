@@ -31,7 +31,7 @@ public static class DbHelper
             AllResultTypesAreUnknown = true,
         };
         var o = await cmd.ExecuteScalarAsync();
-        return o is long l && l == 1;
+        return (o is long l && l == 1) || (o is string s && s == "1");
     }
 
     public static string Join(this IEnumerable<NpgsqlParameter> pars, string prefix = "")
