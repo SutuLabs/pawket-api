@@ -26,6 +26,7 @@ builder.ConfigureServices(services =>
     services.AddHostedService<RefreshPriceService>();
     services.AddHostedService<SyncBlockService>();
     services.AddHostedService<ParseBlockTxService>();
+    services.AddHostedService<AnalyzeTxService>();
 });
 
 var app = builder.Build();

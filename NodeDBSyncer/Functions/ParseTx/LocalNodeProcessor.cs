@@ -1,8 +1,8 @@
 ﻿namespace NodeDBSyncer.Functions.ParseTx;
 
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using WalletServer.Helpers;
 
 public class LocalNodeProcessor
@@ -22,8 +22,22 @@ public class LocalNodeProcessor
         var body = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
 
-        var puz = JsonSerializer.Deserialize<PuzzleArg>(body);
+        var puz = JsonConvert.DeserializeObject<PuzzleArg>(body);
         return puz;
+    }
+
+    public async Task<AnalysisResult?> AnalyzeTx(UnanalyzedTx tx)
+    {
+        using var client = new HttpClient();
+        var json = JsonConvert.SerializeObject(tx);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync($"{TargetAddress}/analyze_tx", content);
+        var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode) return null;
+
+        var result = JsonConvert.DeserializeObject<AnalysisResult>(body);
+        return result;
     }
 
     public async Task<CoinInfo[]> ParseBlock(byte[] generator, byte[][] refGenerators)
@@ -31,7 +45,7 @@ public class LocalNodeProcessor
         var generatorHex = generator.ToHexWithPrefix0x();
         var refGeneratorsHex = refGenerators.Select(_ => _.ToHexWithPrefix0x()).ToArray();
         using var client = new HttpClient();
-        var json = JsonSerializer.Serialize(new
+        var json = JsonConvert.SerializeObject(new
         {
             ref_list = refGeneratorsHex,
             generator = generatorHex,
@@ -44,7 +58,7 @@ public class LocalNodeProcessor
         var body = await response.Content.ReadAsStringAsync();
         response.EnsureSuccessStatusCode();
 
-        var coins = JsonSerializer.Deserialize<CoinInfoJson[]>(body);
+        var coins = JsonConvert.DeserializeObject<CoinInfoJson[]>(body);
         if (coins == null) return Array.Empty<CoinInfo>();
         return coins
             .Select(_ => new CoinInfo(_.coin_name, _.puzzle, _.parsed_puzzle, _.solution, _.mods, _.analysis))
@@ -52,3 +66,6 @@ public class LocalNodeProcessor
     }
 }
 
+public record PuzzleArg(string? mod, PuzzleArg[]? args, string? raw);
+public record CoinInfo(string coin_name, string puzzle, PuzzleArg parsed_puzzle, string solution, string mods, string analysis);
+public record AnalysisResult(string coin_name, PuzzleArg parsed_puzzle, string mods, string analysis);

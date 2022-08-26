@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using NodeDBSyncer.Helpers;
 using Npgsql;
+using WalletServer.Helpers;
 using static NodeDBSyncer.Helpers.DbReference;
 
 public class ParseTxDbConnection : PgsqlConnection
@@ -126,6 +127,31 @@ public class ParseTxDbConnection : PgsqlConnection
         await cmd.ExecuteNonQueryAsync();
     }
 
+    public async Task<int> UpdateTxAnalysis(AnalysisUpdateEntity[] changes)
+    {
+        var tmpTable = "_tmp_import_analysis_update_table";
+        var analysisField = nameof(AnalysisUpdateEntity.analysis);
+        var idField = nameof(AnalysisUpdateEntity.id);
+
+        using var cmd = new NpgsqlCommand(
+            $"CREATE TEMPORARY TABLE {tmpTable}" +
+            $"({idField} bigint NOT NULL," +
+            $" {analysisField} json NOT NULL," +
+            $" PRIMARY KEY ({idField}));",
+            connection);
+        await cmd.ExecuteNonQueryAsync();
+
+        var dataTable = changes.ConvertToDataTable();
+        await this.connection.Import(dataTable, tmpTable);
+
+        using var cmd2 = new NpgsqlCommand($"UPDATE {CoinClassTableName} SET {analysisField} = t.{analysisField}" +
+            $" FROM {tmpTable} as t" +
+            $" WHERE t.{idField} = {CoinClassTableName}.{idField};" +
+            $"DROP TABLE {tmpTable};",
+            connection);
+        return await cmd2.ExecuteNonQueryAsync();
+    }
+
     public async Task<long> GetLatestBlockSynced() => await GetMaxId(FullBlockTableName, "index");
 
     internal async Task<bool> CheckIndexExistence() => await this.connection.CheckExistence($"idx_{FullBlockTableName}_index");
@@ -163,6 +189,56 @@ WHERE id in
         cmd.CommandTimeout = 1000;
 
         await cmd.ExecuteNonQueryAsync();
+    }
+
+    public async Task<UnanalyzedTx[]> GetUnanalyzedTxs(int number)
+    {
+        var sql = $"SELECT cc.id,c.coin_name,cc.puzzle,cc.solution,c.amount,c.coin_parent,c.puzzle_hash" +
+            $" FROM sync_coin_class cc" +
+            $" JOIN sync_coin_record c ON c.coin_name=cc.coin_name" +
+            $" WHERE cc.mods IN ('singleton_top_layer_v1_1(did_innerpuz(p2_delegated_puzzle_or_hidden_puzzle()))'," +
+            $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),p2_delegated_puzzle_or_hidden_puzzle())))'," +
+            $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments())))')" +
+            $" AND cc.analysis IS NULL" +
+            $" ORDER BY cc.id DESC" +
+            $" LIMIT @limit";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("limit", number),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var list = await ReadTxs(reader);
+
+        return list;
+    }
+
+    private static async Task<UnanalyzedTx[]> ReadTxs(NpgsqlDataReader reader)
+    {
+        var list = new List<UnanalyzedTx>();
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetFieldValue<long>(0);
+            var coin_name = reader.GetFieldValue<byte[]>(1);
+            var puzzle = reader.GetFieldValue<byte[]>(2);
+            var solution = reader.GetFieldValue<byte[]>(3);
+            var amount = reader.GetFieldValue<long>(4);
+            var coin_parent = reader.GetFieldValue<byte[]>(5);
+            var puzzle_hash = reader.GetFieldValue<byte[]>(6);
+            list.Add(new UnanalyzedTx(
+                id,
+                coin_name.ToHexWithPrefix0x(),
+                puzzle.Decompress().ToHexWithPrefix0x(),
+                solution.Decompress().ToHexWithPrefix0x(),
+                amount,
+                coin_parent.ToHexWithPrefix0x(),
+                puzzle_hash.ToHexWithPrefix0x()));
+        }
+
+        return list.ToArray();
     }
 
     private DataTable ConvertRecordsToTable(IEnumerable<BlockInfo> records)
