@@ -121,13 +121,21 @@ internal class ParseBlockTxService : BaseRefreshService
                     && pgex.TableName == DbReference.CoinClassTableName)
                 {
                     this.logger.LogWarning($"duplicate coin name found, maybe fork happened, clean related coins");
-                    await db.CleanCoinClassByBlock((long)begin, (long)Math.Min(end, begin + 3000));
+                    try
+                    {
+                        await db.RemoveCoinClass(lstCoins.Select(_ => _.coin_name).ToArray());
+                        await db.WriteCoinClassRecords(lstCoins);
+                    }
+                    catch
+                    {
+                        return false;
+                    }
                 }
                 else
                 {
                     this.logger.LogWarning(pgex, $"Unknown postgres exception");
+                    return false;
                 }
-                return false;
             }
         }
 

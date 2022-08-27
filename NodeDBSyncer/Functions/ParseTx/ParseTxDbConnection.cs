@@ -191,6 +191,20 @@ WHERE id in
         await cmd.ExecuteNonQueryAsync();
     }
 
+    public async Task RemoveCoinClass(byte[][] coins)
+    {
+        var sql = @$"DELETE FROM {CoinClassTableName} WHERE coin_name = ANY(@list)";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("list", coins),
+            }
+        };
+
+        await cmd.ExecuteNonQueryAsync();
+    }
+
     public async Task<UnanalyzedTx[]> GetUnanalyzedTxs(int number)
     {
         var sql = $"SELECT cc.id,c.coin_name,cc.puzzle,cc.solution,c.amount,c.coin_parent,c.puzzle_hash" +
