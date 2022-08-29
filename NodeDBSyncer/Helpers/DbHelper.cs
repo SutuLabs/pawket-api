@@ -37,8 +37,17 @@ public static class DbHelper
     public static string Join(this IEnumerable<NpgsqlParameter> pars, string prefix = "")
         => string.Join(",", pars.Select(_ => prefix + _.ParameterName));
 
+    public static async Task EnsureOpen(this NpgsqlConnection connection, CancellationToken ct = default)
+    {
+        if (connection.State == ConnectionState.Closed || connection.State == ConnectionState.Broken)
+        {
+            await connection.OpenAsync(ct);
+        }
+    }
+
     public static async Task Import(this NpgsqlConnection connection, DataTable dataTable, string tableName, CancellationToken ct = default)
     {
+        await connection.EnsureOpen();
         var fields = string.Join(",", dataTable.Columns.OfType<DataColumn>().Select(_ => $"\"{_.ColumnName}\""));
         using var writer = connection.BeginBinaryImport($"COPY {tableName} ({fields}) FROM STDIN (FORMAT BINARY)");
 

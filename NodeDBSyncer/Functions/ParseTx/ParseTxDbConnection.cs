@@ -28,32 +28,12 @@ public class ParseTxDbConnection : PgsqlConnection
         }
     }
 
-    public async Task<CoinRemovalIndex[]> GetCoinRemovalIndex(long spent_index)
-    {
-        // for parallel
-        using var tconn = new NpgsqlConnection(connString);
-        tconn.Open();
-        await using var cmd = new NpgsqlCommand($"SELECT coin_name FROM {CoinRecordTableName} WHERE spent_index=@spent_index", tconn)
-        {
-            Parameters = { new("spent_index", spent_index), }
-        };
-        await using var reader = await cmd.ExecuteReaderAsync();
-
-        var list = new List<CoinRemovalIndex>();
-        while (await reader.ReadAsync())
-        {
-            var coin_name = reader.GetFieldValue<byte[]>(0);
-            list.Add(new CoinRemovalIndex(coin_name, spent_index));
-        }
-
-        return list.ToArray();
-    }
-
     public record GetUnparsedBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, BlockTransactionGeneratorRetrieval[] RefBlocks);
     public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);
 
     public async Task<GetUnparsedBlockResponse> GetUnparsedBlock(int number)
     {
+        await this.connection.EnsureOpen();
         var sql = $"SELECT index,generator,generator_ref_list FROM {FullBlockTableName}" +
             $" WHERE tx_parsed=FALSE AND is_tx_block=TRUE" +
             $" ORDER BY index DESC" +
@@ -113,6 +93,7 @@ public class ParseTxDbConnection : PgsqlConnection
 
     public async Task UpdateParsedBlock(ulong[] blockIndexes)
     {
+        await this.connection.EnsureOpen();
         var sql = $"UPDATE {FullBlockTableName}" +
             $" SET tx_parsed=TRUE" +
             $" WHERE index = ANY(@list)";
@@ -129,6 +110,7 @@ public class ParseTxDbConnection : PgsqlConnection
 
     public async Task<int> UpdateTxAnalysis(AnalysisUpdateEntity[] changes)
     {
+        await this.connection.EnsureOpen();
         var tmpTable = "_tmp_import_analysis_update_table";
         var analysisField = nameof(AnalysisUpdateEntity.analysis);
         var idField = nameof(AnalysisUpdateEntity.id);
@@ -158,16 +140,19 @@ public class ParseTxDbConnection : PgsqlConnection
 
     public async Task WriteCoinClassRecords(IEnumerable<CoinInfoForStorage> records)
     {
+        await this.connection.EnsureOpen();
         await this.connection.Import(ConvertRecordsToTable(records), CoinClassTableName);
     }
 
     public async Task WriteBlockRecords(IEnumerable<BlockInfo> records)
     {
+        await this.connection.EnsureOpen();
         await this.connection.Import(ConvertRecordsToTable(records), FullBlockTableName);
     }
 
     public async Task CleanCoinClassByBlock(long begin, long end)
     {
+        await this.connection.EnsureOpen();
         var sql = @$"DELETE FROM {CoinClassTableName}
 WHERE id in
 		(SELECT cc.id FROM {CoinClassTableName} cc
@@ -193,6 +178,7 @@ WHERE id in
 
     public async Task RemoveCoinClass(byte[][] coins)
     {
+        await this.connection.EnsureOpen();
         var sql = @$"DELETE FROM {CoinClassTableName} WHERE coin_name = ANY(@list)";
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
@@ -207,6 +193,7 @@ WHERE id in
 
     public async Task<UnanalyzedTx[]> GetUnanalyzedTxs(int number)
     {
+        await this.connection.EnsureOpen();
         var sql = $"SELECT cc.id,c.coin_name,cc.puzzle,cc.solution,c.amount,c.coin_parent,c.puzzle_hash" +
             $" FROM sync_coin_class cc" +
             $" JOIN sync_coin_record c ON c.coin_name=cc.coin_name" +
@@ -386,6 +373,7 @@ ALTER TABLE IF EXISTS public.{CoinClassTableName}
 
     internal async Task InitializeIndex()
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
 CREATE INDEX IF NOT EXISTS idx_{FullBlockTableName}_index
     ON public.{FullBlockTableName} USING btree

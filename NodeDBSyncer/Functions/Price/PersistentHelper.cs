@@ -56,6 +56,7 @@ public class PersistentHelper : PgsqlConnection
 
     private async Task InitializeDatabase()
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
 CREATE TABLE public.{PriceTableName}
 (

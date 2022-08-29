@@ -48,6 +48,7 @@ public class PgsqlTargetConnection : PgsqlConnection
 
     public async Task<int> WriteSpentHeight(CoinSpentRecord[] changes)
     {
+        await this.connection.EnsureOpen();
         var tmpTable = "_tmp_import_spent_height_table";
 
         using var cmd = new NpgsqlCommand(@$"CREATE TEMPORARY TABLE {tmpTable}(coin_name bytea NOT NULL, spent_index bigint NOT NULL, PRIMARY KEY (coin_name));"
@@ -69,6 +70,7 @@ public class PgsqlTargetConnection : PgsqlConnection
 
     public async Task<long> GetPeakSpentHeight()
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"select max(spent_index) from {CoinRecordTableName};", connection);
         var o = await cmd.ExecuteScalarAsync();
         return o is DBNull ? 0
@@ -138,6 +140,7 @@ INSERT INTO public.{SyncStateTableName} (id, spent_index) VALUES (1, 0);
 
     internal async Task InitializeIndex()
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
 CREATE INDEX IF NOT EXISTS idx_{CoinRecordTableName}_confirmed_index
     ON public.{CoinRecordTableName} USING btree

@@ -27,6 +27,7 @@ public abstract class PgsqlConnection : IDisposable
 
     protected async Task<long> GetMaxId(string tableName, string columnName = "id")
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"select max({columnName}) from {tableName};", connection);
         var o = await cmd.ExecuteScalarAsync();
         return o is DBNull ? 0
@@ -36,6 +37,7 @@ public abstract class PgsqlConnection : IDisposable
 
     protected async Task<long> GetSyncState(string stateName)
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"select {stateName} from {SyncStateTableName} where id=1;", connection);
         var o = await cmd.ExecuteScalarAsync();
         return o is DBNull ? 0
@@ -45,6 +47,7 @@ public abstract class PgsqlConnection : IDisposable
 
     protected async Task WriteSyncState(string stateName, object value)
     {
+        await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"UPDATE {SyncStateTableName} SET {stateName}=(@{stateName}) WHERE id=1;", connection)
         {
             Parameters = { new(stateName, value), }
