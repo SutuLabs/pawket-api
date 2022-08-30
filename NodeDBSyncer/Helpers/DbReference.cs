@@ -7,4 +7,6 @@ public static class DbReference
     public const string HintRecordTableName = "sync_hint_record";
     public const string FullBlockTableName = "sync_block";
     public const string CoinClassTableName = "sync_coin_class";
+    public const string SingletonRecordTableName = "ext_singleton_record";
+    public const string SingletonHistoryTableName = "ext_singleton_history";
 }

@@ -2,6 +2,7 @@
 
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
 using System.Threading.Tasks;
 using K4os.Compression.LZ4;
 using Npgsql;
@@ -80,6 +81,15 @@ public static class DbHelper
         }
         return table;
     }
+
+    public static IEnumerable<string> GetPropNames(this Type type)
+    {
+        var properties = TypeDescriptor.GetProperties(type);
+        return properties.OfType<PropertyDescriptor>().Select(_ => _.Name);
+    }
+
+    public static T? GetNullableFieldValue<T>(this DbDataReader reader, int ordinal) =>
+        reader.IsDBNull(ordinal) ? default : reader.GetFieldValue<T>(ordinal);
 
     public static byte[] Compress(this byte[] input)
     {
