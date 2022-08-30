@@ -252,6 +252,46 @@ public class DataAccess : IDisposable
         return rows;
     }
 
+    public async Task<NameEntity[]> GetAllNameEntities(string creator_puzzle_hash = "0x0eb720d9195ffe59684b62b12d54791be7ad3bb6207f5eb92e0e1b40ecbc1155")
+    {
+        using var cmd = new NpgsqlCommand(
+            $@"
+SELECT
+    sr.singleton_coin_name AS nft_coin_name,
+    sh.this_coin_name AS last_change_coin_name,
+    sh.this_coin_spent_index AS last_change_spent_index,
+    cc.analysis->'metadata'->>'name' AS name,
+    cc.analysis->'metadata'->>'address' AS address
+FROM ext_singleton_record sr
+LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
+LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
+LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
+WHERE sr.creator_puzzle_hash=@ph
+AND c.spent_index=0
+AND sr.type='nft_v1';", connection)
+        {
+            Parameters =
+            {
+                new ("ph", creator_puzzle_hash.ToHexBytes()),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new NameEntity(
+                (_[nameof(NameEntity.nft_coin_name)] as byte[]).ToHexWithPrefix0x(),
+                (_[nameof(NameEntity.last_change_coin_name)] as byte[]).ToHexWithPrefix0x(),
+                (int)_[nameof(NameEntity.last_change_spent_index)],
+                (_[nameof(NameEntity.name)] as string ?? "").ToLower(),
+                _[nameof(NameEntity.address)] as string ?? ""))
+            .ToArray();
+
+        return rows;
+    }
+
     private string[] GetTypeStringArrayByType(CoinClassType type)
     {
         switch (type)
@@ -320,6 +360,12 @@ public enum CoinClassType
 
 public record FullBalanceInfo(long Amount, int CoinCount, long SpentAmount, int SpentCount);
 public record PriceEntity(string source, string from, string to, decimal price, DateTime time);
+public record NameEntity(
+    string nft_coin_name,
+    string last_change_coin_name,
+    int last_change_spent_index,
+    string name,
+    string address);
 
 public record CoinDetail
 (

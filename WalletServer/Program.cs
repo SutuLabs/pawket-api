@@ -28,6 +28,7 @@ builder.Services.AddCors(options =>
 });
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddScoped<DataAccess>();
+builder.Services.AddScoped<NameResolvingService>();
 builder.Services.AddScoped<PushLogHelper>();
 builder.Services.AddSingleton<OnlineCounter>();
 
