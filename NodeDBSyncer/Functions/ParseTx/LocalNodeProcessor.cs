@@ -13,6 +13,18 @@ public class LocalNodeProcessor
         this.TargetAddress = targetAddress;
     }
 
+    public async Task<string?> GetVersion()
+    {
+        using var client = new HttpClient();
+
+        var response = await client.GetAsync($"{TargetAddress}/version");
+        var body = await response.Content.ReadAsStringAsync();
+        response.EnsureSuccessStatusCode();
+
+        var ret = JsonConvert.DeserializeAnonymousType(body, new { version = "" });
+        return ret?.version;
+    }
+
     public async Task<PuzzleArg?> ParsePuzzle(string puzzleHex)
     {
         using var client = new HttpClient();

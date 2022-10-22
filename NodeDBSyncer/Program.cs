@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using NodeDBSyncer.Functions.ParseSingleton;
 using NodeDBSyncer.Functions.ParseTx;
 using NodeDBSyncer.Functions.Price;
@@ -33,6 +34,29 @@ builder.ConfigureServices(services =>
 
 var app = builder.Build();
 
+var appSettings = GetService<IOptions<AppSettings>>().Value;
+if (string.IsNullOrWhiteSpace(appSettings.LocalNodeProcessor))
+{
+    Console.Error.WriteLine("Mandatory LocalNodeProcessor is not configured.");
+    throw new SystemException("Mandatory LocalNodeProcessor is not configured.");
+}
+
+try
+{
+    var nodeProcessor = new LocalNodeProcessor(appSettings.LocalNodeProcessor);
+    var version = await nodeProcessor.GetVersion();
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"LocalNodeProcessor is unable to connect due to: {ex.Message}.");
+    throw new SystemException($"LocalNodeProcessor is unable to connect due to: {ex.Message}.");
+}
+
+await GetService<PersistentHelper>().Open();
+await GetService<PushLogHelper>().Open();
+
+await app.RunAsync();
+
 T GetService<T>() where T : class
 {
     if (app == null)
@@ -49,8 +73,3 @@ T GetService<T>() where T : class
 
     return ph;
 }
-
-await GetService<PersistentHelper>().Open();
-await GetService<PushLogHelper>().Open();
-
-await app.RunAsync();

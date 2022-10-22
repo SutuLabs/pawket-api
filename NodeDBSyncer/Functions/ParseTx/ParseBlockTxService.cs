@@ -97,6 +97,10 @@ internal class ParseBlockTxService : BaseRefreshService
 
                 lstBlockCoins.ToList().ForEach(c => lstCoins.Add(c));
             }
+            catch (HttpRequestException ex)
+            {
+                this.logger.LogWarning(ex, $"failed to connect to local node for further processing: {ex.Message}");
+            }
             catch (Exception ex)
             {
                 var json = JsonSerializer.Serialize(new { generator = block.generator.ToHexWithPrefix0x(), });
