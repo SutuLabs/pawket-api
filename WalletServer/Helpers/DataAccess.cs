@@ -252,7 +252,7 @@ public class DataAccess : IDisposable
         return rows;
     }
 
-    public async Task<NameEntity[]> GetAllNameEntities(string creator_puzzle_hash = "0x0eb720d9195ffe59684b62b12d54791be7ad3bb6207f5eb92e0e1b40ecbc1155")
+    public async Task<NameEntity[]> GetAllNameEntities(string creator_puzzle_hash)
     {
         using var cmd = new NpgsqlCommand(
             $@"

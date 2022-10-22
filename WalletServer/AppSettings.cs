@@ -7,6 +7,7 @@
     public string? OnlineDbConnString { get; set; }
     public uint OnlineUserStaySeconds { get; set; } = 90;
     public string? PriceSourceUrl { get; set; }
+    public string CnsCreatorPuzzleHash { get; set; } = "0x0eb720d9195ffe59684b62b12d54791be7ad3bb6207f5eb92e0e1b40ecbc1155";
 }
 
 public class NetworkSettings
