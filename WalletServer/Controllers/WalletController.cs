@@ -278,12 +278,8 @@ namespace WalletServer.Controllers
             if (request == null || string.IsNullOrEmpty(request.offer)) return BadRequest("Malformat request");
             RequestOfferUploadCount.Inc();
 
-            var url = this.appSettings.Network == NetworkEnum.testnet
-                ? "https://api-testnet.dexie.space/v1/offers"
-                : "https://api.dexie.space/v1/offers";
-
             using var client = new HttpClient();
-            var resp = await client.PostAsJsonAsync(url, request);
+            var resp = await client.PostAsJsonAsync(this.appSettings.Network.OfferUploadTarget, request);
             if (resp.IsSuccessStatusCode)
             {
                 return Ok();
@@ -337,23 +333,27 @@ namespace WalletServer.Controllers
                 new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution);
         }
 
-        public record GetNetworkInfoResponse(string name, string prefix);
+        public record GetNetworkInfoResponse(string name, string prefix, string chainId, string symbol, int @decimal, string explorerUrl);
 
         [HttpGet("network")]
         public async Task<ActionResult> GetNetworkInfo()
         {
-            if (!this.memoryCache.TryGetValue(nameof(GetNetworkInfo), out GetNetworkInfoResponse cacheInfo))
-            {
-                var (name, prefix) = await this.client.GetNetworkInfo();
-                cacheInfo = new GetNetworkInfoResponse(name, prefix);
+            // TODO: the code may used when we need to check network or need compatibility.
+            ////if (!this.memoryCache.TryGetValue(nameof(GetNetworkInfo), out GetNetworkInfoResponse cacheInfo))
+            ////{
+            ////    var (name, prefix) = await this.client.GetNetworkInfo();
+            ////    cacheInfo = new GetNetworkInfoResponse(name, prefix);
 
-                var cacheEntryOptions = new MemoryCacheEntryOptions()
-                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
+            ////    var cacheEntryOptions = new MemoryCacheEntryOptions()
+            ////        .SetAbsoluteExpiration(TimeSpan.FromMinutes(10));
 
-                this.memoryCache.Set(nameof(GetNetworkInfo), cacheInfo, cacheEntryOptions);
-            }
+            ////    this.memoryCache.Set(nameof(GetNetworkInfo), cacheInfo, cacheEntryOptions);
+            ////}
 
-            return Ok(cacheInfo);
+            ////return Ok(cacheInfo);
+
+            var net = this.appSettings.Network;
+            return Ok(new GetNetworkInfoResponse(net.Name, net.Prefix, net.ChainId, net.Symbol, net.Decimal, net.ExplorerUrl));
         }
     }
 }
