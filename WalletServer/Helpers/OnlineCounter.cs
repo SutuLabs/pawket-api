@@ -14,11 +14,6 @@ public class OnlineCounter : IDisposable
     private readonly AppSettings appSettings;
     private readonly Timer timer;
 
-    [Obsolete]
-    private static readonly Gauge LegacyDailyActiveUser = Metrics.CreateGauge("active_user", "Number of active user account in recent 24h.");
-    [Obsolete]
-    private static readonly Gauge LegacyDailyActiveIp = Metrics.CreateGauge("active_ip", "Number of active ip in recent 24h.");
-
     private static readonly Gauge OnlineUser = Metrics.CreateGauge("online_user", "Number of online user account according to latest interactive.");
     private static readonly Gauge DailyActiveUser = Metrics.CreateGauge("daily_active_user", "Number of active user account in recent 24h.");
     private static readonly Gauge DailyActiveIp = Metrics.CreateGauge("daily_active_ip", "Number of active ip in recent 24h.");
@@ -68,9 +63,7 @@ public class OnlineCounter : IDisposable
         {
             Count(this.dictUsers, TimeSpan.FromSeconds(this.appSettings.OnlineUserStaySeconds), OnlineUser);
             Count(this.dictDailyUsers, TimeSpan.FromHours(24), DailyActiveUser);
-            Count(this.dictDailyUsers, TimeSpan.FromHours(24), LegacyDailyActiveUser);
             Count(this.dictDailyIps, TimeSpan.FromHours(24), DailyActiveIp);
-            Count(this.dictDailyIps, TimeSpan.FromHours(24), LegacyDailyActiveIp);
             Count(this.dictMonthlyUsers, TimeSpan.FromDays(31), MonthlyActiveUser);
             Count(this.dictMonthlyIps, TimeSpan.FromDays(31), MonthlyActiveIp);
             this.Save();
