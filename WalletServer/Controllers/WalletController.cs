@@ -30,6 +30,7 @@ namespace WalletServer.Controllers
         private static readonly Counter RequestPuzzleCount = Metrics.CreateCounter("request_puzzle_total", "Number of puzzle request.");
         private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.");
         private static readonly Counter RequestOfferUploadCount = Metrics.CreateCounter("request_offer_upload_total", "Number of offer upload request.");
+        private static readonly Counter RequestAnalysisCount = Metrics.CreateCounter("request_analysis_total", "Number of analysis record request.");
 
         public WalletController(
             ILogger<WalletController> logger,
@@ -180,7 +181,7 @@ namespace WalletServer.Controllers
             }
             catch (ResponseException re)
             {
-                this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{re.Message}\n============\n{JsonSerializer.Serialize(bundle)}");
+                this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed: {(re.InnerException is null ? re.Message : re.InnerException.Message)}");
                 status = 3;
                 error = re.Message;
                 return BadRequest(new { success = false, error = re.Message });
@@ -354,6 +355,27 @@ namespace WalletServer.Controllers
 
             var net = this.appSettings.Network;
             return Ok(new GetNetworkInfoResponse(net.Name, net.Prefix, net.ChainId, net.Symbol, net.Decimal, net.ExplorerUrl));
+        }
+
+        public record GetAnalysisRequest(string[] puzzleHashes);
+        public record GetAnalysisResponse(CoinAnalysis[] analyses);
+
+        [HttpPost("analysis")]
+        public async Task<ActionResult> GetAnalysis(GetAnalysisRequest request)
+        {
+            if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
+            if (request.puzzleHashes.Length > 200)
+                return BadRequest("Valid puzzle hash number per request is 300");
+
+            //var remoteIpAddress = this.HttpContext.GetRealIp();
+            //this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
+            //this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
+            //    + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
+
+            RequestAnalysisCount.Inc();
+
+            var analyses = await this.dataAccess.GetCoinAnalysis(request.puzzleHashes);
+            return Ok(new GetAnalysisResponse(analyses));
         }
     }
 }

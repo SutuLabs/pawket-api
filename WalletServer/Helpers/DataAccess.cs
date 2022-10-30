@@ -292,6 +292,40 @@ AND sr.type='nft_v1';", connection)
         return rows;
     }
 
+    public async Task<CoinAnalysis[]> GetCoinAnalysis(string[] coinNames, long? pageStart = 0, int? pageLength = 100)
+    {
+        using var cmd = new NpgsqlCommand(
+            $"SELECT coin_name,analysis FROM sync_coin_class"
+            + $" WHERE coin_name = ANY(@coin_name)"
+            + $" ORDER BY id DESC"
+            + $" LIMIT (@limit) OFFSET (@offset)"
+            , connection)
+        {
+            Parameters =
+            {
+                new("coin_name", coinNames.Select(_=> HexMate.Convert.FromHexString(_.Unprefix0x().AsSpan())).ToArray()),
+                new("limit", pageLength),
+                new("offset", pageStart),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new
+            {
+                coinname = _["coin_name"] as byte[],
+                analysis = _["analysis"] as string,
+            })
+            .Select(_ => (_.analysis == null) ? null : new CoinAnalysis(_.coinname.ToHexWithPrefix0x(), _.analysis))
+            .WhereNotNull()
+            .ToArray();
+
+        return rows;
+    }
+
     private string[] GetTypeStringArrayByType(CoinClassType type)
     {
         switch (type)
@@ -375,3 +409,5 @@ public record CoinDetail
      string? PuzzleReveal,
      string? Solution
 );
+
+public record CoinAnalysis(string CoinName, string Analysis);
