@@ -278,6 +278,29 @@ DO NOTHING;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
+    public async Task<int> EnsureCoinSpentIndex()
+    {
+        using var cmd = new NpgsqlCommand(@$"
+UPDATE {SingletonHistoryTableName} sh
+SET {nameof(SingletonHistoryInfo.this_coin_spent_index)}=c.spent_index
+FROM {CoinRecordTableName} c
+WHERE c.coin_name=sh.{nameof(SingletonHistoryInfo.this_coin_name)}
+    AND sh.{nameof(SingletonHistoryInfo.this_coin_spent_index)}=0
+
+", connection);
+
+        try
+        {
+            return await cmd.ExecuteNonQueryAsync();
+        }
+        catch (PostgresException pex)
+        {
+            Console.WriteLine($"Failed to ensure coin spent index due to [{pex.Message}], you may want to execute it yourself, here it is:");
+            Console.WriteLine(cmd.CommandText);
+            return -1;
+        }
+    }
+
     public async Task<long> GetSingletonRecordLatestCoinClassIdSynced() => await GetMaxId(SingletonRecordTableName, nameof(SingletonRecordInfo.last_coin_class_id));
     public async Task<long> GetSingletonHistoryLatestCoinClassIdSynced() => await GetMaxId(SingletonHistoryTableName, nameof(SingletonHistoryInfo.coin_class_id));
 

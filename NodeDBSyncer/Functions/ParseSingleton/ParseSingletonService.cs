@@ -30,6 +30,8 @@ internal class ParseSingletonService : BaseRefreshService
         using var target = new ParseSingletonDbConnection(this.appSettings.OnlineDbConnString);
         await target.Open();
 
+        await EnsureCoinSpentIndex(target);
+
         var sw = new Stopwatch();
         sw.Start();
         var threshold = Timeout * 1000 / 2;
@@ -44,6 +46,12 @@ internal class ParseSingletonService : BaseRefreshService
             var processed = await ParseSingletonHistory(target);
             if (!processed) break;
         }
+    }
+
+    private async Task EnsureCoinSpentIndex(ParseSingletonDbConnection db)
+    {
+        var number = await db.EnsureCoinSpentIndex();
+        this.logger.LogInformation($"Ensured coin spent index, number = {number}");
     }
 
     private async Task<bool> ParseSingletonRecords(ParseSingletonDbConnection db)
