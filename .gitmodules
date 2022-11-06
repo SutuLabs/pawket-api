@@ -1,0 +1,3 @@
+[submodule "chia-dotnet"]
+	path = chia-dotnet
+	url = git@github.com:Chiabee/chia-dotnet.git

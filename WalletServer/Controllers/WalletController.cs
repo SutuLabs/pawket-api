@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using chia.dotnet;
@@ -55,7 +56,7 @@ namespace WalletServer.Controllers
                 Uri = new Uri($"https://{this.appSettings.Host}:{this.appSettings.Port}/"),
             };
             this.rpcClient = new HttpRpcClient(endpoint);
-            this.client = new FullNodeProxy(this.rpcClient, "client") { MaxRetries = 2 };
+            this.client = new FullNodeProxy(this.rpcClient, "client");// { MaxRetries = 2 };
         }
 
         public record GetRecordsRequest(
@@ -168,7 +169,11 @@ namespace WalletServer.Controllers
 
                 if (!result)
                 {
-                    this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed\n============\n{JsonSerializer.Serialize(result)}\n============\n{JsonSerializer.Serialize(bundle)}");
+                    this.logger.LogWarning($@"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed
+============
+{JsonSerializer.Serialize(result)}
+============
+{JsonSerializer.Serialize(bundle)}");
                     status = 2;
                 }
                 else
@@ -183,8 +188,8 @@ namespace WalletServer.Controllers
             {
                 this.logger.LogWarning($"[{DateTime.UtcNow.ToShortTimeString()}]push tx failed: {(re.InnerException is null ? re.Message : re.InnerException.Message)}");
                 status = 3;
-                error = re.Message;
-                return BadRequest(new { success = false, error = re.Message });
+                error = re.Message == "{\"status\":\"PENDING\",\"success\":true}" ? "error PENDING" : re.Message;
+                return BadRequest(new { success = false, error = error });
             }
             finally
             {
@@ -218,10 +223,12 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
 
-            var parentCoin = await this.client.GetCoinRecordByName(request.parentCoinId);
+            //var parentCoin = await this.client.GetCoinRecordByName(request.parentCoinId);
+            var parentCoin = await RetryAsync(_ => this.client.GetCoinRecordByName(request.parentCoinId));
             if (!parentCoin.Spent) return BadRequest("Coin not spend yet.");
 
-            var spend = await this.client.GetPuzzleAndSolution(request.parentCoinId, parentCoin.SpentBlockIndex);
+            //var spend = await this.client.GetPuzzleAndSolution(request.parentCoinId, parentCoin.SpentBlockIndex);
+            var spend = await RetryAsync(_ => this.client.GetPuzzleAndSolution(request.parentCoinId, parentCoin.SpentBlockIndex));
             if (string.IsNullOrEmpty(spend.PuzzleReveal))
             {
                 this.logger.LogWarning($"failed to get puzzle for {parentCoin.Coin.ParentCoinInfo} on {parentCoin.ConfirmedBlockIndex}");
@@ -376,6 +383,60 @@ namespace WalletServer.Controllers
 
             var analyses = await this.dataAccess.GetCoinAnalysis(request.puzzleHashes);
             return Ok(new GetAnalysisResponse(analyses));
+        }
+
+        const uint MaxRetries = 3;
+        const uint RetryWait = 100;
+
+        private async Task<T> RetryAsync<T>(Func<CancellationToken, Task<T>> function, CancellationToken cancellationToken = default, uint? maxRetries = null)
+        {
+            var attempts = 0;
+            var lastError = "";
+            var lastRequest = new Message();
+            maxRetries ??= MaxRetries;
+
+            try
+            {
+                while (attempts <= maxRetries)
+                {
+                    try
+                    {
+                        var response = await function(cancellationToken).ConfigureAwait(false);
+                        return response;
+                    }
+                    catch (ResponseException re)
+                    {
+                        lastError = re.Message;
+                        lastRequest = re.Request;
+                    }
+
+                    if (maxRetries == 0) break;
+
+                    attempts++;
+                    var waitTime = (int)RetryWait * attempts;
+
+                    await Task.Delay(waitTime, cancellationToken).ConfigureAwait(false);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new TaskCanceledException();
+                    }
+                }
+            }
+            catch (TaskCanceledException)
+            {
+                throw;
+            }
+            catch (Exception e) // wrap eveything else in a response exception - this will include websocket or http specific failures
+            {
+                throw new ResponseException(lastRequest, "Something went wrong sending the rpc message. Inspect the InnerException for details.", e);
+            }
+
+            if (attempts == 1)
+            {
+                throw new ResponseException(lastRequest, lastError);
+            }
+
+            throw new ResponseException(lastRequest, $"Failed after {attempts} attempts, last error: {lastError}");
         }
     }
 }
