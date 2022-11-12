@@ -25,15 +25,6 @@ stages:
   jobs:
   - job: Build
     steps:
-    - task: CmdLine@2
-      inputs:
-        workingDirectory: '$(Build.SourcesDirectory)'
-        script: |
-          git clone --depth=1 -b chore_retry https://github.com/Chiabee/chia-dotnet.git
-          rm -rf chia-dotnet/.git
-          rm -rf ChatServer
-      displayName: 'clone chia-dotnet'
-
     - task: DotNetCoreCLI@2
       displayName: Restore
       inputs:
@@ -82,7 +73,7 @@ stages:
           #mv legacy/win-x64 runtimes/
           mv legacy/linux-x64 runtimes/
           rm -rf legacy
-      displayName: 'clone chia-dotnet'
+      displayName: 'select runtime'
 
     - task: CopyFiles@2
       inputs:
