@@ -111,7 +111,7 @@ namespace WalletServer.Controllers
                 infos.Add(new CoinRecordInfo(hash, coinRecords, balance.Amount, balance));
             }
 
-            return Ok(new GetRecordsResponse(peak, infos.ToArray()));
+            return Ok(new GetRecordsResponse(peak, infos.Where(_ => _.records.Length > 0).ToArray()));
         }
 
         public record PushTxRequest(SpendBundleReq? bundle);
