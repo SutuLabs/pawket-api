@@ -16,7 +16,7 @@ RUN dotnet publish -c Release -o /syncer /p:Version=${versionNumber}
 WORKDIR /src/WalletServer
 RUN dotnet publish -c Release -o /api /p:Version=${versionNumber}
 
-FROM mcr.microsoft.com/dotnet/runtime-deps:6.0-alpine as syncer
+FROM mcr.microsoft.com/dotnet/runtime:6.0-alpine as syncer
 WORKDIR /backend/syncer
 COPY --from=build-env /syncer .
 ENTRYPOINT ["dotnet", "NodeDBSyncer.dll"]
