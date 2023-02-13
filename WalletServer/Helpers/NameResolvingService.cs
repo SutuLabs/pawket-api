@@ -22,15 +22,7 @@ public class NameResolvingService
         this.appSettings = appSettings.Value;
     }
 
-    public async Task<NameEntity[]> QueryNames(params string[] names)
-    {
-        var nes = await this.GetNamesAsync();
-        return nes
-            .Where(_ => names.Any(n => _.name == n))
-            .ToArray();
-    }
-
-    private async Task<NameEntity[]> GetNamesAsync()
+    public async Task<NameEntity[]> GetAllNamesAsync()
     {
         const string key = nameof(NameResolvingService);
         if (!memoryCache.TryGetValue(key, out NameEntity[] names))

@@ -41,27 +41,51 @@ namespace WalletServer.Controllers
         [HttpPost("resolve")]
         public async Task<ActionResult> StandardResolve(StandardResolveQueryRequest request)
         {
-            if (request is null || request.queries is null || request.queries.Length == 0) return BadRequest("Invalid request");
-            request = request with { queries = request.queries.Select(_ => _ with { name = _.name.ToLower() }).ToArray() };
-            StandardResolveRequestRecordCount.Inc();
-            var ne = await this.nameService.QueryNames(request.queries.Select(_ => _.name).ToArray());
-            var answers = request.queries
-                .Select(_ => new { q = _, a = ne.FirstOrDefault(n => _.name == n.name) })
-                .Where(_ => _.q.type == nameof(NameEntity.address) || (_.a?.bindings.ContainsKey(_.q.type) ?? false))
-                .Select(_ => _.a is null ? null : new StandardResolveAnswer(
-                    _.q.name,
-                    _.q.type,
-                    600,
-                    _.q.type == nameof(NameEntity.address)
-                        ? _.a.address
-                        : _.a.bindings[_.q.type],
-                    _.a.last_change_coin_name,
-                    _.a.last_change_spent_index,
-                    _.a.nft_coin_name))
-                .WhereNotNull()
+            if (request is null || request.queries is null || request.queries.Length == 0)
+                return BadRequest("Invalid request");
+            var queries = request.queries
+                .Select(_ => _ with { name = _.name.ToLower() })
                 .ToArray();
+            StandardResolveRequestRecordCount.Inc();
+            var ne = await this.nameService.GetAllNamesAsync();
 
+            var answers = ProduceAnswers(queries, ne).ToArray();
             return Ok(new StandardResolveQueryResponse(answers));
+        }
+
+        private IEnumerable<StandardResolveAnswer> ProduceAnswers(StandardResolveQuery[] queries, NameEntity[] allNames)
+        {
+            foreach (var q in queries)
+            {
+                var a = q.type switch
+                {
+                    nameof(NameEntity.name) => allNames.FirstOrDefault(_ => q.name == _.address),
+                    _ => allNames.FirstOrDefault(_ => q.name == _.name),
+                };
+                if (a is null) continue;
+
+                // type must be name/address or attribute in bindings
+                if (q.type != nameof(NameEntity.name)
+                    && q.type != nameof(NameEntity.address)
+                    && !(a?.bindings.ContainsKey(q.type) ?? false))
+                {
+                    continue;
+                }
+
+                yield return new StandardResolveAnswer(
+                    q.name,
+                    q.type,
+                    600,
+                    q.type switch
+                    {
+                        nameof(NameEntity.address) => a.address,
+                        nameof(NameEntity.name) => a.address,
+                        _ => a.bindings[q.type],
+                    },
+                    a.last_change_coin_name,
+                    a.last_change_spent_index,
+                    a.nft_coin_name);
+            }
         }
     }
 }
