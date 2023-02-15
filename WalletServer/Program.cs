@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Diagnostics;
 using NodeDBSyncer.Helpers;
 using Prometheus;
 using WalletServer.Helpers;
+using static System.Net.Mime.MediaTypeNames;
 
 var metricServer = new KestrelMetricServer(port: 5888);
 metricServer.Start();
@@ -48,5 +50,29 @@ app.UseCors();
 
 app.MapControllers();
 app.UseHttpMetrics();
+
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
+
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = Text.Plain;
+
+        await context.Response.WriteAsync("Server internal error.");
+
+        var exHandler = context.Features.Get<IExceptionHandlerPathFeature>();
+
+        if (exHandler?.Error is BadHttpRequestException bex)
+        {
+            logger.LogWarning(bex, "Bad request received");
+        }
+        else
+        {
+            logger.LogError(exHandler?.Error, $"Unhandled exception for {exHandler?.Path}");
+        }
+    });
+});
 
 app.Run();
