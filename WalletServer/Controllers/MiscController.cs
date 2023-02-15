@@ -4,52 +4,71 @@ using Newtonsoft.Json;
 using Prometheus;
 using WalletServer.Helpers;
 
-namespace WalletServer.Controllers
+namespace WalletServer.Controllers;
+
+[ApiController]
+[Route("[controller]")]
+public class MiscController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class MiscController : ControllerBase
+    private readonly ILogger<MiscController> logger;
+    private readonly DataAccess dataAccess;
+    private readonly AppSettings appSettings;
+
+    private static readonly Counter RequestPriceCount = Metrics.CreateCounter("request_price_total", "Number of Price request.");
+    private static readonly Counter RequestTailDbCount = Metrics.CreateCounter("request_taildb_total", "Number of taildb request.");
+
+    public MiscController(ILogger<MiscController> logger, DataAccess dataAccess, IOptions<AppSettings> appSettings)
     {
-        private readonly ILogger<MiscController> logger;
-        private readonly DataAccess dataAccess;
-        private readonly AppSettings appSettings;
+        this.logger = logger;
+        this.dataAccess = dataAccess;
+        this.appSettings = appSettings.Value;
+    }
 
-        private static readonly Counter RequestPriceCount = Metrics.CreateCounter("request_price_total", "Number of Price request.");
+    public record PriceResponse(string Source, string From, string To, decimal Price, DateTime Time);
 
-        public MiscController(ILogger<MiscController> logger, DataAccess dataAccess, IOptions<AppSettings> appSettings)
+    [HttpGet("prices")]
+    public async Task<IActionResult> GetPrice()
+    {
+        RequestPriceCount.Inc();
+
+        if (string.IsNullOrWhiteSpace(this.appSettings.PriceSourceUrl))
         {
-            this.logger = logger;
-            this.dataAccess = dataAccess;
-            this.appSettings = appSettings.Value;
+            var prices = await this.dataAccess.GetLatestPrices("XCH");
+            return this.Ok(prices.Select(_ => new PriceResponse(_.source, _.from, _.to, _.price, _.time)));
         }
-
-        public record PriceResponse(string Source, string From, string To, decimal Price, DateTime Time);
-
-        [HttpGet("prices")]
-        public async Task<IActionResult> GetPrice()
+        else
         {
-            RequestPriceCount.Inc();
-
-            if (string.IsNullOrWhiteSpace(this.appSettings.PriceSourceUrl))
+            using var client = new HttpClient();
+            try
             {
-                var prices = await this.dataAccess.GetLatestPrices("XCH");
-                return this.Ok(prices.Select(_ => new PriceResponse(_.source, _.from, _.to, _.price, _.time)));
+                var json = await client.GetStringAsync(this.appSettings.PriceSourceUrl);
+                var prices = JsonConvert.DeserializeObject<PriceResponse[]>(json);
+                return this.Ok(prices);
             }
-            else
+            catch (Exception ex)
             {
-                using var client = new HttpClient();
-                try
-                {
-                    var json = await client.GetStringAsync(this.appSettings.PriceSourceUrl);
-                    var prices = JsonConvert.DeserializeObject<PriceResponse[]>(json);
-                    return this.Ok(prices);
-                }
-                catch (Exception ex)
-                {
-                    this.logger.LogWarning("unable to get prices, ex: " + ex.Message);
-                    return this.StatusCode(StatusCodes.Status502BadGateway);
-                }
+                this.logger.LogWarning("unable to get prices, ex: " + ex.Message);
+                return this.StatusCode(StatusCodes.Status502BadGateway);
             }
         }
     }
+
+    [HttpGet("taildb")]
+    public IActionResult GetTailDb()
+    {
+        RequestTailDbCount.Inc();
+
+        using var fs = System.IO.File.OpenRead("tails.json");
+        using var sr = new StreamReader(fs);
+        var bytes = sr.ReadToEnd();
+        return this.Content(bytes, "application/json");
+    }
 }
+
+public record TailEntity(
+    string name,
+    string code,
+    string description,
+    string category,
+    string launcher_id,
+    string uri);
