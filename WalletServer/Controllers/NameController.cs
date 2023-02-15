@@ -57,6 +57,15 @@ namespace WalletServer.Controllers
             return Ok(new StandardResolveQueryResponse(answers));
         }
 
+#if DEBUG
+        [HttpGet("all")]
+        public async Task<ActionResult> GetAllDomains()
+        {
+            var ne = await this.nameService.GetAllNamesAsync();
+            return Ok(ne);
+        }
+#endif
+
         private IEnumerable<StandardResolveAnswer> ProduceAnswers(StandardResolveQuery[] queries, NameEntity[] allNames)
         {
             foreach (var q in queries)
