@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "chia-dotnet", "chia-dotnet\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NodeDBSyncer", "NodeDBSyncer\NodeDBSyncer.csproj", "{46F96E13-5EEA-40A9-873F-FA9B98463063}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TailProcessor", "TailProcessor\TailProcessor.csproj", "{E16EC1B8-2B6F-4FD7-B9E4-CB8179181EE9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{46F96E13-5EEA-40A9-873F-FA9B98463063}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46F96E13-5EEA-40A9-873F-FA9B98463063}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46F96E13-5EEA-40A9-873F-FA9B98463063}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E16EC1B8-2B6F-4FD7-B9E4-CB8179181EE9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E16EC1B8-2B6F-4FD7-B9E4-CB8179181EE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E16EC1B8-2B6F-4FD7-B9E4-CB8179181EE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E16EC1B8-2B6F-4FD7-B9E4-CB8179181EE9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
