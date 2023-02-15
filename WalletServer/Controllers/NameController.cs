@@ -16,7 +16,9 @@ namespace WalletServer.Controllers
         private readonly DataAccess dataAccess;
         private readonly AppSettings appSettings;
 
-        private static readonly Counter StandardResolveRequestRecordCount = Metrics.CreateCounter("standard_resolve_total", "Number of standard resolve request.");
+        private static readonly Counter LegacyStandardResolveRequestRecordCount = Metrics.CreateCounter("standard_resolve_total", "Number of standard resolve request.");
+        private static readonly Counter StandardResolveRequestRecordCount = Metrics.CreateCounter("name_resolve_total", "Number of standard resolve request.");
+        private static readonly Gauge ValidNameRecordCount = Metrics.CreateGauge("name_valid_total", "Number of valid name.");
 
         public NameController(
             ILogger<NameController> logger,
@@ -47,7 +49,9 @@ namespace WalletServer.Controllers
                 .Select(_ => _ with { name = _.name.ToLower() })
                 .ToArray();
             StandardResolveRequestRecordCount.Inc();
+            LegacyStandardResolveRequestRecordCount.Inc();
             var ne = await this.nameService.GetAllNamesAsync();
+            ValidNameRecordCount.Set(ne.Length);
 
             var answers = ProduceAnswers(queries, ne).ToArray();
             return Ok(new StandardResolveQueryResponse(answers));
