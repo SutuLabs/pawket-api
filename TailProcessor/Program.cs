@@ -47,8 +47,7 @@ if (File.Exists(targetTailFile))
 var finalTails = new List<TailEntity>();
 foreach (var tail in tails)
 {
-    var rt = refTails.FirstOrDefault(_ => _.launcher_id == tail.launcher_id);
-    if (rt != null) continue;
+    var rt = refTails.FirstOrDefault(_ => _.id == tail.hash);
 
     var srcImgFile = Path.Combine(srcImgFolder, tail.launcher_id + ".jpg");
     var minPngFile = Path.Combine(minifiedPngFolder, tail.launcher_id + ".png");
@@ -95,14 +94,22 @@ foreach (var tail in tails)
 
     if (File.Exists(minPngFile))
     {
-        using var fs = File.OpenRead(minPngFile);
-        Console.WriteLine($"Uploading {tail.code}.png");
-        var link = await UploadToIpfs(fs, tail.code + ".png");
-        finalTails.Add(new TailEntity(tail.name, tail.code, tail.description, tail.category, tail.launcher_id, ipfsBaseUrl + link));
+        if (rt.uri.IndexOf(ipfsBaseUrl) > -1) // already uploaded
+        {
+            finalTails.Add(new TailEntity(tail.hash, tail.name, tail.code, tail.description, tail.category, rt.uri));
+        }
+        else
+        {
+            using var fs = File.OpenRead(minPngFile);
+            Console.WriteLine($"Uploading {tail.code}.png");
+            var link = await UploadToIpfs(fs, tail.code + ".png");
+            finalTails.Add(new TailEntity(tail.hash, tail.name, tail.code, tail.description, tail.category, ipfsBaseUrl + link));
+        }
     }
 }
 
 {
+    File.Delete(targetTailFile);
     using var fs = new FileStream(targetTailFile, FileMode.OpenOrCreate);
     await JsonSerializer.SerializeAsync(fs, finalTails);
 }
@@ -199,9 +206,9 @@ public record SourceTailEntity(
     string nft_uri);
 
 public record TailEntity(
+    string id,
     string name,
     string code,
     string description,
     string category,
-    string launcher_id,
     string uri);

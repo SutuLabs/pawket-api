@@ -66,9 +66,9 @@ public class MiscController : ControllerBase
 }
 
 public record TailEntity(
+    string id,
     string name,
     string code,
     string description,
     string category,
-    string launcher_id,
     string uri);
