@@ -66,7 +66,7 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 
         if (exHandler?.Error is BadHttpRequestException bex)
         {
-            logger.LogWarning(bex, "Bad request received");
+            logger.LogWarning($"Bad request received: {bex.Message}");
         }
         else
         {
