@@ -39,7 +39,7 @@ public class DataAccess : IDisposable
         this.connection.Open();
     }
 
-    public async Task<CoinRecord[]> GetCoins(
+    public async Task<CoinRecordWithMetadata[]> GetCoins(
         string[] puzzleHashes,
         bool includeSpent = true,
         GetCoinOrder order = GetCoinOrder.ConfirmedIndexAsc,
@@ -61,7 +61,7 @@ public class DataAccess : IDisposable
             {
                 GetCoinMethod.PuzzleHash => $"SELECT c.* FROM sync_coin_record c{SqlLastIndexLateral} WHERE puzzle_hash=ANY(@puzzle_hash)",
                 GetCoinMethod.Hint => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name{SqlLastIndexLateral} WHERE hint=ANY(@puzzle_hash)",
-                GetCoinMethod.Class => $"SELECT c.* FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name" +
+                GetCoinMethod.Class => $"SELECT c.*, cc.analysis->>'metadata' as metadata FROM sync_hint_record h JOIN sync_coin_record c ON c.coin_name=h.coin_name" +
                 $" JOIN sync_coin_record pc ON pc.coin_name = c.coin_parent" +
                 $" FULL JOIN sync_coin_class cc ON cc.coin_name = pc.coin_name{SqlLastIndexLateral} WHERE hint=ANY(@puzzle_hash)",
                 _ => throw new NotImplementedException(),
@@ -96,7 +96,7 @@ public class DataAccess : IDisposable
         dt.Load(reader);
         var records = dt.Rows
             .OfType<DataRow>()
-            .Select(_ => new CoinRecord
+            .Select(_ => new CoinRecordWithMetadata
             {
                 Coinbase = _["coinbase"] as bool? ?? false,
                 ConfirmedBlockIndex = Convert.ToUInt32(_["confirmed_index"] as long? ?? 0L),
@@ -108,7 +108,8 @@ public class DataAccess : IDisposable
                     Amount = Convert.ToUInt64(_["amount"] as long? ?? 0L),
                     ParentCoinInfo = (_["coin_parent"] as byte[]).ToHexWithPrefix0x(),
                     PuzzleHash = (_["puzzle_hash"] as byte[]).ToHexWithPrefix0x(),
-                }
+                },
+                Metadata = _.ItemArray.Length <= 9 ? null : _["metadata"] as string,
             })
             .ToArray();
 
@@ -472,3 +473,8 @@ public record CoinDetail
 public record CoinPuzzleInfo(string CoinName, ulong Amount, string ParentCoinName, string PuzzleReveal);
 
 public record CoinAnalysis(string CoinName, string Analysis);
+
+public record CoinRecordWithMetadata : CoinRecord
+{
+    public string? Metadata { get; init; }
+}

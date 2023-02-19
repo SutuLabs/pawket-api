@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using chia.dotnet;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -72,7 +73,11 @@ namespace WalletServer.Controllers
             bool hint = false,
             string? coinType = null);
         public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
-        public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, long balance, FullBalanceInfo balanceInfo);
+        public record CoinRecordInfo(string puzzleHash, CoinRecordWithMetadataObject[] records, long? balance, FullBalanceInfo? balanceInfo);
+        public record CoinRecordWithMetadataObject : CoinRecord
+        {
+            public JsonNode? Metadata { get; init; }
+        }
 
         private const int MaxCoinCount = 100;
 
@@ -101,7 +106,6 @@ namespace WalletServer.Controllers
             var infos = new List<CoinRecordInfo>();
             foreach (var hash in request.puzzleHashes)
             {
-                var balance = await this.dataAccess.GetBalance(hash);
                 var coinRecords = await this.dataAccess.GetCoins(
                     new[] { hash },
                     request.includeSpentCoins,
@@ -111,7 +115,19 @@ namespace WalletServer.Controllers
                     request.pageStart,
                     request.pageLength,
                     coinType);
-                infos.Add(new CoinRecordInfo(hash, coinRecords, balance.Amount, balance));
+                var ret = coinRecords.Select(_ => new CoinRecordWithMetadataObject
+                {
+                    Coin = _.Coin,
+                    Coinbase = _.Coinbase,
+                    ConfirmedBlockIndex = _.ConfirmedBlockIndex,
+                    Spent = _.Spent,
+                    SpentBlockIndex = _.SpentBlockIndex,
+                    Timestamp = _.Timestamp,
+                    Metadata = ConvertMetadata(_.Metadata),
+                }).ToArray();
+
+                var balance = coinType != null ? null : await this.dataAccess.GetBalance(hash);
+                infos.Add(new CoinRecordInfo(hash, ret, balance?.Amount, balance));
             }
 
             return Ok(new GetRecordsResponse(peak, infos.Where(_ => _.records.Length > 0).ToArray()));
@@ -447,6 +463,26 @@ namespace WalletServer.Controllers
             }
 
             throw new ResponseException(lastRequest, $"Failed after {attempts} attempts, last error: {lastError}");
+        }
+
+        private JsonNode? ConvertMetadata(string? rawMetadata)
+        {
+            if (string.IsNullOrWhiteSpace(rawMetadata) || rawMetadata.Trim() == "{}") return null;
+
+            try
+            {
+                return JsonSerializer.Deserialize<JsonNode>(rawMetadata);
+            }
+            catch (JsonException ex)
+            {
+                logger.LogDebug(ex, $"failed to parse raw metadata: {rawMetadata}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, $"failed to parse raw metadata: {rawMetadata}");
+                return null;
+            }
         }
     }
 }
