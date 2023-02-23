@@ -86,7 +86,11 @@ namespace WalletServer.Controllers
                 }
 
                 yield return new StandardResolveAnswer(
-                    q.name,
+                    q.type switch
+                    {
+                        nameof(NameEntity.name) => a.name,
+                        _ => q.name,
+                    },
                     q.type,
                     600,
                     q.type switch
