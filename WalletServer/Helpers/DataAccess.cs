@@ -394,6 +394,7 @@ ORDER BY last_change_spent_index DESC;", connection)
                     "cat_v2()",
                     "cat_v2(p2_delegated_puzzle_or_hidden_puzzle())",
                     "cat_v2(settlement_payments())",
+                    "cat_v2(settlement_payments_v1())",
                 };
             case CoinClassType.DidV1:
                 return new[] {
@@ -403,6 +404,7 @@ ORDER BY last_change_spent_index DESC;", connection)
                 return new[] {
                     "singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),p2_delegated_puzzle_or_hidden_puzzle())))",
                     "singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments())))",
+                    "singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments_v1())))",
                 };
             default:
                 throw new NotImplementedException($"Unrecognize class type: {type}");
