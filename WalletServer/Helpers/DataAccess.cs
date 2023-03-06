@@ -310,7 +310,7 @@ LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
 WHERE sr.creator_puzzle_hash=@ph
 AND c.spent_index=0
 AND sr.type='nft_v1'
-ORDER BY last_change_spent_index DESC;", connection)
+ORDER BY last_change_spent_index ASC;", connection)
         {
             Parameters =
             {
