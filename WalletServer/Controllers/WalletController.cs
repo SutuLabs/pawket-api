@@ -71,12 +71,13 @@ namespace WalletServer.Controllers
             int? pageLength = null,
             bool includeSpentCoins = false,
             bool hint = false,
+            bool includeAnalysis = false,
             string? coinType = null);
         public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
-        public record CoinRecordInfo(string puzzleHash, CoinRecordWithMetadataObject[] records, long? balance, FullBalanceInfo? balanceInfo);
-        public record CoinRecordWithMetadataObject : CoinRecord
+        public record CoinRecordInfo(string puzzleHash, CoinRecordWithAnalysisObject[] records, long? balance, FullBalanceInfo? balanceInfo);
+        public record CoinRecordWithAnalysisObject : CoinRecord
         {
-            public JsonNode? Metadata { get; init; }
+            public JsonNode? Analysis { get; init; }
         }
 
         private const int MaxCoinCount = 100;
@@ -115,7 +116,7 @@ namespace WalletServer.Controllers
                     request.pageStart,
                     request.pageLength,
                     coinType);
-                var ret = coinRecords.Select(_ => new CoinRecordWithMetadataObject
+                var ret = coinRecords.Select(_ => new CoinRecordWithAnalysisObject
                 {
                     Coin = _.Coin,
                     Coinbase = _.Coinbase,
@@ -123,7 +124,7 @@ namespace WalletServer.Controllers
                     Spent = _.Spent,
                     SpentBlockIndex = _.SpentBlockIndex,
                     Timestamp = _.Timestamp,
-                    Metadata = ConvertMetadata(_.Metadata),
+                    Analysis = request.includeAnalysis ? ConvertAnalysis(_.Analysis) : null,
                 }).ToArray();
 
                 var balance = coinType != null ? null : await this.dataAccess.GetBalance(hash);
@@ -465,22 +466,22 @@ namespace WalletServer.Controllers
             throw new ResponseException(lastRequest, $"Failed after {attempts} attempts, last error: {lastError}");
         }
 
-        private JsonNode? ConvertMetadata(string? rawMetadata)
+        private JsonNode? ConvertAnalysis(string? rawAnalysis)
         {
-            if (string.IsNullOrWhiteSpace(rawMetadata) || rawMetadata.Trim() == "{}") return null;
+            if (string.IsNullOrWhiteSpace(rawAnalysis) || rawAnalysis.Trim() == "{}") return null;
 
             try
             {
-                return JsonSerializer.Deserialize<JsonNode>(rawMetadata);
+                return JsonSerializer.Deserialize<JsonNode>(rawAnalysis);
             }
             catch (JsonException ex)
             {
-                logger.LogDebug(ex, $"failed to parse raw metadata: {rawMetadata}");
+                logger.LogDebug(ex, $"failed to parse raw analysis: {rawAnalysis}");
                 return null;
             }
             catch (Exception ex)
             {
-                logger.LogWarning(ex, $"failed to parse raw metadata: {rawMetadata}");
+                logger.LogWarning(ex, $"failed to parse raw analysis: {rawAnalysis}");
                 return null;
             }
         }
