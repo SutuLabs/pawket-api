@@ -1,4 +1,6 @@
-﻿namespace WalletServer.Helpers;
+﻿using Microsoft.Extensions.Primitives;
+
+namespace WalletServer.Helpers;
 
 public static class Misc
 {
@@ -10,6 +12,30 @@ public static class Misc
         }
 
         return httpContext.Connection.RemoteIpAddress?.ToString() ?? "";
+    }
+
+    public static string GetReferer(this HttpContext httpContext, ILogger? logger = null)
+    {
+        try
+        {
+            var referer = httpContext.Request.Headers.Referer;
+            var r = StringValues.IsNullOrEmpty(referer) ? null : (string)referer;
+
+            if (r != null) return r;
+
+            // iOS don't send referer, we collect user agent instead
+            var agent = httpContext.Request.Headers.UserAgent;
+            var a = StringValues.IsNullOrEmpty(agent) ? null : (string)agent;
+
+            if (a != null) return a;
+
+            return "UNKNOWN";
+        }
+        catch (Exception ex)
+        {
+            logger?.LogWarning(ex, "caught exception when getting referer");
+            return "EXCEPTION";
+        }
     }
 
     public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : class

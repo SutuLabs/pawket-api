@@ -101,7 +101,7 @@ namespace WalletServer.Controllers
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
                 + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
 
-            RequestRecordCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            RequestRecordCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
             var peak = await this.dataAccess.GetPeakHeight();
 
             var infos = new List<CoinRecordInfo>();
@@ -157,7 +157,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> PushTx(PushTxRequest request)
         {
             if (request?.bundle?.CoinSpends == null) return BadRequest("Invalid request");
-            PushTxCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            PushTxCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             var bundle = new SpendBundle
             {
@@ -238,7 +238,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetParentPuzzle(GetParentPuzzleRequest request)
         {
             if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
-            RequestPuzzleCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            RequestPuzzleCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
@@ -281,7 +281,7 @@ namespace WalletServer.Controllers
             var coinIds = request.coinId != null ? new[] { request.coinId } : request.coinIds != null ? request.coinIds : null;
             if (coinIds == null) return BadRequest("Invalid request");
 
-            RequestCoinSolutionCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            RequestCoinSolutionCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request coin solution {request.coinId}");
@@ -311,7 +311,7 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> UploadOffer(UploadOfferRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.offer)) return BadRequest("Malformat request");
-            RequestOfferUploadCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            RequestOfferUploadCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             using var client = new HttpClient();
             var resp = await client.PostAsJsonAsync(this.appSettings.Network.OfferUploadTarget, request);
@@ -406,7 +406,7 @@ namespace WalletServer.Controllers
             //this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
             //    + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
 
-            RequestAnalysisCount.WithLabels(this.HttpContext.Request.Headers.Referer).Inc();
+            RequestAnalysisCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             var analyses = await this.dataAccess.GetCoinAnalysis(request.puzzleHashes);
             return Ok(new GetAnalysisResponse(analyses));
