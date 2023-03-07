@@ -335,6 +335,100 @@ ORDER BY last_change_spent_index ASC;", connection)
         return rows;
     }
 
+    public async Task<RecentNameEntity[]> GetRecentNames(string creator_puzzle_hash, int? limit = null)
+    {
+        limit = limit ?? 10;
+        limit = limit > 100 ? 100 : limit;
+        using var cmd = new NpgsqlCommand(
+            $@"
+SELECT
+    sr.singleton_coin_name AS nft_coin_name,
+	sr.singleton_create_index,
+    (CASE WHEN (cc.analysis->>'cnsName' != '') THEN cc.analysis->>'cnsName' ELSE cc.analysis->'metadata'->>'name' END) AS name
+FROM ext_singleton_record sr
+LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
+LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
+LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
+WHERE sr.creator_puzzle_hash=@ph
+AND c.spent_index=0
+AND sr.type='nft_v1'
+ORDER BY singleton_create_index DESC
+LIMIT @limit;", connection)
+        {
+            Parameters =
+            {
+                new ("ph", creator_puzzle_hash.ToHexBytes()),
+                new ("limit", limit),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new RecentNameEntity(
+                (_[nameof(RecentNameEntity.nft_coin_name)] as byte[]).ToHexWithPrefix0x(),
+                (int)_[nameof(RecentNameEntity.singleton_create_index)],
+                (_[nameof(RecentNameEntity.name)] as string ?? "").ToLower()))
+            .ToArray();
+
+        return rows;
+    }
+
+    public async Task<WealthiestNameEntity[]> GetWealthiestNames(string creator_puzzle_hash, int? limit = null)
+    {
+        limit = limit ?? 10;
+        limit = limit > 100 ? 100 : limit;
+        using var cmd = new NpgsqlCommand(
+            $@"
+WITH names_table AS (
+SELECT
+    (CASE WHEN (cc.analysis->>'cnsName' != '') THEN cc.analysis->>'cnsName' ELSE cc.analysis->'metadata'->>'name' END) AS name,
+    decode((CASE WHEN (cc.analysis->>'cnsAddress' != '') THEN cc.analysis->>'cnsAddress' ELSE cc.analysis->'metadata'->>'address' END),'hex') AS address
+FROM ext_singleton_record sr
+    LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
+    LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
+    LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
+WHERE sr.creator_puzzle_hash=@ph
+    AND c.spent_index=0
+    AND sr.type='nft_v1'
+)
+SELECT
+	sum(amount)::bigint as balance,
+	c.puzzle_hash,
+	count(distinct(n.name)) as count,
+	array_to_string((array_agg(distinct n.name))[1:10],',') as names
+FROM sync_coin_record c
+JOIN names_table n on n.address = c.puzzle_hash
+WHERE amount > 0
+AND spent_index = 0
+GROUP BY c.puzzle_hash, n.address
+ORDER BY balance DESC
+LIMIT @limit;", connection)
+        {
+            Parameters =
+            {
+                new ("ph", creator_puzzle_hash.ToHexBytes()),
+                new ("limit", limit),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new WealthiestNameEntity(
+                _[nameof(WealthiestNameEntity.balance)] as long? ?? -1,
+                (_[nameof(WealthiestNameEntity.puzzle_hash)] as byte[]).ToHexWithPrefix0x(),
+                _[nameof(WealthiestNameEntity.count)] as long? ?? -1,
+                (_[nameof(WealthiestNameEntity.names)] as string ?? "")))
+            .ToArray();
+
+        return rows;
+    }
+
     public async Task<CoinAnalysis[]> GetCoinAnalysis(string[] coinNames, long? pageStart = 0, int? pageLength = 100)
     {
         using var cmd = new NpgsqlCommand(
@@ -462,6 +556,17 @@ public record NameEntity(
     string name,
     string address,
     Dictionary<string, string> bindings);
+
+public record RecentNameEntity(
+    string nft_coin_name,
+    int singleton_create_index,
+    string name);
+
+public record WealthiestNameEntity(
+    long balance,
+    string puzzle_hash,
+    long count,
+    string names);
 
 public record CoinDetail
 (

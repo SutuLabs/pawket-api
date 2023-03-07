@@ -19,6 +19,8 @@ namespace WalletServer.Controllers
         private static readonly Counter LegacyStandardResolveRequestRecordCount = Metrics.CreateCounter("standard_resolve_total", "Number of standard resolve request.");
         private static readonly Counter StandardResolveRequestRecordCount = Metrics.CreateCounter("name_resolve_total", "Number of standard resolve request.");
         private static readonly Gauge ValidNameRecordCount = Metrics.CreateGauge("name_valid_total", "Number of valid name.");
+        private static readonly Counter GetRecentNameRequestRecordCount = Metrics.CreateCounter("name_recent_total", "Number of get recent name request.");
+        private static readonly Counter GetWealthiestNameRequestRecordCount = Metrics.CreateCounter("name_wealthiest_total", "Number of get wealthiest name request.");
 
         public NameController(
             ILogger<NameController> logger,
@@ -55,6 +57,28 @@ namespace WalletServer.Controllers
 
             var answers = ProduceAnswers(queries, ne).ToArray();
             return Ok(new StandardResolveQueryResponse(answers));
+        }
+
+        public record GetRecentNamesQueryRequest(int? number);
+        public record GetRecentNamesQueryResponse(RecentNameEntity[] names);
+
+        [HttpPost("recent")]
+        public async Task<ActionResult> GetRecentNames(GetRecentNamesQueryRequest request)
+        {
+            GetRecentNameRequestRecordCount.Inc();
+            var names = await this.nameService.GetRecentNamesAsync(request.number);
+            return Ok(new GetRecentNamesQueryResponse(names));
+        }
+
+        public record GetWealthiestNamesQueryRequest(int? number);
+        public record GetWealthiestNamesQueryResponse(WealthiestNameEntity[] names);
+
+        [HttpPost("wealthiest")]
+        public async Task<ActionResult> GetWealthiestNames(GetWealthiestNamesQueryRequest request)
+        {
+            GetWealthiestNameRequestRecordCount.Inc();
+            var names = await this.nameService.GetWealthiestNamesAsync(request.number);
+            return Ok(new GetWealthiestNamesQueryResponse(names));
         }
 
 #if DEBUG
