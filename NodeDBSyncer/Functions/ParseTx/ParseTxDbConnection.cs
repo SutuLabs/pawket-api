@@ -199,7 +199,7 @@ WHERE id in
             $" JOIN sync_coin_record c ON c.coin_name=cc.coin_name" +
             $" WHERE cc.mods IN ('singleton_top_layer_v1_1(did_innerpuz(p2_delegated_puzzle_or_hidden_puzzle()))'," +
             $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),p2_delegated_puzzle_or_hidden_puzzle())))'," +
-            $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments())))',)" +
+            $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments())))'," +
             $" 'singleton_top_layer_v1_1(nft_state_layer(nft_ownership_layer(nft_ownership_transfer_program_one_way_claim_with_royalties(),settlement_payments_v1())))')" +
             $" AND cc.analysis IS NULL" +
             $" ORDER BY cc.id DESC" +
