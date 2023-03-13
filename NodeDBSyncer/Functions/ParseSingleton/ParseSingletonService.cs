@@ -69,7 +69,7 @@ internal class ParseSingletonService : BaseRefreshService
         this.logger.LogInformation($"Analyzing singleton record from coin class id from [{begin}] to [{end}] [Total: {records.Length}].");
 
         records = records
-            .GroupBy(_ => _.bootstrap_coin_name)
+            .GroupBy(_ => _.singleton_coin_name)
             .Select(_ => _.OrderByDescending(_ => _.last_coin_class_id).First())
             .ToArray();
 
