@@ -59,25 +59,25 @@ namespace WalletServer.Controllers
             return Ok(new StandardResolveQueryResponse(answers));
         }
 
-        public record GetRecentNamesQueryRequest(int? number);
+        public record GetRecentNamesQueryRequest(int? count);
         public record GetRecentNamesQueryResponse(RecentNameEntity[] names);
 
         [HttpPost("recent")]
         public async Task<ActionResult> GetRecentNames(GetRecentNamesQueryRequest request)
         {
             GetRecentNameRequestRecordCount.Inc();
-            var names = await this.nameService.GetRecentNamesAsync(request.number);
+            var names = await this.nameService.GetRecentNamesAsync(request.count);
             return Ok(new GetRecentNamesQueryResponse(names));
         }
 
-        public record GetWealthiestNamesQueryRequest(int? number);
+        public record GetWealthiestNamesQueryRequest(int? count);
         public record GetWealthiestNamesQueryResponse(WealthiestNameEntity[] names);
 
         [HttpPost("wealthiest")]
         public async Task<ActionResult> GetWealthiestNames(GetWealthiestNamesQueryRequest request)
         {
             GetWealthiestNameRequestRecordCount.Inc();
-            var names = await this.nameService.GetWealthiestNamesAsync(request.number);
+            var names = await this.nameService.GetWealthiestNamesAsync(request.count);
             return Ok(new GetWealthiestNamesQueryResponse(names));
         }
 

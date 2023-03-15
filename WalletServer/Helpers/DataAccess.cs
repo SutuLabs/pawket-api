@@ -343,16 +343,17 @@ ORDER BY last_change_spent_index ASC;", connection)
             $@"
 SELECT
     sr.singleton_coin_name AS nft_coin_name,
-	sr.singleton_create_index,
+	sc.timestamp as create_time,
     (CASE WHEN (cc.analysis->>'cnsName' != '') THEN cc.analysis->>'cnsName' ELSE cc.analysis->'metadata'->>'name' END) AS name
 FROM ext_singleton_record sr
 LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
 LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
 LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
+LEFT JOIN sync_coin_record sc ON sc.coin_name=sr.singleton_coin_name
 WHERE sr.creator_puzzle_hash=@ph
 AND c.spent_index=0
 AND sr.type='nft_v1'
-ORDER BY singleton_create_index DESC
+ORDER BY sr.singleton_create_index DESC
 LIMIT @limit;", connection)
         {
             Parameters =
@@ -369,7 +370,7 @@ LIMIT @limit;", connection)
             .OfType<DataRow>()
             .Select(_ => new RecentNameEntity(
                 (_[nameof(RecentNameEntity.nft_coin_name)] as byte[]).ToHexWithPrefix0x(),
-                (int)_[nameof(RecentNameEntity.singleton_create_index)],
+                (long)_[nameof(RecentNameEntity.create_time)],
                 (_[nameof(RecentNameEntity.name)] as string ?? "").ToLower()))
             .ToArray();
 
@@ -395,7 +396,7 @@ WHERE sr.creator_puzzle_hash=@ph
     AND sr.type='nft_v1'
 )
 SELECT
-	sum(amount)::bigint as balance,
+	(sum(amount)/count(distinct(n.name)))::bigint as balance,
 	c.puzzle_hash,
 	count(distinct(n.name)) as count,
 	array_to_string((array_agg(distinct n.name))[1:10],',') as names
@@ -559,7 +560,7 @@ public record NameEntity(
 
 public record RecentNameEntity(
     string nft_coin_name,
-    int singleton_create_index,
+    long create_time,
     string name);
 
 public record WealthiestNameEntity(
