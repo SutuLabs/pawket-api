@@ -394,6 +394,7 @@ FROM ext_singleton_record sr
 WHERE sr.creator_puzzle_hash=@ph
     AND c.spent_index=0
     AND sr.type='nft_v1'
+	ORDER BY sh.this_coin_spent_index ASC
 )
 SELECT
 	(sum(amount)/count(distinct(n.name)))::bigint as balance,
@@ -404,6 +405,7 @@ FROM sync_coin_record c
 JOIN names_table n on n.address = c.puzzle_hash
 WHERE amount > 0
 AND spent_index = 0
+AND c.puzzle_hash IN (SELECT address FROM names_table)
 GROUP BY c.puzzle_hash, n.address
 ORDER BY balance DESC
 LIMIT @limit;", connection)
