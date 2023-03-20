@@ -94,7 +94,7 @@ foreach (var tail in tails)
 
     if (File.Exists(minPngFile))
     {
-        if (rt.uri.IndexOf(ipfsBaseUrl) > -1) // already uploaded
+        if (rt is not null && rt.uri.IndexOf(ipfsBaseUrl) > -1) // already uploaded
         {
             finalTails.Add(new TailEntity(tail.hash, tail.name, tail.code, tail.description, tail.category, rt.uri));
         }
