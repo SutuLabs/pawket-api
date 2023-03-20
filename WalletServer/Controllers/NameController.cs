@@ -66,7 +66,9 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetRecentNames(GetRecentNamesQueryRequest request)
         {
             GetRecentNameRequestRecordCount.Inc();
-            var names = await this.nameService.GetRecentNamesAsync(request.count);
+            var count = request.count ?? 10;
+            count = count > 100 ? 100 : count;
+            var names = (await this.nameService.GetRecentNamesAsync()).Take(count).ToArray();
             return Ok(new GetRecentNamesQueryResponse(names));
         }
 
@@ -77,7 +79,9 @@ namespace WalletServer.Controllers
         public async Task<ActionResult> GetWealthiestNames(GetWealthiestNamesQueryRequest request)
         {
             GetWealthiestNameRequestRecordCount.Inc();
-            var names = await this.nameService.GetWealthiestNamesAsync(request.count);
+            var count = request.count ?? 10;
+            count = count > 100 ? 100 : count;
+            var names = (await this.nameService.GetWealthiestNamesAsync()).Take(count).ToArray();
             return Ok(new GetWealthiestNamesQueryResponse(names));
         }
 

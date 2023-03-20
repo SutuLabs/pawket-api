@@ -337,8 +337,8 @@ ORDER BY last_change_spent_index ASC;", connection)
 
     public async Task<RecentNameEntity[]> GetRecentNames(string creator_puzzle_hash, int? limit = null)
     {
-        limit = limit ?? 10;
-        limit = limit > 100 ? 100 : limit;
+        limit = limit ?? 500;
+        limit = limit > 5000 ? 5000 : limit;
         using var cmd = new NpgsqlCommand(
             $@"
 SELECT
@@ -379,8 +379,8 @@ LIMIT @limit;", connection)
 
     public async Task<WealthiestNameEntity[]> GetWealthiestNames(string creator_puzzle_hash, int? limit = null)
     {
-        limit = limit ?? 10;
-        limit = limit > 100 ? 100 : limit;
+        limit = limit ?? 500;
+        limit = limit > 5000 ? 5000 : limit;
         using var cmd = new NpgsqlCommand(
             $@"
 WITH names_table AS (

@@ -35,26 +35,26 @@ public class NameResolvingService
         return names;
     }
 
-    public async Task<RecentNameEntity[]> GetRecentNamesAsync(int? limit = null)
+    public async Task<RecentNameEntity[]> GetRecentNamesAsync()
     {
         const string key = nameof(GetRecentNamesAsync);
         if (!memoryCache.TryGetValue(key, out RecentNameEntity[] names))
         {
             // TODO: throttling to avoid concurrent database retrieval
-            names = await this.dataAccess.GetRecentNames(this.appSettings.CnsCreatorPuzzleHash, limit);
+            names = await this.dataAccess.GetRecentNames(this.appSettings.CnsCreatorPuzzleHash);
             memoryCache.Set(key, names, TimeSpan.FromMinutes(10));
         }
 
         return names;
     }
 
-    public async Task<WealthiestNameEntity[]> GetWealthiestNamesAsync(int? limit = null)
+    public async Task<WealthiestNameEntity[]> GetWealthiestNamesAsync()
     {
         const string key = nameof(GetWealthiestNamesAsync);
         if (!memoryCache.TryGetValue(key, out WealthiestNameEntity[] names))
         {
             // TODO: throttling to avoid concurrent database retrieval
-            names = await this.dataAccess.GetWealthiestNames(this.appSettings.CnsCreatorPuzzleHash, limit);
+            names = await this.dataAccess.GetWealthiestNames(this.appSettings.CnsCreatorPuzzleHash);
             memoryCache.Set(key, names, TimeSpan.FromMinutes(10));
         }
 
