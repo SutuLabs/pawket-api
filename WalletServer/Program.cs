@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using NodeDBSyncer.Helpers;
+using Npgsql;
 using Prometheus;
 using System.Text.Json.Serialization;
 using WalletServer.Helpers;
@@ -72,6 +73,18 @@ app.UseExceptionHandler(exceptionHandlerApp =>
         if (exHandler?.Error is BadHttpRequestException bex)
         {
             logger.LogWarning($"Bad request received: {bex.Message}");
+        }
+        else if (exHandler?.Error is NpgsqlException nex)
+        {
+            if (nex.InnerException is TimeoutException tex)
+            {
+                context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+                logger.LogWarning($"timeout executing pg sql: {tex.Message}");
+            }
+            else
+            {
+                logger.LogWarning($"Pg unhandled exception: {nex.Message}");
+            }
         }
         else
         {
