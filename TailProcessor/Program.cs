@@ -6,7 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 
 const string tailFile = "tail.json";
-const string targetTailFile = "tails.json";
+const string targetTailFile = "../../../../WalletServer/tails.json";
 const string minifiedPngFolder = "logo_png";
 const string minifiedJpgFolder = "logo_jpg";
 const string srcImgFolder = "img";
