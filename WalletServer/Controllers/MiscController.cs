@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -63,6 +64,18 @@ public class MiscController : ControllerBase
         var bytes = sr.ReadToEnd();
         return this.Content(bytes, "application/json");
     }
+
+    [HttpGet("version")]
+    public IActionResult GetVersion()
+    {
+        var fileVersion = typeof(Program)
+            .GetTypeInfo()
+            .Assembly
+            .GetCustomAttribute<AssemblyFileVersionAttribute>()?
+            .Version ?? "-1";
+        return this.Ok(fileVersion);
+    }
+
 }
 
 public record TailEntity(
