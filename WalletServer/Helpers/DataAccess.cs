@@ -377,10 +377,12 @@ LIMIT @limit;", connection)
         return rows;
     }
 
-    public async Task<WealthiestNameEntity[]> GetWealthiestNames(string creator_puzzle_hash, int? limit = null)
+    public async Task<WealthiestNameEntity[]> GetWealthiestNames(
+        string creator_puzzle_hash, bool isOwnerOnly, int? limit = null)
     {
         limit = limit ?? 500;
         limit = limit > 5000 ? 5000 : limit;
+        var ownerHint = isOwnerOnly ? "	AND cc.analysis->>'cnsAddress'=cc.analysis->>'p2Owner'" : "";
         using var cmd = new NpgsqlCommand(
             $@"
 WITH names_table AS (
@@ -394,6 +396,7 @@ FROM ext_singleton_record sr
 WHERE sr.creator_puzzle_hash=@ph
     AND c.spent_index=0
     AND sr.type='nft_v1'
+{ownerHint}
 	ORDER BY sh.this_coin_spent_index ASC
 )
 SELECT

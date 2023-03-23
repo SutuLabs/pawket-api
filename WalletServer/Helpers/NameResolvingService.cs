@@ -48,13 +48,13 @@ public class NameResolvingService
         return names;
     }
 
-    public async Task<WealthiestNameEntity[]> GetWealthiestNamesAsync()
+    public async Task<WealthiestNameEntity[]> GetWealthiestNamesAsync(bool isOwnerOnly)
     {
-        const string key = nameof(GetWealthiestNamesAsync);
+        string key = $"{nameof(GetWealthiestNamesAsync)}-{(isOwnerOnly ? "Owner" : "All")}";
         if (!memoryCache.TryGetValue(key, out WealthiestNameEntity[] names))
         {
             // TODO: throttling to avoid concurrent database retrieval
-            names = await this.dataAccess.GetWealthiestNames(this.appSettings.CnsCreatorPuzzleHash);
+            names = await this.dataAccess.GetWealthiestNames(this.appSettings.CnsCreatorPuzzleHash, isOwnerOnly);
             memoryCache.Set(key, names, TimeSpan.FromMinutes(10));
         }
 

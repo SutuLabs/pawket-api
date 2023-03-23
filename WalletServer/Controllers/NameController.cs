@@ -72,7 +72,7 @@ namespace WalletServer.Controllers
             return Ok(new GetRecentNamesQueryResponse(names));
         }
 
-        public record GetWealthiestNamesQueryRequest(int? count);
+        public record GetWealthiestNamesQueryRequest(int? count, bool? isOwnerOnly);
         public record GetWealthiestNamesQueryResponse(WealthiestNameEntity[] names);
 
         [HttpPost("wealthiest")]
@@ -81,7 +81,8 @@ namespace WalletServer.Controllers
             GetWealthiestNameRequestRecordCount.Inc();
             var count = request.count ?? 10;
             count = count > 100 ? 100 : count;
-            var names = (await this.nameService.GetWealthiestNamesAsync()).Take(count).ToArray();
+            var names = (await this.nameService.GetWealthiestNamesAsync(request.isOwnerOnly?? false))
+                .Take(count).ToArray();
             return Ok(new GetWealthiestNamesQueryResponse(names));
         }
 
