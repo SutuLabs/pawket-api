@@ -20,7 +20,14 @@
 
         public static byte[] ToHexBytes(this string hex)
         {
-            return HexMate.Convert.FromHexString(hex.Unprefix0x().AsSpan());
+            try
+            {
+                return HexMate.Convert.FromHexString(hex.Unprefix0x().AsSpan());
+            }
+            catch (Exception ex)
+            {
+                throw new FormatException($"Malformat hex string: {hex}", ex);
+            }
         }
     }
 }
