@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Runtime.InteropServices;
 using chia.dotnet;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
@@ -14,6 +15,7 @@ public class DataAccess : IDisposable
     private const string SqlLastIndexLateral = ", LATERAL (SELECT spent_index AS last_index FROM sync_state WHERE id=1) AS t";
     private const string SqlIndexConstraint = " AND (c.confirmed_index <= last_index) AND (c.spent_index <= last_index)";
     private const string PriceTableName = "series_price";
+    private const string FullBlockTableName = "sync_block";
 
     private readonly ILogger<DataAccess> logger;
     private readonly IMemoryCache memoryCache;
@@ -167,7 +169,7 @@ public class DataAccess : IDisposable
     public async Task<CoinDetail[]> GetCoinDetails(string[] coinIds, long? pageStart = 0, int? pageLength = 100)
     {
         using var cmd = new NpgsqlCommand(
-            $"SELECT c.amount, c.coin_parent, c.puzzle_hash, cc.puzzle, cc.solution FROM sync_coin_record c"
+            $"SELECT c.amount, c.coin_parent, c.puzzle_hash, cc.puzzle, cc.solution, c.confirmed_index, c.spent_index, c.timestamp FROM sync_coin_record c"
             + $" LEFT JOIN sync_coin_class cc ON c.coin_name = cc.coin_name"
             + SqlLastIndexLateral
             + $" WHERE c.coin_name = ANY(@coin_name)"
@@ -196,9 +198,15 @@ public class DataAccess : IDisposable
                 hash = _["puzzle_hash"] as byte[],
                 puzzle = _["puzzle"] as byte[],
                 solution = _["solution"] as byte[],
+                confirmed_index = _["confirmed_index"] as long?,
+                spent_index = _["spent_index"] as long?,
+                timestamp = _["timestamp"] as long?,
             })
             .Select(_ => (_.amount == null || _.parent == null || _.hash == null) ? null : new CoinDetail(
                 Convert.ToUInt64(_.amount),
+                Convert.ToUInt64(_.confirmed_index ?? 0),
+                Convert.ToUInt64(_.spent_index ?? 0),
+                Convert.ToUInt64(_.timestamp ?? 0),
                 _.parent.ToHexWithPrefix0x(),
                 _.hash.ToHexWithPrefix0x(),
                 _.puzzle?.Decompress().ToHexWithPrefix0x(),
@@ -469,6 +477,66 @@ LIMIT @limit;", connection)
         return rows;
     }
 
+    // adapted from NodeDBSyncer\Functions\ParseTx\ParseTxDbConnection.cs
+    public async Task<GetBlockResponse> GetBlock(int[] indexes)
+    {
+        await this.connection.EnsureOpen();
+        var sql = $"SELECT index,generator,generator_ref_list FROM {FullBlockTableName}" +
+            $" WHERE index = ANY(@indexes)" +
+            $" ORDER BY index DESC";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("indexes", indexes),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var list = await ReadBlocks(reader);
+        var refIndexes = list.SelectMany(_ => _.generator_ref_list ?? Array.Empty<uint>()).Distinct().ToArray();
+
+        await reader.CloseAsync();
+        await cmd.DisposeAsync();
+        var refs = await GetRelativeBlocks(refIndexes);
+
+        return new GetBlockResponse(list, refs);
+    }
+
+    private async Task<BlockTransactionGeneratorRetrieval[]> GetRelativeBlocks(uint[] blockIndexes)
+    {
+        if (blockIndexes.Length == 0) return Array.Empty<BlockTransactionGeneratorRetrieval>();
+
+        var sql = $"SELECT index,generator,generator_ref_list FROM {FullBlockTableName}" +
+            $" WHERE index = ANY(@list)" +
+            $" ORDER BY index";
+        var idxs = blockIndexes.Select(_ => (long)_).ToArray();
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            Parameters =
+            {
+                new("list", idxs),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+        return await ReadBlocks(reader);
+    }
+
+    private static async Task<BlockTransactionGeneratorRetrieval[]> ReadBlocks(NpgsqlDataReader reader)
+    {
+        var list = new List<BlockTransactionGeneratorRetrieval>();
+        while (await reader.ReadAsync())
+        {
+            var index = reader.GetFieldValue<long>(0);
+            var generator = reader.GetFieldValue<byte[]>(1);
+            var generator_ref_list_buff = reader.GetFieldValue<byte[]>(2);
+            var generator_ref_list = MemoryMarshal.Cast<byte, uint>(generator_ref_list_buff).ToArray();
+            list.Add(new BlockTransactionGeneratorRetrieval((ulong)index, generator.Decompress(), generator_ref_list));
+        }
+
+        return list.ToArray();
+    }
+
     private Dictionary<string, string> ParseBindings(string bindingString)
     {
         if (string.IsNullOrEmpty(bindingString)) return new Dictionary<string, string>();
@@ -576,11 +644,14 @@ public record WealthiestNameEntity(
 
 public record CoinDetail
 (
-     ulong Amount,
-     string ParentCoinInfo,
-     string PuzzleHash,
-     string? PuzzleReveal,
-     string? Solution
+    ulong Amount,
+    ulong ConfirmedIndex,
+    ulong SpentIndex,
+    ulong Timestamp,
+    string ParentCoinInfo,
+    string PuzzleHash,
+    string? PuzzleReveal,
+    string? Solution
 );
 
 public record CoinPuzzleInfo(string CoinName, ulong Amount, string ParentCoinName, string PuzzleReveal);
@@ -591,3 +662,6 @@ public record CoinRecordWithAnalysis : CoinRecord
 {
     public string? Analysis { get; init; }
 }
+
+public record GetBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, BlockTransactionGeneratorRetrieval[] RefBlocks);
+public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);

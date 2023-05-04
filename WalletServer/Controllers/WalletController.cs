@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
@@ -34,6 +35,7 @@ namespace WalletServer.Controllers
         private static readonly Counter PushTxSuccessCount = Metrics.CreateCounter("push_tx_success_total", "Number of successful pushtx request.");
         private static readonly Counter RequestPuzzleCount = Metrics.CreateCounter("request_puzzle_total", "Number of puzzle request.", refererLabels);
         private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.", refererLabels);
+        private static readonly Counter RequestBlockCount = Metrics.CreateCounter("request_block_total", "Number of Block request.", refererLabels);
         private static readonly Counter RequestOfferUploadCount = Metrics.CreateCounter("request_offer_upload_total", "Number of offer upload request.", refererLabels);
         private static readonly Counter RequestAnalysisCount = Metrics.CreateCounter("request_analysis_total", "Number of analysis record request.", refererLabels);
 
@@ -144,7 +146,10 @@ namespace WalletServer.Controllers
         (
             [property: JsonPropertyName("coin")] CoinItemReq? Coin,
             [property: JsonPropertyName("puzzle_reveal")] string PuzzleReveal,
-            [property: JsonPropertyName("solution")] string Solution
+            [property: JsonPropertyName("solution")] string Solution,
+            [property: JsonPropertyName("confirmed_index")] ulong ConfirmedIndex,
+            [property: JsonPropertyName("spent_index")] ulong SpentIndex,
+            [property: JsonPropertyName("timestamp")] ulong Timestamp
         );
         public record CoinItemReq
         (
@@ -304,6 +309,31 @@ namespace WalletServer.Controllers
             //}
         }
 
+        public record GetBlockRequest(int[]? indexes);
+
+        [HttpPost("get-block")]
+        public async Task<ActionResult> GetBlock(GetBlockRequest request)
+        {
+            if (request == null) return BadRequest("Malformat request");
+            if (request.indexes == null) return BadRequest("Invalid request");
+
+            RequestBlockCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
+
+            var remoteIpAddress = this.HttpContext.GetRealIp();
+            this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request block {string.Join(",", request.indexes)}");
+
+
+            var blocks = await dataAccess.GetBlock(request.indexes);
+            var d = Convert.ToBase64String(blocks.Blocks.FirstOrDefault().generator);
+            blocks = blocks with
+            {
+                Blocks = blocks.Blocks.Select(_ => _ with { generator = _.generator.CompressGzip() }).ToArray(),
+                RefBlocks = blocks.RefBlocks.Select(_ => _ with { generator = _.generator.CompressGzip() }).ToArray(),
+            };
+
+            return Ok(blocks);
+        }
+
         public record UploadOfferRequest(string offer);
         public record DexieErrorResponse(bool success, string error_message);
 
@@ -344,7 +374,10 @@ namespace WalletServer.Controllers
         {
             return new CoinSpendReq(new CoinItemReq(coin.Amount, coin.ParentCoinInfo, coin.PuzzleHash),
                 coin.PuzzleReveal ?? string.Empty,
-                coin.Solution ?? string.Empty);
+                coin.Solution ?? string.Empty,
+                coin.ConfirmedIndex,
+                coin.SpentIndex,
+                coin.Timestamp);
         }
 
         private async Task<CoinSpendReq?> GetCoinSolutionByApi(string coinId)
@@ -354,7 +387,8 @@ namespace WalletServer.Controllers
             {
                 var c = thisRecord.Coin;
                 return new CoinSpendReq(
-                    new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty);
+                    new CoinItemReq(c.Amount, c.ParentCoinInfo, c.PuzzleHash), string.Empty, string.Empty,
+                        thisRecord.ConfirmedBlockIndex, thisRecord.SpentBlockIndex, thisRecord.Timestamp);
             }
 
             var cs = await this.client.GetPuzzleAndSolution(coinId, thisRecord.SpentBlockIndex);
@@ -365,7 +399,8 @@ namespace WalletServer.Controllers
             }
 
             return new CoinSpendReq(
-                new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution);
+                new CoinItemReq(cs.Coin.Amount, cs.Coin.ParentCoinInfo, cs.Coin.PuzzleHash), cs.PuzzleReveal, cs.Solution,
+                    thisRecord.ConfirmedBlockIndex, thisRecord.SpentBlockIndex, thisRecord.Timestamp);
         }
 
         public record GetNetworkInfoResponse(string name, string prefix, string chainId, string symbol, int @decimal, string explorerUrl);
