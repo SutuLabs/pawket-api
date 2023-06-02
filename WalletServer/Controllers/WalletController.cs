@@ -322,9 +322,7 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request block {string.Join(",", request.indexes)}");
 
-
             var blocks = await dataAccess.GetBlock(request.indexes);
-            var d = Convert.ToBase64String(blocks.Blocks.FirstOrDefault().generator);
             blocks = blocks with
             {
                 Blocks = blocks.Blocks.Select(_ => _ with { generator = _.generator.CompressGzip() }).ToArray(),
