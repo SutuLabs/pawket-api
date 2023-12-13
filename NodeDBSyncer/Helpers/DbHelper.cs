@@ -88,6 +88,11 @@ public static class DbHelper
         return properties.OfType<PropertyDescriptor>().Select(_ => _.Name);
     }
 
+    public static string GetFieldsNameFromType(this Type type)
+    {
+        return string.Join(",", type.GetPropNames().Select(_ => $"\"{_}\""));
+    }
+
     public static T? GetNullableFieldValue<T>(this DbDataReader reader, int ordinal) =>
         reader.IsDBNull(ordinal) ? default : reader.GetFieldValue<T>(ordinal);
 

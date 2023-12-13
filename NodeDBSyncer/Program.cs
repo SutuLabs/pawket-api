@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using NodeDBSyncer.Functions.ParseInscription;
 using NodeDBSyncer.Functions.ParseSingleton;
 using NodeDBSyncer.Functions.ParseTx;
 using NodeDBSyncer.Functions.Price;
@@ -30,6 +31,7 @@ builder.ConfigureServices(services =>
     services.AddHostedService<ParseBlockTxService>();
     services.AddHostedService<AnalyzeTxService>();
     services.AddHostedService<ParseSingletonService>();
+    services.AddHostedService<ParseInscriptionService>();
 });
 
 var app = builder.Build();

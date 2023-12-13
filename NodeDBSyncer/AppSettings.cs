@@ -12,6 +12,7 @@
     public int SyncBlockBatchSize { get; set; } = 200;
     public int ParsingTxBlockBatchSize { get; set; } = 100;
     public int ParsingSingletonBatchSize { get; set; } = 1000;
+    public int ParsingInscriptionBatchSize { get; set; } = 300;
     public int AnalyzingTxBatchSize { get; set; } = 0;
     public string? PriceProxy { get; set; }
     public string? PriceSource { get; set; }

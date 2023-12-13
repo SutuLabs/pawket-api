@@ -9,4 +9,6 @@ public static class DbReference
     public const string CoinClassTableName = "sync_coin_class";
     public const string SingletonRecordTableName = "ext_singleton_record";
     public const string SingletonHistoryTableName = "ext_singleton_history";
+    public const string InscriptionRecordTableName = "ext_inscription_record";
+    public const string InscriptionTickTableName = "ext_inscription_tick";
 }
