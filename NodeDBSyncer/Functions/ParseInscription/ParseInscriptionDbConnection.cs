@@ -126,6 +126,7 @@ ON CONFLICT DO NOTHING;
             $@"CREATE TEMPORARY TABLE {tmpTable}(
     id serial NOT NULL,
     ""{nameof(TickInfo.coin_name)}"" bytea NOT NULL UNIQUE,
+    ""{nameof(TickInfo.index)}"" bigint NOT NULL,
     ""{nameof(TickInfo.tick)}"" text NOT NULL UNIQUE,
     ""{nameof(TickInfo.lim)}"" bigint NOT NULL,
     ""{nameof(TickInfo.max)}"" bigint NOT NULL,
@@ -206,6 +207,7 @@ ON CONFLICT DO NOTHING;
     {
         var dt = new DataTable();
         dt.Columns.Add(nameof(TickInfo.coin_name), typeof(byte[]));
+        dt.Columns.Add(nameof(TickInfo.index), typeof(long));
         dt.Columns.Add(nameof(TickInfo.tick), typeof(string));
         dt.Columns.Add(nameof(TickInfo.max), typeof(long));
         dt.Columns.Add(nameof(TickInfo.lim), typeof(long));
@@ -215,6 +217,7 @@ ON CONFLICT DO NOTHING;
         {
             dt.Rows.Add(
                 r.coin_name.ToHexBytes(),
+                r.index,
                 r.tick,
                 r.max,
                 r.lim,
@@ -259,6 +262,7 @@ CREATE TABLE public.{InscriptionTickTableName}
 (
     id serial NOT NULL,
     ""{nameof(TickInfo.coin_name)}"" bytea NOT NULL UNIQUE,
+    ""{nameof(TickInfo.index)}"" bigint NOT NULL,
     ""{nameof(TickInfo.tick)}"" text NOT NULL UNIQUE,
     ""{nameof(TickInfo.lim)}"" bigint NOT NULL,
     ""{nameof(TickInfo.max)}"" bigint NOT NULL,

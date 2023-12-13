@@ -25,6 +25,7 @@ public record InscriptionRecordRaw(
 
 public record TickInfo(
     string coin_name,
+    long index,
     string tick,
     long max,
     long lim,

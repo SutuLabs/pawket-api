@@ -195,7 +195,7 @@ internal class ParseInscriptionService : BaseRefreshService
             }
 
             yield return new TickInfo(
-                r.coin_name, r.tick, max, lim, "{}");
+                r.coin_name, r.spent_index, r.tick, max, lim, "{}");
         }
     }
 }
