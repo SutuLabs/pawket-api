@@ -443,6 +443,30 @@ LIMIT @limit;", connection)
         return rows;
     }
 
+    public async Task<TickEntity[]> GetAllTickEntities()
+    {
+        using var cmd = new NpgsqlCommand(
+            $@"
+SELECT tick, lim, max, info
+FROM ext_inscription_tick
+ORDER BY id
+LIMIT 1000;", connection);
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new TickEntity(
+                _[nameof(TickEntity.tick)] as string ?? "",
+                (long)_[nameof(TickEntity.lim)],
+                (long)_[nameof(TickEntity.max)],
+                _[nameof(TickEntity.info)] as string ?? ""))
+            .ToArray();
+
+        return rows;
+    }
+
     public async Task<CoinAnalysis[]> GetCoinAnalysis(string[] coinNames, long? pageStart = 0, int? pageLength = 100)
     {
         using var cmd = new NpgsqlCommand(
@@ -665,3 +689,9 @@ public record CoinRecordWithAnalysis : CoinRecord
 
 public record GetBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, BlockTransactionGeneratorRetrieval[] RefBlocks);
 public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);
+
+public record TickEntity(
+    string tick,
+    long lim,
+    long max,
+    string info);
