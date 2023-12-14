@@ -53,7 +53,7 @@ internal class RefreshPriceService : BaseRefreshService
     private IEnumerable<PriceEntity> GetCoinBasePrices()
     {
         var urls = new[] {
-                "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=USDT",
+                "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=USD",
                 "https://www.coinbase.com/api/v2/assets/prices/chia-network?base=CNY",
             };
         using var wc = new WebClient();
