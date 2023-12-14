@@ -49,10 +49,12 @@ internal class ParseInscriptionService : BaseRefreshService
 
         var sw = new Stopwatch();
         sw.Start();
-        var available = await db.GetLatestBlockIndex();
+        var available = await db.GetLatestProcessedBlockIndex();
         var start = await db.GetInscriptionRecordProcessedBlockIndex();
 
         if (start >= available) return false;
+
+        batch = batch > available - start ? (int)(available - start) : batch;
 
         var records = await db.GetRawInscriptionRecords(start, batch);
         this.logger.LogInformation(

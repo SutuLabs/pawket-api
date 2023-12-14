@@ -155,6 +155,33 @@ ON CONFLICT DO NOTHING;
     public async Task<long> GetInscriptionRecordProcessedBlockIndex()
         => await GetSyncState(ProcessedKey);
 
+    public async Task<long> GetLatestProcessedBlockIndex()
+    {
+        await this.connection.EnsureOpen();
+        using var cmd = new NpgsqlCommand(@$"SELECT min(index)
+	FROM {FullBlockTableName}
+	WHERE tx_parsed=false AND is_tx_block=true;", connection);
+        var o = await cmd.ExecuteScalarAsync();
+
+        if (o is DBNull)
+        {
+            using var cmd2 = new NpgsqlCommand(@$"SELECT max(index)
+	FROM {FullBlockTableName}
+	WHERE tx_parsed=true AND is_tx_block=true;", connection);
+            var o2 = await cmd2.ExecuteScalarAsync();
+
+            return o2 is DBNull ? 0
+                : o2 is long lo ? lo
+                : 0;
+        }
+        else
+        {
+            return o is long lo ? lo - 1 : 0;
+        }
+
+
+    }
+
     public async Task WriteInscriptionRecordProcessedBlockIndex(long block_index)
         => await WriteSyncState(ProcessedKey, block_index);
 
