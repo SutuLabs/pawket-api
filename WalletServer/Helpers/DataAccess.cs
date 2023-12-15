@@ -449,7 +449,7 @@ LIMIT @limit;", connection)
             $@"
 SELECT index, tick, lim, max, info
 FROM ext_inscription_tick
-ORDER BY id
+ORDER BY index
 LIMIT 1000;", connection);
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -466,6 +466,32 @@ LIMIT 1000;", connection);
             .ToArray();
 
         return rows;
+    }
+
+    public async Task EnsureTickInfo()
+    {
+        using var cmd = new NpgsqlCommand(
+            $@"
+UPDATE ext_inscription_tick uit
+SET ""info""=b.""json""
+FROM
+	(
+    SELECT tick, json_build_object('total',total, 'mints', mints, 'tick', rawtick, 'minters', minters) AS json FROM
+	    (
+		SELECT
+            count(*) AS mints,
+            sum(amt) AS total,
+            ir.tick,
+            it.info->>'tick' AS rawtick,
+            count(distinct(""to"")) AS minters
+        FROM public.ext_inscription_record ir
+        JOIN ext_inscription_tick it ON ir.tick = it.tick
+        WHERE amt <= it.lim AND ir.spent_index>= it.index AND op='mint'
+        GROUP BY ir.tick, it.info->>'tick'
+        ) a
+	) b
+WHERE b.tick = uit.tick;", connection);
+        await cmd.ExecuteNonQueryAsync();
     }
 
     public async Task<CoinAnalysis[]> GetCoinAnalysis(string[] coinNames, long? pageStart = 0, int? pageLength = 100)

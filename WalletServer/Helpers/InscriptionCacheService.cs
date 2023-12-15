@@ -13,6 +13,9 @@ public class InscriptionCacheService
     private static object GetAllTickEntitiesDbTaskLock = new object();
     private static Task<TickEntity[]>? GetAllTickEntitiesDbTask;
 
+    private static object EnsureTicksDbTaskLock = new object();
+    private static Task? EnsureTicksTask;
+
     public InscriptionCacheService(
         IMemoryCache memoryCache,
         DataAccess dataAccess,
@@ -27,20 +30,36 @@ public class InscriptionCacheService
 
     public async Task<TickEntity[]> GetAllTicksAsync()
     {
-        const string key = nameof(GetAllTicksAsync);
-        if (!memoryCache.TryGetValue(key, out TickEntity[] ticks))
         {
-            Task<TickEntity[]> task;
-            lock (GetAllTickEntitiesDbTaskLock)
+            const string key = nameof(this.dataAccess.EnsureTickInfo);
+            if (!memoryCache.TryGetValue(key, out int nouse))
             {
-                task = GetAllTickEntitiesDbTask ?? this.dataAccess.GetAllTickEntities();
-            }
+                Task task;
+                lock (EnsureTicksDbTaskLock)
+                {
+                    task = EnsureTicksTask ?? this.dataAccess.EnsureTickInfo();
+                }
 
-            ticks = await task;
-            memoryCache.Set(key, ticks, TimeSpan.FromMinutes(1));
+                await task;
+                memoryCache.Set(key, 1, TimeSpan.FromMinutes(5));
+            }
         }
 
-        return ticks;
-    }
+        {
+            const string key = nameof(GetAllTicksAsync);
+            if (!memoryCache.TryGetValue(key, out TickEntity[] ticks))
+            {
+                Task<TickEntity[]> task;
+                lock (GetAllTickEntitiesDbTaskLock)
+                {
+                    task = GetAllTickEntitiesDbTask ?? this.dataAccess.GetAllTickEntities();
+                }
 
+                ticks = await task;
+                memoryCache.Set(key, ticks, TimeSpan.FromMinutes(1));
+            }
+
+            return ticks;
+        }
+    }
 }
