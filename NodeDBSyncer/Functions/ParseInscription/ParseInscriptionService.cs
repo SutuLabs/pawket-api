@@ -88,7 +88,9 @@ internal class ParseInscriptionService : BaseRefreshService
         }
 
         var irecords = ConvertToRecord(rs).ToArray();
-        var trecords = ConvertToTickRecord(irecords).ToArray();
+        var trecords = ConvertToTickRecord(irecords)
+            .DistinctBy(_ => _.tick)
+            .ToArray();
 
         var tget = sw.ElapsedMilliseconds;
 
