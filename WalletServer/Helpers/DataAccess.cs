@@ -447,7 +447,7 @@ LIMIT @limit;", connection)
     {
         using var cmd = new NpgsqlCommand(
             $@"
-SELECT tick, lim, max, info
+SELECT index, tick, lim, max, info
 FROM ext_inscription_tick
 ORDER BY id
 LIMIT 1000;", connection);
@@ -458,6 +458,7 @@ LIMIT 1000;", connection);
         var rows = dt.Rows
             .OfType<DataRow>()
             .Select(_ => new TickEntity(
+                (long)_[nameof(TickEntity.index)],
                 _[nameof(TickEntity.tick)] as string ?? "",
                 (long)_[nameof(TickEntity.lim)],
                 (long)_[nameof(TickEntity.max)],
@@ -691,6 +692,7 @@ public record GetBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, Bloc
 public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);
 
 public record TickEntity(
+    long index,
     string tick,
     long lim,
     long max,
