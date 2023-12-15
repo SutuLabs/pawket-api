@@ -154,7 +154,7 @@ internal class ParseInscriptionService : BaseRefreshService
                 if (coin.meta.max > MAX_SAFE_INTEGER) continue;
                 if (coin.meta.lim > MAX_SAFE_INTEGER) continue;
                 var lim = coin.meta.lim > coin.meta.max ? coin.meta.max : coin.meta.lim;
-                meta = JsonConvert.SerializeObject(new JsonDeployMeta(lim ?? 0, coin.meta.max ?? 0));
+                meta = JsonConvert.SerializeObject(new JsonDeployMeta(lim ?? 0, coin.meta.max ?? 0, coin.meta.tick));
             }
 
             yield return new InscriptionRecordInfo(
@@ -184,12 +184,14 @@ internal class ParseInscriptionService : BaseRefreshService
             if (r.op != "deploy") continue;
             long max;
             long lim;
+            string tick;
             try
             {
                 var meta = JsonConvert.DeserializeObject<JsonDeployMeta>(r.meta ?? "{}");
                 if (meta == null) continue;
                 max = meta.max;
                 lim = meta.lim;
+                tick = meta.tick;
             }
             catch (Exception ex)
             {
@@ -198,7 +200,7 @@ internal class ParseInscriptionService : BaseRefreshService
             }
 
             yield return new TickInfo(
-                r.coin_name, r.spent_index, r.tick, max, lim, "{}");
+                r.coin_name, r.spent_index, r.tick, max, lim, JsonConvert.SerializeObject(new { tick }));
         }
     }
 }

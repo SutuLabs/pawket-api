@@ -50,4 +50,4 @@ public record JsonInscriptionEntity(
 
 public record JsonP2InscriptionCoinAnalysisResult(JsonP2InscriptionCoin[] coins);
 
-public record JsonDeployMeta(long lim, long max);
+public record JsonDeployMeta(long lim, long max, string tick);
