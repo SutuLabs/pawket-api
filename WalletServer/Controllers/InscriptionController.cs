@@ -35,7 +35,7 @@ namespace WalletServer.Controllers
 
         public record GetTickListQueryResponse(TickEntity[] ticks);
 
-        [HttpPost("ticks")]
+        [HttpGet("ticks")]
         public async Task<ActionResult> GetTickList()
         {
             GetTickListRequestRecordCount.Inc();
