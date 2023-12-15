@@ -94,6 +94,7 @@ ORDER BY cr.spent_index, cc.id";
     ""{nameof(InscriptionRecordInfo.from_balance)}"" bigint,
     ""{nameof(InscriptionRecordInfo.to_balance)}"" bigint,
     ""{nameof(InscriptionRecordInfo.meta)}"" json,
+    ""{nameof(InscriptionRecordInfo.valid)}"" boolean,
     PRIMARY KEY (id)
 );", connection);
         await cmd.ExecuteNonQueryAsync();
@@ -206,6 +207,7 @@ ON CONFLICT DO NOTHING;
         dt.Columns.Add(nameof(InscriptionRecordInfo.from_balance), typeof(long));
         dt.Columns.Add(nameof(InscriptionRecordInfo.to_balance), typeof(long));
         dt.Columns.Add(nameof(InscriptionRecordInfo.meta), typeof(string));
+        dt.Columns.Add(nameof(InscriptionRecordInfo.valid), typeof(bool));
 
         foreach (var r in records)
         {
@@ -224,7 +226,8 @@ ON CONFLICT DO NOTHING;
                 r.amt,
                 r.from_balance,
                 r.to_balance,
-                r.meta);
+                r.meta,
+                r.valid);
         }
 
         return dt;
@@ -279,6 +282,7 @@ CREATE TABLE public.{InscriptionRecordTableName}
     ""{nameof(InscriptionRecordInfo.from_balance)}"" bigint,
     ""{nameof(InscriptionRecordInfo.to_balance)}"" bigint,
     ""{nameof(InscriptionRecordInfo.meta)}"" json,
+    ""{nameof(InscriptionRecordInfo.valid)}"" boolean,
     PRIMARY KEY (id)
 );
 

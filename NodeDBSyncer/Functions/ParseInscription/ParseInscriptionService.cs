@@ -172,7 +172,8 @@ internal class ParseInscriptionService : BaseRefreshService
                 coin.meta.amt ?? 0,
                 null,
                 null,
-                meta);
+                meta,
+                null);
         }
     }
 

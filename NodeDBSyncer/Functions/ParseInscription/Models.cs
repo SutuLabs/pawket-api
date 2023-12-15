@@ -15,7 +15,8 @@ public record InscriptionRecordInfo(
     long amt,
     long? from_balance,
     long? to_balance,
-    string? meta);
+    string? meta,
+    bool? valid);
 
 public record InscriptionRecordRaw(
     long coin_class_id,
