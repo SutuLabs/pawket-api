@@ -156,6 +156,9 @@ ON CONFLICT DO NOTHING;
     public async Task<long> GetInscriptionRecordProcessedBlockIndex()
         => await GetSyncState(ProcessedKey);
 
+    public async Task<long> GetSyncDbProcessedBlockIndex()
+        => await GetSyncState("spent_index");
+
     public async Task<long> GetLatestProcessedBlockIndex()
     {
         await this.connection.EnsureOpen();

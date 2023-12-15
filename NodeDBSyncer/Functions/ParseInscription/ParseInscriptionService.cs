@@ -50,6 +50,9 @@ internal class ParseInscriptionService : BaseRefreshService
         var sw = new Stopwatch();
         sw.Start();
         var available = await db.GetLatestProcessedBlockIndex();
+        var synced = await db.GetSyncDbProcessedBlockIndex();
+        available = Math.Min(available, synced);
+
         var start = await db.GetInscriptionRecordProcessedBlockIndex();
 
         if (start >= available) return false;
