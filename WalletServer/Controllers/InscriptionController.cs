@@ -18,6 +18,8 @@ namespace WalletServer.Controllers
 
         private static readonly Counter GetTickListRequestRecordCount =
             Metrics.CreateCounter("inscription_tick_list_total", "Number of get tick list request.");
+        private static readonly Counter GetHolderTickListRequestRecordCount =
+            Metrics.CreateCounter("inscription_holder_tick_list_total", "Number of get holder tick list request.");
 
         public InscriptionController(
             ILogger<InscriptionController> logger,
@@ -42,6 +44,17 @@ namespace WalletServer.Controllers
             var ticks = (await this.inscriptionService.GetAllTicksAsync());
 
             return Ok(new GetTickListQueryResponse(ticks));
+        }
+
+        public record GetHolderTickListQueryResponse(TickHolderEntity[] ticks);
+
+        [HttpGet("holder/{address}")]
+        public async Task<ActionResult> GetHolderTickList(string address)
+        {
+            GetHolderTickListRequestRecordCount.Inc();
+            var ticks = await this.inscriptionService.GetAllHolderTicksAsync(address);
+
+            return Ok(new GetHolderTickListQueryResponse(ticks));
         }
 
         // /ticks (start, page, order) -> list

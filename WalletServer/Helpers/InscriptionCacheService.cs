@@ -62,4 +62,16 @@ public class InscriptionCacheService
             return ticks;
         }
     }
+
+    public async Task<TickHolderEntity[]> GetAllHolderTicksAsync(string holder)
+    {
+        string key = $"{nameof(GetAllHolderTicksAsync)}{holder}";
+        if (!memoryCache.TryGetValue(key, out TickHolderEntity[] ticks))
+        {
+            ticks = await this.dataAccess.GetHolderTicks(holder);
+            memoryCache.Set(key, ticks, TimeSpan.FromMinutes(3));
+        }
+
+        return ticks;
+    }
 }

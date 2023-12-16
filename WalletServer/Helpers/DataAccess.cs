@@ -494,6 +494,36 @@ WHERE b.tick = uit.tick;", connection);
         await cmd.ExecuteNonQueryAsync();
     }
 
+    public async Task<TickHolderEntity[]> GetHolderTicks(string holder)
+    {
+        using var cmd = new NpgsqlCommand(
+            $@"
+SELECT tick, count(*), sum(amt) FROM ext_inscription_record
+WHERE ""to""=@holder
+AND p='xchs'
+AND op='mint'
+GROUP BY tick;", connection)
+        {
+            Parameters =
+            {
+                new("holder", HexMate.Convert.FromHexString(holder.Unprefix0x().AsSpan())),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var dt = new DataTable();
+        dt.Load(reader);
+        var rows = dt.Rows
+            .OfType<DataRow>()
+            .Select(_ => new TickHolderEntity(
+                _[nameof(TickHolderEntity.tick)] as string ?? "",
+                (long)(decimal)_[nameof(TickHolderEntity.sum)],
+                (long)_[nameof(TickHolderEntity.count)]))
+            .ToArray();
+
+        return rows;
+    }
+
     public async Task<CoinAnalysis[]> GetCoinAnalysis(string[] coinNames, long? pageStart = 0, int? pageLength = 100)
     {
         using var cmd = new NpgsqlCommand(
@@ -723,3 +753,8 @@ public record TickEntity(
     long lim,
     long max,
     string info);
+
+public record TickHolderEntity(
+    string tick,
+    long sum,
+    long count);
