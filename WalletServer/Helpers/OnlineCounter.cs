@@ -8,7 +8,7 @@ namespace WalletServer.Helpers;
 
 public class OnlineCounter : IDisposable
 {
-    private const string CacheFileName = "counter_data.json";
+    private const string CacheFileName = "data/counter_data.json";
     private readonly ILogger<OnlineCounter> logger;
     private readonly IMemoryCache memoryCache;
     private readonly AppSettings appSettings;
@@ -118,9 +118,17 @@ public class OnlineCounter : IDisposable
         this.isSaving = true;
         try
         {
+            var fi = new FileInfo(CacheFilePath);
+            if (fi.Directory == null)
+            {
+                this.logger.LogWarning("failed to create directory for counter cache data");
+                return;
+            }
+
+            if (!fi.Directory.Exists) fi.Create();
             var data = new PersistentData(
                 this.dictUsers, this.dictDailyUsers, this.dictDailyIps, this.dictMonthlyUsers, this.dictMonthlyIps);
-            File.WriteAllText(CacheFilePath, JsonConvert.SerializeObject(data));
+            File.WriteAllText(fi.FullName, JsonConvert.SerializeObject(data));
         }
         catch (Exception ex)
         {
