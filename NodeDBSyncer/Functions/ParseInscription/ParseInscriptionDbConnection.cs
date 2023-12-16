@@ -40,6 +40,7 @@ AND cr.spent_index <= @end
 ORDER BY cr.spent_index, cc.id";
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
+            CommandTimeout = 600,
             Parameters =
             {
                 new("start", block_index),
@@ -114,6 +115,7 @@ ON CONFLICT DO NOTHING;
             //    {nameof(InscriptionRecordInfo.coin_class_id)} = EXCLUDED.{nameof(InscriptionRecordInfo.coin_class_id)};
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 300;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
@@ -147,6 +149,7 @@ ON CONFLICT DO NOTHING;
 " +
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 300;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
@@ -337,7 +340,7 @@ CREATE INDEX IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionR
 ", connection);
         try
         {
-            cmd.CommandTimeout = 600;
+            cmd.CommandTimeout = 1000;
             await cmd.ExecuteNonQueryAsync();
         }
         catch (PostgresException pex)

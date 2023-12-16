@@ -40,6 +40,7 @@ public class ParseTxDbConnection : PgsqlConnection
             $" LIMIT @limit";
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
+            CommandTimeout = 600,
             Parameters =
             {
                 new("limit", number),
@@ -67,6 +68,7 @@ public class ParseTxDbConnection : PgsqlConnection
         var idxs = blockIndexes.Select(_ => (long)_).ToArray();
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
+            CommandTimeout = 600,
             Parameters =
             {
                 new("list", idxs),
@@ -99,6 +101,7 @@ public class ParseTxDbConnection : PgsqlConnection
             $" WHERE index = ANY(@list)";
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
+            CommandTimeout = 600,
             Parameters =
             {
                 new("list", blockIndexes.Select(_=>(long)_).ToArray()),
@@ -131,6 +134,7 @@ public class ParseTxDbConnection : PgsqlConnection
             $" WHERE t.{idField} = {CoinClassTableName}.{idField};" +
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 600;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
@@ -169,9 +173,9 @@ WHERE id in
             {
                 new("begin", begin),
                 new("end", end),
-            }
+            },
+            CommandTimeout = 1000
         };
-        cmd.CommandTimeout = 1000;
 
         await cmd.ExecuteNonQueryAsync();
     }
@@ -185,7 +189,8 @@ WHERE id in
             Parameters =
             {
                 new("list", coins),
-            }
+            },
+            CommandTimeout = 1000
         };
 
         await cmd.ExecuteNonQueryAsync();
@@ -209,9 +214,9 @@ WHERE id in
             Parameters =
             {
                 new("limit", number),
-            }
+            },
+            CommandTimeout = 1000
         };
-        cmd.CommandTimeout = 1000;
         await using var reader = await cmd.ExecuteReaderAsync();
 
         var list = await ReadTxs(reader);

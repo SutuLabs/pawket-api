@@ -323,7 +323,8 @@ ORDER BY last_change_spent_index ASC;", connection)
             Parameters =
             {
                 new ("ph", creator_puzzle_hash.ToHexBytes()),
-            }
+            },
+            CommandTimeout = 300,
         };
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -368,7 +369,8 @@ LIMIT @limit;", connection)
             {
                 new ("ph", creator_puzzle_hash.ToHexBytes()),
                 new ("limit", limit),
-            }
+            },
+            CommandTimeout = 300,
         };
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -425,7 +427,8 @@ LIMIT @limit;", connection)
             {
                 new ("ph", creator_puzzle_hash.ToHexBytes()),
                 new ("limit", limit),
-            }
+            },
+            CommandTimeout = 300,
         };
         await using var reader = await cmd.ExecuteReaderAsync();
 
@@ -450,7 +453,10 @@ LIMIT @limit;", connection)
 SELECT index, tick, lim, max, info
 FROM ext_inscription_tick
 ORDER BY index
-LIMIT 1000;", connection);
+LIMIT 1000;", connection)
+        {
+            CommandTimeout = 120
+        };
         await using var reader = await cmd.ExecuteReaderAsync();
 
         var dt = new DataTable();
@@ -490,7 +496,8 @@ FROM
         GROUP BY ir.tick, it.info->>'tick'
         ) a
 	) b
-WHERE b.tick = uit.tick;", connection);
+WHERE b.tick = uit.tick;", connection)
+        { CommandTimeout = 600 };
         await cmd.ExecuteNonQueryAsync();
     }
 

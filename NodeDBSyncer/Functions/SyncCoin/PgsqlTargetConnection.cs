@@ -65,6 +65,7 @@ public class PgsqlTargetConnection : PgsqlConnection
             //$"TRUNCATE TABLE {tmpTable};",
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 600;
         return await cmd2.ExecuteNonQueryAsync();
     }
 

@@ -76,6 +76,7 @@ LIMIT @limit
 ";
         await using var cmd = new NpgsqlCommand(sql, this.connection)
         {
+            CommandTimeout = 1200,
             Parameters =
             {
                 new("start",last_coin_class_id),
@@ -245,6 +246,7 @@ DO UPDATE SET {nameof(SingletonRecordInfo.last_coin_class_id)} = EXCLUDED.{nameo
 " +
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 600;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
@@ -281,6 +283,7 @@ DO NOTHING;
 " +
             $"DROP TABLE {tmpTable};",
             connection);
+        cmd2.CommandTimeout = 600;
         return await cmd2.ExecuteNonQueryAsync();
     }
 
@@ -297,6 +300,7 @@ WHERE c.coin_name=sh.{nameof(SingletonHistoryInfo.this_coin_name)}
 
         try
         {
+            cmd.CommandTimeout = 1000;
             return await cmd.ExecuteNonQueryAsync();
         }
         catch (PostgresException pex)
