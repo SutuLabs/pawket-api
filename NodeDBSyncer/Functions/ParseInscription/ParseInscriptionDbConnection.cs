@@ -83,7 +83,7 @@ ORDER BY cr.spent_index, cc.id";
     ""{nameof(InscriptionRecordInfo.spent_index)}"" bigint NOT NULL,
     ""{nameof(InscriptionRecordInfo.serial)}"" int NOT NULL,
     ""{nameof(InscriptionRecordInfo.coin_index)}"" int NOT NULL,
-    ""{nameof(InscriptionRecordInfo.coin_name)}"" bytea NOT NULL UNIQUE,
+    ""{nameof(InscriptionRecordInfo.coin_name)}"" bytea NOT NULL,
     ""{nameof(InscriptionRecordInfo.parent)}"" bytea NOT NULL,
     ""{nameof(InscriptionRecordInfo.from)}"" bytea NOT NULL,
     ""{nameof(InscriptionRecordInfo.to)}"" bytea NOT NULL,
@@ -126,9 +126,9 @@ ON CONFLICT DO NOTHING;
         using var cmd = new NpgsqlCommand(
             $@"CREATE TEMPORARY TABLE {tmpTable}(
     id serial NOT NULL,
-    ""{nameof(TickInfo.coin_name)}"" bytea NOT NULL UNIQUE,
+    ""{nameof(TickInfo.coin_name)}"" bytea NOT NULL,
     ""{nameof(TickInfo.index)}"" bigint NOT NULL,
-    ""{nameof(TickInfo.tick)}"" text NOT NULL UNIQUE,
+    ""{nameof(TickInfo.tick)}"" text NOT NULL,
     ""{nameof(TickInfo.lim)}"" bigint NOT NULL,
     ""{nameof(TickInfo.max)}"" bigint NOT NULL,
     ""{nameof(TickInfo.info)}"" json,
