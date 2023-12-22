@@ -38,6 +38,7 @@ public class InscriptionCacheService
                 lock (EnsureTicksDbTaskLock)
                 {
                     task = EnsureTicksTask ?? this.dataAccess.EnsureTickInfo();
+                    EnsureTicksTask = task;
                 }
 
                 await task;
@@ -53,6 +54,7 @@ public class InscriptionCacheService
                 lock (GetAllTickEntitiesDbTaskLock)
                 {
                     task = GetAllTickEntitiesDbTask ?? this.dataAccess.GetAllTickEntities();
+                    GetAllTickEntitiesDbTask = task;
                 }
 
                 ticks = await task;
