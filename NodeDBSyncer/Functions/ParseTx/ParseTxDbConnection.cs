@@ -382,7 +382,7 @@ ALTER TABLE IF EXISTS public.{CoinClassTableName}
     {
         await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
-CREATE INDEX IF NOT EXISTS idx_{FullBlockTableName}_index
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{FullBlockTableName}_index
     ON public.{FullBlockTableName} USING btree
     (index DESC NULLS LAST);
 ", connection);

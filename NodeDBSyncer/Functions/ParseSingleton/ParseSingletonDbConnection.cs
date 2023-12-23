@@ -426,7 +426,7 @@ ALTER TABLE IF EXISTS public.{SingletonHistoryTableName}
     {
         await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
-CREATE INDEX IF NOT EXISTS idx_{SingletonRecordTableName}_{nameof(SingletonRecordInfo.creator_puzzle_hash)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{SingletonRecordTableName}_{nameof(SingletonRecordInfo.creator_puzzle_hash)}
     ON public.{SingletonRecordTableName} USING btree
     ({nameof(SingletonRecordInfo.creator_puzzle_hash)} DESC NULLS LAST);
 ", connection);
