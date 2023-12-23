@@ -36,10 +36,18 @@ internal class ParseInscriptionService : BaseRefreshService
         var sw = new Stopwatch();
         sw.Start();
         var threshold = Timeout * 1000;
+        var processed = true;
         while (sw.ElapsedMilliseconds < threshold)
         {
-            var processed = await ParseInscriptionRecords(target);
+            processed = await ParseInscriptionRecords(target);
             if (!processed) break;
+        }
+
+        // for first time finish initialize, initialize the index
+        if (!processed && !await target.CheckIndexExistence())
+        {
+            this.logger.LogInformation($"First finish initialization, starting index initialization");
+            await target.InitializeIndex();
         }
     }
 

@@ -326,15 +326,15 @@ ALTER TABLE IF EXISTS public.{InscriptionTickTableName}
     {
         await this.connection.EnsureOpen();
         using var cmd = new NpgsqlCommand(@$"
-CREATE INDEX IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.coin_name)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.coin_name)}
     ON public.{InscriptionRecordTableName} USING btree
     ({nameof(InscriptionRecordInfo.coin_name)} DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.to)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.to)}
     ON public.{InscriptionRecordTableName} USING btree
     ({nameof(InscriptionRecordInfo.to)} DESC NULLS LAST);
 
-CREATE INDEX IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.from)}
+CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.from)}
     ON public.{InscriptionRecordTableName} USING btree
     ({nameof(InscriptionRecordInfo.from)} DESC NULLS LAST);
 ", connection);
