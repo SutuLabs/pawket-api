@@ -89,13 +89,13 @@ var info = await fullNode.GetNetworkInfo();
 Console.WriteLine($"This node : {info.NetworkPrefix}");
 var b = await fullNode.GetBlocks(225697, 225699, false);
 var s = await fullNode.GetBlocks(640000, 641003, false);
-var c = s.Where(_ => _.TransactionsGeneratorRefList?.Count > 0);
+var c = s.Where(_ => _.TransactionsGeneratorRefList?.Count() > 0);
 //var c = s.Blocks.Where(_ => _.TransactionsGenerator.Length == 0).ToArray();
 //var d1 = c[2];
 //var d2 = c[3];
 var f = c.First();
 var ar = await fullNode.GetAdditionsAndRemovals(f.HeaderHash);
-var dddd = string.Join(",", c.Select(_ => _.TransactionsInfo.RewardClaimsIncorporated.Count));
+var dddd = string.Join(",", c.Select(_ => _.TransactionsInfo.RewardClaimsIncorporated.Count()));
 var ddd = c;
 
 //var records = await fullNode.GetCoinRecordsByHint("0eb720d9195ffe59684b62b12d54791be7ad3bb6207f5eb92e0e1b40ecbc1155", true);
