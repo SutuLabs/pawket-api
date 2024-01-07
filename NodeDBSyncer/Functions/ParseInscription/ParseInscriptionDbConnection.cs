@@ -193,7 +193,7 @@ ON CONFLICT DO NOTHING;
         => await WriteSyncState(ProcessedKey, block_index);
 
     internal async Task<bool> CheckIndexExistence()
-        => await this.connection.CheckExistence($"idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.coin_name)}");
+        => await this.connection.CheckExistence($"idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.to)}");
 
     private DataTable ConvertRecordsToTable(IEnumerable<InscriptionRecordInfo> records)
     {
@@ -332,15 +332,15 @@ CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.to)}
     ON public.{InscriptionRecordTableName} USING btree
-    ({nameof(InscriptionRecordInfo.to)} DESC NULLS LAST);
+    (""{nameof(InscriptionRecordInfo.to)}"" DESC NULLS LAST);
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS idx_{InscriptionRecordTableName}_{nameof(InscriptionRecordInfo.from)}
     ON public.{InscriptionRecordTableName} USING btree
-    ({nameof(InscriptionRecordInfo.from)} DESC NULLS LAST);
+    (""{nameof(InscriptionRecordInfo.from)}"" DESC NULLS LAST);
 ", connection);
         try
         {
-            cmd.CommandTimeout = 1000;
+            cmd.CommandTimeout = 3600;
             await cmd.ExecuteNonQueryAsync();
         }
         catch (PostgresException pex)
