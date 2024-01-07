@@ -14,7 +14,7 @@ public class InscriptionCacheService
     private static Task<TickEntity[]>? GetAllTickEntitiesDbTask;
 
     private static object EnsureTicksDbTaskLock = new object();
-    private static Task? EnsureTicksTask;
+    private static Task<int>? EnsureTicksTask;
 
     public InscriptionCacheService(
         IMemoryCache memoryCache,
@@ -28,52 +28,44 @@ public class InscriptionCacheService
         this.appSettings = appSettings.Value;
     }
 
-    public async Task<TickEntity[]> GetAllTicksAsync()
+    public async Task<TickEntity[]?> GetAllTicksAsync()
     {
         {
             const string key = nameof(this.dataAccess.EnsureTickInfo);
-            if (!memoryCache.TryGetValue(key, out int nouse))
-            {
-                Task task;
-                lock (EnsureTicksDbTaskLock)
-                {
-                    task = EnsureTicksTask ?? this.dataAccess.EnsureTickInfo();
-                    EnsureTicksTask = task;
-                }
+            await memoryCache.GetByCacheAsync(
+                key,
+                EnsureTicksDbTaskLock,
+                () => EnsureTicksTask,
+                task => EnsureTicksTask = task,
+                async () => { await this.dataAccess.EnsureTickInfo(); return 1; },
+                TimeSpan.FromMinutes(5));
 
-                await task;
-                memoryCache.Set(key, 1, TimeSpan.FromMinutes(5));
-            }
         }
 
         {
             const string key = nameof(GetAllTicksAsync);
-            if (!memoryCache.TryGetValue(key, out TickEntity[] ticks))
-            {
-                Task<TickEntity[]> task;
-                lock (GetAllTickEntitiesDbTaskLock)
-                {
-                    task = GetAllTickEntitiesDbTask ?? this.dataAccess.GetAllTickEntities();
-                    GetAllTickEntitiesDbTask = task;
-                }
-
-                ticks = await task;
-                memoryCache.Set(key, ticks, TimeSpan.FromMinutes(1));
-            }
-
-            return ticks;
+            return await memoryCache.GetByCacheAsync(
+                key,
+                GetAllTickEntitiesDbTaskLock,
+                () => GetAllTickEntitiesDbTask,
+                task => GetAllTickEntitiesDbTask = task,
+                this.dataAccess.GetAllTickEntities,
+                TimeSpan.FromMinutes(1));
         }
     }
 
-    public async Task<TickHolderEntity[]> GetAllHolderTicksAsync(string holder)
+    private static object GetAllHolderTicksDbTaskLock = new object();
+    private static Task<TickHolderEntity[]>? GetAllHolderTicksTask;
+
+    public async Task<TickHolderEntity[]?> GetAllHolderTicksAsync(string holder)
     {
         string key = $"{nameof(GetAllHolderTicksAsync)}{holder}";
-        if (!memoryCache.TryGetValue(key, out TickHolderEntity[] ticks))
-        {
-            ticks = await this.dataAccess.GetHolderTicks(holder);
-            memoryCache.Set(key, ticks, TimeSpan.FromMinutes(3));
-        }
-
-        return ticks;
+        return await memoryCache.GetByCacheAsync(
+            key,
+            GetAllHolderTicksDbTaskLock,
+            () => GetAllHolderTicksTask,
+            task => GetAllHolderTicksTask = task,
+            () => this.dataAccess.GetHolderTicks(holder),
+            TimeSpan.FromMinutes(3));
     }
 }
