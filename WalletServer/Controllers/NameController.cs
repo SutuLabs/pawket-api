@@ -52,7 +52,9 @@ namespace WalletServer.Controllers
                 .ToArray();
             StandardResolveRequestRecordCount.Inc();
             LegacyStandardResolveRequestRecordCount.Inc();
-            var ne = await this.nameService.GetAllNamesAsync();
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var ne = await this.nameService.GetAllNamesAsync(timestamp);
+            if (ne is null) return StatusCode(500, "Internal name resolving issue");
             ValidNameRecordCount.Set(ne.Length);
 
             var answers = ProduceAnswers(queries, ne).ToArray();

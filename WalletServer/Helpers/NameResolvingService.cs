@@ -25,16 +25,17 @@ public class NameResolvingService
     private static object GetAllNamesDbTaskLock = new object();
     private static Task<NameEntity[]>? GetAllNamesDbTask;
 
-    public async Task<NameEntity[]?> GetAllNamesAsync()
+    public async Task<NameEntity[]?> GetAllNamesAsync(long expiryBefore = 0)
     {
         const string key = nameof(GetAllNamesAsync);
-        return await memoryCache.GetByCacheAsync(
+        var ents = await memoryCache.GetByCacheAsync(
             key,
             GetAllNamesDbTaskLock,
             () => GetAllNamesDbTask,
             task => GetAllNamesDbTask = task,
             () => this.dataAccess.GetAllNameEntities(this.appSettings.CnsCreatorPuzzleHash),
             TimeSpan.FromMinutes(2));
+        return expiryBefore == 0 ? ents : ents?.Where(_ => _.expiry < expiryBefore).ToArray();
     }
 
     private static object GetRecentNamesDbTaskLock = new object();

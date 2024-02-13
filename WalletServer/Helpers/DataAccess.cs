@@ -308,8 +308,9 @@ SELECT
     sr.singleton_coin_name AS nft_coin_name,
     sh.this_coin_name AS last_change_coin_name,
     sh.this_coin_spent_index AS last_change_spent_index,
-    (CASE WHEN (cc.analysis->>'cnsName' != '') THEN cc.analysis->>'cnsName' ELSE cc.analysis->'metadata'->>'name' END) AS name,
-    (CASE WHEN (cc.analysis->>'cnsAddress' != '') THEN cc.analysis->>'cnsAddress' ELSE cc.analysis->'metadata'->>'address' END) AS address,
+    cc.analysis->>'cnsName' AS name,
+    cc.analysis->>'cnsAddress' AS address,
+    CAST(cc.analysis->>'cnsExpiry' as integer) AS expiry,
     cc.analysis->>'cnsBindings' AS bindings
 FROM ext_singleton_record sr
 LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
@@ -338,6 +339,7 @@ ORDER BY last_change_spent_index ASC;", connection)
                 (int)_[nameof(NameEntity.last_change_spent_index)],
                 (_[nameof(NameEntity.name)] as string ?? "").ToLower(),
                 _[nameof(NameEntity.address)] as string ?? "",
+                (int)_[nameof(NameEntity.expiry)],
                 ParseBindings(_[nameof(NameEntity.bindings)] as string ?? "")))
             .ToArray();
 
@@ -717,6 +719,7 @@ public record NameEntity(
     int last_change_spent_index,
     string name,
     string address,
+    int expiry,
     Dictionary<string, string> bindings);
 
 public record RecentNameEntity(
