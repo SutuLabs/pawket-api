@@ -53,6 +53,9 @@ namespace WalletServer.Controllers
             StandardResolveRequestRecordCount.Inc();
             LegacyStandardResolveRequestRecordCount.Inc();
             var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Temporarily extend expiry to 2024-03-14
+            // UTC: Mar 14 2024 00:00:00
+            timestamp = timestamp < 1710374400 ? 1710374400 : timestamp;
             var ne = await this.nameService.GetAllNamesAsync(timestamp);
             if (ne is null) return StatusCode(500, "Internal name resolving issue");
             ValidNameRecordCount.Set(ne.Length);
@@ -83,7 +86,7 @@ namespace WalletServer.Controllers
             GetWealthiestNameRequestRecordCount.Inc();
             var count = request.count ?? 10;
             count = count > 100 ? 100 : count;
-            var names = (await this.nameService.GetWealthiestNamesAsync(request.isOwnerOnly?? false))
+            var names = (await this.nameService.GetWealthiestNamesAsync(request.isOwnerOnly ?? false))
                 .Take(count).ToArray();
             return Ok(new GetWealthiestNamesQueryResponse(names));
         }
