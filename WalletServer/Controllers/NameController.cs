@@ -39,7 +39,7 @@ namespace WalletServer.Controllers
         public record StandardResolveQueryRequest(StandardResolveQuery[]? queries);
         public record StandardResolveQueryResponse(StandardResolveAnswer[] answers);
         public record StandardResolveQuery(string name, string type);
-        public record StandardResolveAnswer(string name, string type, int time_to_live, string data, string proof_coin_name, int proof_coin_spent_index, string nft_coin_name);
+        public record StandardResolveAnswer(string name, string type, int time_to_live, string data, string proof_coin_name, int proof_coin_spent_index, string nft_coin_name, long expiry);
         public const int MaxQueryPerRequest = 10;
 
         [HttpPost("resolve")]
@@ -52,11 +52,7 @@ namespace WalletServer.Controllers
                 .ToArray();
             StandardResolveRequestRecordCount.Inc();
             LegacyStandardResolveRequestRecordCount.Inc();
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            // Temporarily extend expiry to 2024-03-14
-            // UTC: Mar 14 2024 00:00:00
-            timestamp = timestamp < 1710374400 ? 1710374400 : timestamp;
-            var ne = await this.nameService.GetAllNamesAsync(timestamp);
+            var ne = await this.nameService.GetAllNamesAsync();
             if (ne is null) return StatusCode(500, "Internal name resolving issue");
             ValidNameRecordCount.Set(ne.Length);
 
@@ -102,18 +98,27 @@ namespace WalletServer.Controllers
 
         private IEnumerable<StandardResolveAnswer> ProduceAnswers(StandardResolveQuery[] queries, NameEntity[] allNames)
         {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            // Temporarily extend expiry to 2024-03-14
+            // UTC: Mar 14 2024 00:00:00
+            timestamp = timestamp < 1710374400 ? 1710374400 : timestamp;
+            var validNames = allNames.Where(_ => _.expiry < timestamp);
+            const string typeWhois = "whois";
+
             foreach (var q in queries)
             {
                 var a = q.type switch
                 {
-                    nameof(NameEntity.name) => allNames.FirstOrDefault(_ => q.name == _.address),
-                    _ => allNames.FirstOrDefault(_ => q.name == _.name),
+                    nameof(NameEntity.name) => validNames.FirstOrDefault(_ => q.name == _.address),
+                    typeWhois => allNames.FirstOrDefault(_ => q.name == _.name),
+                    _ => validNames.FirstOrDefault(_ => q.name == _.name),
                 };
                 if (a is null) continue;
 
                 // type must be name/address or attribute in bindings
                 if (q.type != nameof(NameEntity.name)
                     && q.type != nameof(NameEntity.address)
+                    && q.type != typeWhois
                     && !(a?.bindings.ContainsKey(q.type) ?? false))
                 {
                     continue;
@@ -131,11 +136,13 @@ namespace WalletServer.Controllers
                     {
                         nameof(NameEntity.address) => a.address,
                         nameof(NameEntity.name) => a.address,
+                        typeWhois => "",
                         _ => a.bindings[q.type],
                     },
                     a.last_change_coin_name,
                     a.last_change_spent_index,
-                    a.nft_coin_name);
+                    a.nft_coin_name,
+                    a.expiry);
             }
         }
     }
