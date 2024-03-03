@@ -87,22 +87,33 @@ namespace WalletServer.Controllers
             return Ok(new GetWealthiestNamesQueryResponse(names));
         }
 
-#if DEBUG
         [HttpGet("all")]
         public async Task<ActionResult> GetAllDomains()
         {
-            var ne = await this.nameService.GetAllNamesAsync();
-            return Ok(ne);
+            var allNames = await this.nameService.GetAllNamesAsync();
+            if (allNames is null) return StatusCode(500, "Internal name resolving issue");
+            var validNames = GetValidNames(allNames);
+            return Ok(validNames);
         }
-#endif
+
+        private NameEntity[] GetValidNames(NameEntity[] allNames)
+        {
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var validNames = allNames.Where(_ => IsValid(_.expiry)).ToArray();
+            return validNames;
+
+            bool IsValid(int expiry)
+            {
+                // Temporarily extend expiry to 2024-03-14
+                // UTC: Mar 14 2024 00:00:00
+                expiry = expiry < 1710374400 ? 1710374400 : expiry;
+                return expiry >= timestamp;
+            }
+        }
 
         private IEnumerable<StandardResolveAnswer> ProduceAnswers(StandardResolveQuery[] queries, NameEntity[] allNames)
         {
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            // Temporarily extend expiry to 2024-03-14
-            // UTC: Mar 14 2024 00:00:00
-            timestamp = timestamp < 1710374400 ? 1710374400 : timestamp;
-            var validNames = allNames.Where(_ => _.expiry < timestamp);
+            var validNames = GetValidNames(allNames);
             const string typeWhois = "whois";
 
             foreach (var q in queries)
