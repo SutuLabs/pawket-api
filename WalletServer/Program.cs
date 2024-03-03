@@ -41,6 +41,12 @@ builder.Services.AddScoped<InscriptionCacheService>();
 builder.Services.AddScoped<PushLogHelper>();
 builder.Services.AddSingleton<OnlineCounter>();
 
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
+
+
 var app = builder.Build();
 
 #if DEBUG
@@ -57,6 +63,8 @@ app.UseCors();
 
 app.MapControllers();
 app.UseHttpMetrics();
+
+app.UseResponseCompression();
 
 var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
