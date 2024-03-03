@@ -125,7 +125,7 @@ public class OnlineCounter : IDisposable
                 return;
             }
 
-            if (!fi.Directory.Exists) fi.Create();
+            if (!fi.Directory.Exists) fi.Directory.Create();
             var data = new PersistentData(
                 this.dictUsers, this.dictDailyUsers, this.dictDailyIps, this.dictMonthlyUsers, this.dictMonthlyIps);
             File.WriteAllText(fi.FullName, JsonConvert.SerializeObject(data));
