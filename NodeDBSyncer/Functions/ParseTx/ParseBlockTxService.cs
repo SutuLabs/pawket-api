@@ -97,10 +97,6 @@ internal class ParseBlockTxService : BaseRefreshService
 
                 lstBlockCoins.ToList().ForEach(c => lstCoins.Add(c));
             }
-            catch (HttpRequestException ex)
-            {
-                this.logger.LogWarning(ex, $"failed to connect to local node for further processing: {ex.Message}");
-            }
             catch (Exception ex)
             {
                 var json = JsonSerializer.Serialize(new { generator = block.generator.ToHexWithPrefix0x(), });
@@ -151,6 +147,12 @@ internal class ParseBlockTxService : BaseRefreshService
             $" estimated remain {estimatedRemain.TotalMinutes:0.0} minute(s)," +
             $" parse: {tget} ms, persistent: {sw.ElapsedMilliseconds - tget} ms," +
             $" total {lstCoins.Count} coin(s).");
+
+        if (!lstBadBlocks.IsEmpty)
+        {
+            this.logger.LogError($"Sleep a while due to processed bad blocks: {string.Join(",", lstBadBlocks)}");
+            await Task.Delay(30000);
+        }
 
         return true;
     }
