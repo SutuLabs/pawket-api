@@ -14,6 +14,7 @@
     public int ParsingSingletonBatchSize { get; set; } = 1000;
     public int ParsingInscriptionBatchSize { get; set; } = 300;
     public int AnalyzingTxBatchSize { get; set; } = 0;
+    public bool UseChiaClientToParseBlock { get; set; } = false;
     public string? PriceProxy { get; set; }
     public string? PriceSource { get; set; }
 }

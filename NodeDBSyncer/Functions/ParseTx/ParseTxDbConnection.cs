@@ -58,6 +58,39 @@ public class ParseTxDbConnection : PgsqlConnection
         return new GetUnparsedBlockResponse(list, refs);
     }
 
+    public record GetUnparsedBlockHeaderResponse(BlockHeaderRetrieval[] BlockHeaders);
+    public record BlockHeaderRetrieval(ulong index, string headerHash);
+    public async Task<GetUnparsedBlockHeaderResponse> GetUnparsedBlockHeader(int number)
+    {
+        await this.connection.EnsureOpen();
+        var sql = $"SELECT index, block_info->>'HeaderHash' FROM {FullBlockTableName}" +
+            $" WHERE tx_parsed=FALSE AND is_tx_block=TRUE" +
+            $" ORDER BY index DESC" +
+            $" LIMIT @limit";
+        await using var cmd = new NpgsqlCommand(sql, this.connection)
+        {
+            CommandTimeout = 600,
+            Parameters =
+            {
+                new("limit", number),
+            }
+        };
+        await using var reader = await cmd.ExecuteReaderAsync();
+
+        var list = new List<BlockHeaderRetrieval>();
+        while (await reader.ReadAsync())
+        {
+            var index = reader.GetFieldValue<long>(0);
+            var headerHash = reader.GetFieldValue<string>(1);
+            list.Add(new BlockHeaderRetrieval((ulong)index, headerHash));
+        }
+
+        await reader.CloseAsync();
+        await cmd.DisposeAsync();
+
+        return new GetUnparsedBlockHeaderResponse(list.ToArray());
+    }
+
     private async Task<BlockTransactionGeneratorRetrieval[]> GetRelativeBlocks(uint[] blockIndexes)
     {
         if (blockIndexes.Length == 0) return Array.Empty<BlockTransactionGeneratorRetrieval>();

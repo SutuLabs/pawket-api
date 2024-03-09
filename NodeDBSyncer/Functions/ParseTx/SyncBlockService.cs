@@ -89,7 +89,7 @@ internal class SyncBlockService : BaseRefreshService
             var sw = new Stopwatch();
             sw.Start();
             var tc = current;
-            var blocks = (await source.GetBlocks(current, batch, true, true, token)).ToArray();
+            var blocks = (await source.GetBlocks(current, batch, false, true, token)).ToArray();
 
             var bis = blocks.Select(_ => GetBlockInfo(_)).ToArray();
             var tget = sw.ElapsedMilliseconds;

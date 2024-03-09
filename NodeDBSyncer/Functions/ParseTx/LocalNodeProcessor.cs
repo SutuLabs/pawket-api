@@ -38,7 +38,7 @@ public class LocalNodeProcessor
         return puz;
     }
 
-    public async Task<AnalysisResult?> AnalyzeTx(UnanalyzedTx tx)
+    public async Task<AnalysisResult?> AnalyzeTx(RawUnanalyzedTx tx)
     {
         using var client = new HttpClient();
         var json = JsonConvert.SerializeObject(tx);
@@ -49,6 +49,20 @@ public class LocalNodeProcessor
         if (!response.IsSuccessStatusCode) return null;
 
         var result = JsonConvert.DeserializeObject<AnalysisResult>(body);
+        return result;
+    }
+
+    public async Task<AnalysisResult[]?> AnalyzeTxs(RawUnanalyzedTx[] txs)
+    {
+        using var client = new HttpClient();
+        var json = JsonConvert.SerializeObject(new { txs, include_puzzle_solution = true });
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync($"{TargetAddress}/analyze_txs", content);
+        var body = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode) return null;
+
+        var result = JsonConvert.DeserializeObject<AnalysisResult[]>(body);
         return result;
     }
 
@@ -80,4 +94,4 @@ public class LocalNodeProcessor
 
 public record PuzzleArg(string? mod, PuzzleArg[]? args, string? raw);
 public record CoinInfo(string coin_name, string puzzle, PuzzleArg parsed_puzzle, string solution, string mods, string analysis);
-public record AnalysisResult(string coin_name, PuzzleArg parsed_puzzle, string mods, string analysis);
+public record AnalysisResult(string coin_name, PuzzleArg parsed_puzzle, string mods, string analysis, string? puzzle, string? solution);

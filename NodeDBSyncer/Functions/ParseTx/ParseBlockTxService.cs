@@ -1,5 +1,6 @@
 ﻿namespace NodeDBSyncer.Functions.ParseTx;
 
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Diagnostics;
@@ -32,6 +33,23 @@ internal class ParseBlockTxService : BaseRefreshService
     {
         if (this.appSettings.ParsingTxBlockBatchSize == 0) return;
 
+        if (string.IsNullOrEmpty(this.appSettings.NodeCertPath)
+            || string.IsNullOrEmpty(this.appSettings.NodeKeyPath)
+            || string.IsNullOrEmpty(this.appSettings.NodeUri))
+        {
+            logger.LogWarning("Node information is not available in appsettings");
+            return;
+        }
+
+        var endpoint = new chia.dotnet.EndpointInfo
+        {
+            CertPath = this.appSettings.NodeCertPath,
+            KeyPath = this.appSettings.NodeKeyPath,
+            Uri = new Uri(this.appSettings.NodeUri),
+        };
+
+        using var chain = new SourceChain(endpoint);
+
         using var target = new ParseTxDbConnection(this.appSettings.OnlineDbConnString);
         await target.Open();
         var nodeProcessor = new LocalNodeProcessor(this.appSettings.LocalNodeProcessor);
@@ -41,69 +59,86 @@ internal class ParseBlockTxService : BaseRefreshService
         var threshold = Timeout * 1000 / 2;
         while (sw.ElapsedMilliseconds < threshold)
         {
-            var processed = await ParseTx(target, nodeProcessor);
+            var processed = await ParseTx(target, nodeProcessor, chain);
             if (!processed) break;
         }
     }
 
-    private async Task<bool> ParseTx(ParseTxDbConnection db, LocalNodeProcessor nodeProcessor)
+    private async Task<bool> ParseTx(ParseTxDbConnection db, LocalNodeProcessor nodeProcessor, SourceChain chain)
     {
         var batch = this.appSettings.ParsingTxBlockBatchSize;
 
         var sw = new Stopwatch();
         sw.Start();
-        var (blocks, refs) = await db.GetUnparsedBlock(batch);
-        if (blocks.Length == 0) return false;
-
-        var begin = blocks.Min(_ => _.index);
-        var end = blocks.Max(_ => _.index);
-        this.logger.LogInformation($"Parsing tx from blocks from [{begin}] to [{end}] [Total: {blocks.Length} with {refs.Length} refs].");
-
 
         var lstCoins = new ConcurrentBag<CoinInfoForStorage>();
         var lstBadBlocks = new ConcurrentBag<ulong>();
+        ulong[] blocksIndexes;
+        ulong begin;
+        ulong end;
 
-        byte[][] getGeneratorRefs(uint[]? refIdxes, ParseTxDbConnection.BlockTransactionGeneratorRetrieval[] refs)
+        if (this.appSettings.UseChiaClientToParseBlock)
         {
-            if (refIdxes == null) return Array.Empty<byte[]>();
-            return refs
-                .Where(_ => refIdxes.Contains((uint)_.index))
-                .Select(_ => _.generator)
-                .ToArray();
-        }
+            var blocks = (await db.GetUnparsedBlockHeader(batch)).BlockHeaders;
+            if (blocks.Length == 0) return false;
+            blocksIndexes = blocks.Select(_ => _.index).ToArray();
 
-        var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
-        await Parallel.ForEachAsync(blocks, options, async (block, ct) =>
-        {
-            try
+            begin = blocks.Min(_ => _.index);
+            end = blocks.Max(_ => _.index);
+            this.logger.LogInformation($"Parsing tx from blocks through chia client from [{begin}] to [{end}] [Total: {blocks.Length}].");
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            await Parallel.ForEachAsync(blocks, options, async (block, ct) =>
             {
-                var coins = await GetCoinsFromBlock(block.generator, nodeProcessor, getGeneratorRefs(block.generator_ref_list, refs));
-                var lstBlockCoins = new List<CoinInfoForStorage>();
-
-                foreach (var r in coins)
+                try
                 {
-                    var pp = Newtonsoft.Json.JsonConvert.SerializeObject(
-                    r.parsed_puzzle,
-                    new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore });
-                    var coin = new CoinInfoForStorage(
-                    r.coin_name.ToHexBytes(),
-                    r.puzzle.ToHexBytes().Compress(),
-                    pp,
-                    r.solution.ToHexBytes().Compress(),
-                    r.mods,
-                    r.analysis);
-                    lstBlockCoins.Add(coin);
+                    var coins = await GetCoinsFromBlockThroughChiaClient(block.headerHash, nodeProcessor, chain);
+                    var lstBlockCoins = ConvertToStorageCoins(coins);
+                    lstBlockCoins.ToList().ForEach(c => lstCoins.Add(c));
                 }
+                catch (Exception ex)
+                {
+                    this.logger.LogWarning(ex, $"Block {block.index} cannot be fully parsed.\nBlock Index: {block.index}");
+                    lstBadBlocks.Add(block.index);
+                }
+            });
+        }
+        else
+        {
+            var (blocks, refs) = await db.GetUnparsedBlock(batch);
+            if (blocks.Length == 0) return false;
+            blocksIndexes = blocks.Select(_ => _.index).ToArray();
 
-                lstBlockCoins.ToList().ForEach(c => lstCoins.Add(c));
-            }
-            catch (Exception ex)
+            begin = blocks.Min(_ => _.index);
+            end = blocks.Max(_ => _.index);
+            this.logger.LogInformation($"Parsing tx from blocks from [{begin}] to [{end}] [Total: {blocks.Length} with {refs.Length} refs].");
+
+            byte[][] getGeneratorRefs(uint[]? refIdxes, ParseTxDbConnection.BlockTransactionGeneratorRetrieval[] refs)
             {
-                var json = JsonSerializer.Serialize(new { generator = block.generator.ToHexWithPrefix0x(), });
-                this.logger.LogWarning(ex, $"Block {block.index} format cannot be recognized. Json[Without Ref[{block.generator_ref_list?.Length}]]:\n{json}\nBlock Index: {block.index}");
-                lstBadBlocks.Add(block.index);
+                if (refIdxes == null) return Array.Empty<byte[]>();
+                return refs
+                    .Where(_ => refIdxes.Contains((uint)_.index))
+                    .Select(_ => _.generator)
+                    .ToArray();
             }
-        });
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
+            await Parallel.ForEachAsync(blocks, options, async (block, ct) =>
+            {
+                try
+                {
+                    var coins = await GetCoinsFromBlock(block.generator, nodeProcessor, getGeneratorRefs(block.generator_ref_list, refs));
+                    var lstBlockCoins = ConvertToStorageCoins(coins);
+                    lstBlockCoins.ToList().ForEach(c => lstCoins.Add(c));
+                }
+                catch (Exception ex)
+                {
+                    var json = JsonSerializer.Serialize(new { generator = block.generator.ToHexWithPrefix0x(), });
+                    this.logger.LogWarning(ex, $"Block {block.index} format cannot be recognized. Json[Without Ref[{block.generator_ref_list?.Length}]]:\n{json}\nBlock Index: {block.index}");
+                    lstBadBlocks.Add(block.index);
+                }
+            });
+        }
 
         var tget = sw.ElapsedMilliseconds;
 
@@ -139,7 +174,7 @@ internal class ParseBlockTxService : BaseRefreshService
             }
         }
 
-        await db.UpdateParsedBlock(blocks.Select(_ => _.index).Except(lstBadBlocks).ToArray());
+        await db.UpdateParsedBlock(blocksIndexes.Except(lstBadBlocks).ToArray());
 
         sw.Stop();
         var estimatedRemain = sw.GetEta((long)(end - begin), (long)end);
@@ -157,6 +192,25 @@ internal class ParseBlockTxService : BaseRefreshService
         return true;
     }
 
+    private static IEnumerable<CoinInfoForStorage> ConvertToStorageCoins(CoinInfo[] coins)
+    {
+        foreach (CoinInfo r in coins)
+        {
+            var jsonsetting = new Newtonsoft.Json.JsonSerializerSettings
+            {
+                NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore
+            };
+            var pp = Newtonsoft.Json.JsonConvert.SerializeObject(r.parsed_puzzle, jsonsetting);
+            yield return new CoinInfoForStorage(
+                r.coin_name.ToHexBytes(),
+                r.puzzle.ToHexBytes().Compress(),
+                pp,
+                r.solution.ToHexBytes().Compress(),
+                r.mods,
+                r.analysis);
+        }
+    }
+
     private static async Task<CoinInfo[]> GetCoinsFromBlock(
         byte[] generator,
         LocalNodeProcessor nodeProcessor,
@@ -165,5 +219,24 @@ internal class ParseBlockTxService : BaseRefreshService
         if (generator == null || generator.Length == 0) return Array.Empty<CoinInfo>();
 
         return await nodeProcessor.ParseBlock(generator, refGenerators);
+    }
+
+    private static async Task<CoinInfo[]> GetCoinsFromBlockThroughChiaClient(
+        string headerHash,
+        LocalNodeProcessor nodeProcessor,
+        SourceChain chain)
+    {
+        var spends = await chain.GetBlocksSpends(headerHash.Prefix0x());
+        var txs = spends
+            .Select(_ => new RawUnanalyzedTx(_.PuzzleReveal, _.Solution, (long)_.Coin.Amount, _.Coin.ParentCoinInfo, _.Coin.PuzzleHash))
+            .ToArray();
+
+        if (txs.Length == 0) return Array.Empty<CoinInfo>();
+
+        var ats = await nodeProcessor.AnalyzeTxs(txs) ?? throw new Exception("AnalyzeTxs failed");
+        var cis = ats
+            .Select(_ => new CoinInfo(_.coin_name, _.puzzle ?? "", _.parsed_puzzle, _.solution ?? "", _.mods, _.analysis))
+            .ToArray();
+        return cis;
     }
 }

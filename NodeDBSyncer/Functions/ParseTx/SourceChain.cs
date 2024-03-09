@@ -43,6 +43,12 @@ public class SourceChain : IDisposable
         return await nodeClient.GetPuzzleAndSolution(coinId, height, cancellationToken);
     }
 
+    public async Task<CoinSpend[]> GetBlocksSpends(
+        string headerhash, CancellationToken cancellationToken = default)
+    {
+        return (await nodeClient.GetBlockSpends(headerhash, cancellationToken)).ToArray();
+    }
+
     protected virtual void Dispose(bool disposing)
     {
         if (!disposedValue)
