@@ -90,6 +90,13 @@ internal class ParseBlockTxService : BaseRefreshService
             var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount };
             await Parallel.ForEachAsync(blocks, options, async (block, ct) =>
             {
+                if (string.IsNullOrWhiteSpace(block.headerHash))
+                {
+                    this.logger.LogWarning($"Block {block.index} didn't have the header hash");
+                    lstBadBlocks.Add(block.index);
+                    return;
+                }
+
                 try
                 {
                     var coins = await GetCoinsFromBlockThroughChiaClient(block.headerHash, nodeProcessor, chain);
