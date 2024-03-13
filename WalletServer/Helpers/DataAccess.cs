@@ -304,22 +304,29 @@ public class DataAccess : IDisposable
     {
         using var cmd = new NpgsqlCommand(
             $@"
-SELECT
-    sr.singleton_coin_name AS nft_coin_name,
-    sh.this_coin_name AS last_change_coin_name,
-    sh.this_coin_spent_index AS last_change_spent_index,
-    cc.analysis->>'cnsName' AS name,
-    cc.analysis->>'cnsAddress' AS address,
-    CAST(cc.analysis->>'cnsExpiry' as integer) AS expiry,
-    cc.analysis->>'cnsBindings' AS bindings
-FROM ext_singleton_record sr
-LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
-LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
-LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
-WHERE sr.creator_puzzle_hash=@ph
-AND c.spent_index=0
-AND sr.type='nft_v1'
-ORDER BY last_change_spent_index ASC, name;", connection)
+SELECT nft_coin_name, last_change_coin_name, last_change_spent_index, ""name"", address, expiry, bindings
+FROM (
+    SELECT *, ROW_NUMBER() OVER(PARTITION BY ""name"" ORDER BY expiry DESC) AS rank
+    FROM (
+        SELECT
+            sr.singleton_coin_name AS nft_coin_name,
+            sh.this_coin_name AS last_change_coin_name,
+            sh.this_coin_spent_index AS last_change_spent_index,
+            cc.analysis->>'cnsName' AS ""name"",
+            cc.analysis->>'cnsAddress' AS address,
+            CAST(cc.analysis->>'cnsExpiry' as integer) AS expiry,
+            cc.analysis->>'cnsBindings' AS bindings
+        FROM ext_singleton_record sr
+        LEFT JOIN ext_singleton_history sh ON sr.singleton_coin_name = sh.singleton_coin_name
+        LEFT JOIN sync_coin_record c ON sh.next_coin_name=c.coin_name
+        LEFT JOIN sync_coin_class cc ON sh.this_coin_name=cc.coin_name
+        WHERE sr.creator_puzzle_hash=@ph
+        AND c.spent_index=0
+        AND sr.type='nft_v1'
+        ) t1
+	) t2
+WHERE rank=1
+ORDER BY last_change_spent_index ASC, name, expiry DESC;", connection)
         {
             Parameters =
             {
