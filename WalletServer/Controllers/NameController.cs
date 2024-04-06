@@ -104,9 +104,9 @@ namespace WalletServer.Controllers
 
             bool IsValid(int expiry)
             {
-                // Temporarily extend expiry to 2024-04-15
-                // UTC: Apr 15 2024 00:00:00
-                expiry = expiry < 1713139200 ? 1713139200 : expiry;
+                // Temporarily extend expiry to 2024-06-17
+                // UTC: Jun 17 2024 00:00:00
+                expiry = expiry < 1718582400 ? 1718582400 : expiry;
                 return expiry >= timestamp;
             }
         }
