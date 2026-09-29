@@ -13,6 +13,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="../baseline/production-prices-2026-09-29.json" Link="production-prices-2026-09-29.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../baseline/cases.json" Link="cases.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../baseline/data-cases.json" Link="data-cases.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../baseline/static-snapshot.json" Link="static-snapshot.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../WalletServer/WalletServer.csproj" />
