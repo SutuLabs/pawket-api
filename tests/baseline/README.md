@@ -5,9 +5,8 @@ The API and Syncer images were built from Git commit
 `b59e4c3a37239d2a40dfb3f8f9808d9b431d0f8a`.
 
 The baseline database is intentionally a limited mainnet slice. The Syncer is
-stopped. At capture time it held about 15.2 million coin records, 14.2 million
-hints, and 239 thousand blocks (about 6.9 GB). Do not resume full sync to run
-these tests.
+stopped. It now has 15,200,006 coin records, 15,000,003 hints, 239,000 blocks,
+and 6,642 parsed class rows. Do not resume full sync to run these tests.
 
 The six configuration and validation cases are in `static-snapshot.json`; ten
 real-data cases are in `data-snapshot.json`. Run the xUnit integration tests
@@ -30,7 +29,8 @@ Keep the baseline PostgreSQL volume and API running while verifying. Responses c
 The stored `peekHeight` is the old Syncer's reported source height, not proof
 that all records up to that height were imported. The current slice covers
 positive spent and unspent coin results, pagination, coin details, and blocks
-with generators. Hint, name, and inscription cases cover empty results only.
+with generators. Plain hint, name, and inscription cases cover empty results;
+the class-filtered records cases cover positive hinted coins.
 
 The block endpoint gzip output has a changing header timestamp. The test
 validates the gzip and compares the SHA-256 of its decompressed content;
@@ -48,3 +48,6 @@ for migration scope and unresolved coverage gaps.
 Three additional positive `records` class cases (`CatV2`, `DidV1`, `NftV1`)
 use narrowly seeded public-mainnet samples around height 9000000. They verify
 classification and selected `analysis` fields. The total suite is 28 tests.
+`SampleScanner` is a bounded, read-only C# discovery tool; `SampleSeeder` is a
+separate, narrowly scoped test-database seeder for exactly those three samples.
+Neither is part of the production API or a continuously running Syncer task.
