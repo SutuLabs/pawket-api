@@ -42,8 +42,8 @@ Five additional C# xUnit tests cover the currently ignored `records` height fiel
 the 301-hash limit, a missing puzzle, the legacy single-coin solution shape, and an
 unknown coin solution. A sixth test uses a newly parsed real spent coin to check
 nonempty puzzle and solution values through both endpoints. Three more cover
-unknown, duplicated, and empty-generator block heights. See `API-MIGRATION-NOTES.md`
-for migration scope and unresolved coverage gaps.
+unknown, duplicated, and empty-generator block heights. See
+`STORAGE-MIGRATION-DESIGN.md` for migration scope and remaining focused cases.
 
 Three additional positive `records` class cases (`CatV2`, `DidV1`, `NftV1`)
 use narrowly seeded public-mainnet samples around height 9000000. They verify
@@ -51,3 +51,8 @@ classification and selected `analysis` fields. The total suite is 28 tests.
 `SampleScanner` is a bounded, read-only C# discovery tool; `SampleSeeder` is a
 separate, narrowly scoped test-database seeder for exactly those three samples.
 Neither is part of the production API or a continuously running Syncer task.
+
+The reviewed migration proposal is in [STORAGE-MIGRATION-DESIGN.md](STORAGE-MIGRATION-DESIGN.md).
+The production `prices` response captured on 2026-09-29 is in
+[production-prices-2026-09-29.json](production-prices-2026-09-29.json); it is a
+contract fixture, not a live-price assertion.
