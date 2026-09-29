@@ -86,7 +86,7 @@ public sealed class ChiaWalletData : IDisposable
     public async Task<CoinPuzzleInfo[]> GetParentPuzzle(string coinId, uint? startHeight, uint? endHeight)
     {
         var records = await node.GetCoinRecordsByNames(new[] { coinId }, true, startHeight, endHeight);
-        var record = records.FirstOrDefault(c => c.Coin.Name.Unprefix0x().Equals(
+        var record = records.FirstOrDefault(c => ChiaCoinId.FromCoin(c.Coin).Equals(
             coinId.Unprefix0x(), StringComparison.OrdinalIgnoreCase));
         if (record == null || !record.Spent) return Array.Empty<CoinPuzzleInfo>();
         var spend = await node.GetPuzzleAndSolution(coinId, record.SpentBlockIndex);
@@ -105,7 +105,7 @@ public sealed class ChiaWalletData : IDisposable
         foreach (var coin in records)
         {
             CoinSpend? spend = coin.Spent
-                ? await node.GetPuzzleAndSolution(coin.Coin.Name, coin.SpentBlockIndex) : null;
+                ? await node.GetPuzzleAndSolution(ChiaCoinId.FromCoin(coin.Coin), coin.SpentBlockIndex) : null;
             details.Add(new CoinDetail(coin.Coin.Amount, coin.ConfirmedBlockIndex, coin.SpentBlockIndex,
                 coin.Timestamp, coin.Coin.ParentCoinInfo, coin.Coin.PuzzleHash,
                 spend?.PuzzleReveal, spend?.Solution));

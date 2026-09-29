@@ -68,7 +68,7 @@ public sealed class CoinClassCache
         FullNodeProxy node, CoinRecord parent, string blockHash)
     {
         EnsureInitialized();
-        var id = parent.Coin.Name;
+        var id = ChiaCoinId.FromCoin(parent.Coin);
         var keyLock = keyLocks[(int)((uint)id.GetHashCode() % (uint)keyLocks.Length)];
         await keyLock.WaitAsync();
         try
