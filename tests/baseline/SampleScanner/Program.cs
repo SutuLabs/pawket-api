@@ -43,12 +43,23 @@ while (scanned < end && found.Count < 3)
                 result.mods.StartsWith("singleton_top_layer_v1_1(did_innerpuz(", StringComparison.Ordinal) ? "DidV1" :
                 result.mods.StartsWith("singleton_top_layer_v1_1(nft_state_layer(", StringComparison.Ordinal) ? "NftV1" : null;
             if (type is null || !found.Add(type)) continue;
+            using var analysis = JsonDocument.Parse(result.analysis);
+            var root = analysis.RootElement;
+            var hint = root.TryGetProperty("hintPuzzle", out var hintPuzzle) ? hintPuzzle.GetString() :
+                root.TryGetProperty("nextCoin", out var nextCoin) && nextCoin.TryGetProperty("hint", out var nextHint) ? nextHint.GetString() : null;
+            var children = (await node.GetCoinRecordsByParentIds(new[] { result.coin_name }, true)).ToArray();
+            var hinted = string.IsNullOrEmpty(hint) ? Array.Empty<CoinRecord>() :
+                (await node.GetCoinRecordsByHint(hint, true)).Where(c =>
+                    c.Coin.ParentCoinInfo.Equals(result.coin_name, StringComparison.OrdinalIgnoreCase)).ToArray();
             Console.WriteLine(JsonSerializer.Serialize(new
             {
                 type,
                 blockHeight = block.Height,
                 coinId = result.coin_name,
                 mods = result.mods,
+                hint,
+                childIds = children.Select(c => c.Coin.Name).ToArray(),
+                hintedChildIds = hinted.Select(c => c.Coin.Name).ToArray(),
                 analysisLength = result.analysis?.Length ?? 0,
                 analysisSha256 = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(result.analysis ?? ""))).ToLowerInvariant(),
             }));
