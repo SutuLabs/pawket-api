@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using NodeDBSyncer.Helpers;
 using Prometheus;
 using WalletServer.Helpers;
 

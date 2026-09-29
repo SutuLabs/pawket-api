@@ -4,7 +4,6 @@
     public string Path { get; set; } = "";
     public uint Port { get; set; }
     public NetworkSettings Network { get; set; } = new NetworkSettings();
-    public string? OnlineDbConnString { get; set; }
     public uint OnlineUserStaySeconds { get; set; } = 90;
     public string? PriceSourceUrl { get; set; }
     public string PriceCachePath { get; set; } = "data/prices.sqlite";
