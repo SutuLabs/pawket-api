@@ -95,6 +95,26 @@ public class MigratedApiTests
         }
     }
 
+    [Theory]
+    [InlineData("NftV1", "AC102D11A3B4073CA19856A368FB98BF0F7B5019DAF3E3D388FBD546D3B4F89F",
+        "0x1746d5de2f1a5db40929070073aa15d82b39eceb9307e26b1da38ea84c3cbcd0")]
+    [InlineData("DidV1", "FD283BBD98369889395AC5C92DFC9B35D2B0E16D91B92E93541C61DD044C2F62",
+        "0x0b67d60ed13ad40c9f9005e7b649bda88b884732d813b38b377b09de91c9b970")]
+    public async Task NftAndDidAnalysisSurviveHeightFilter(string coinType, string coinId, string launcherId)
+    {
+        using var body = await Post("Wallet/records", new
+        {
+            puzzleHashes = new[] { "0x82b7ad4c410fa706301cc4a1fc3cc0b34f1808813f8ab3a0e6774aed7b0f7131" },
+            coinType, includeAnalysis = true, includeSpentCoins = true,
+            startHeight = 9000688, endHeight = 9000689, pageLength = 100,
+        });
+        var group = Assert.Single(body.RootElement.GetProperty("coins").EnumerateArray());
+        var sample = group.GetProperty("records").EnumerateArray().FirstOrDefault(r =>
+            r.GetProperty("coin").GetProperty("name").GetString() == coinId);
+        Assert.Equal(9000688U, sample.GetProperty("confirmedBlockIndex").GetUInt32());
+        Assert.Equal(launcherId, sample.GetProperty("analysis").GetProperty("launcherId").GetString());
+    }
+
     [Fact]
     public async Task BlocksKeepOrderReferencesAndGzip()
     {
