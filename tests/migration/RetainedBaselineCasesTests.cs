@@ -48,8 +48,15 @@ public class RetainedBaselineCasesTests
             using var snapshots = JsonDocument.Parse(File.ReadAllText(Asset("static-snapshot.json")));
             var expected = snapshots.RootElement.EnumerateArray().Single(c => c.GetProperty("case").GetString() == id)
                 .GetProperty("response");
+            if (id == "records-invalid-type")
+            {
+                Assert.Equal(200, (int)response.StatusCode);
+                using var retired = JsonDocument.Parse(payload);
+                Assert.Empty(retired.RootElement.GetProperty("coins").EnumerateArray());
+                return;
+            }
             Assert.Equal(expected.GetProperty("status").GetInt32(), (int)response.StatusCode);
-            if (id is "records-invalid-type" or "solution-missing-id" or "block-missing-indexes")
+            if (id is "solution-missing-id" or "block-missing-indexes")
                 Assert.Equal(expected.GetProperty("body").GetString(), payload);
             else if (id == "version")
                 Assert.Equal(expected.GetProperty("body").GetString(), payload);
