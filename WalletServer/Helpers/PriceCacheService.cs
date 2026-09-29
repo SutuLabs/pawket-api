@@ -41,9 +41,23 @@ public sealed class PriceCacheService : IDisposable
                 price TEXT NOT NULL,
                 price_time TEXT NOT NULL,
                 PRIMARY KEY (from_currency, to_currency)
+            );
+            CREATE TABLE IF NOT EXISTS price_refresh_state (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                next_attempt_utc TEXT NOT NULL,
+                consecutive_failures INTEGER NOT NULL
             );";
         schema.ExecuteNonQuery();
         SeedIfEmpty(db);
+        using var state = db.CreateCommand();
+        state.CommandText = "SELECT next_attempt_utc, consecutive_failures FROM price_refresh_state WHERE id=1";
+        using var row = state.ExecuteReader();
+        if (row.Read())
+        {
+            nextAttemptUtc = DateTime.Parse(row.GetString(0), CultureInfo.InvariantCulture,
+                DateTimeStyles.RoundtripKind);
+            consecutiveFailures = row.GetInt32(1);
+        }
     }
 
     public MiscController.PriceResponse[] GetLatestPrices()
@@ -67,6 +81,8 @@ public sealed class PriceCacheService : IDisposable
             if (running || DateTime.UtcNow < nextAttemptUtc) return;
             running = true;
             nextAttemptUtc = DateTime.UtcNow.AddMinutes(Math.Max(1, settings.PriceRefreshMinutes));
+            try { SaveRefreshState(); }
+            catch (Exception ex) { logger.LogWarning(ex, "Unable to persist price refresh cooldown"); }
         }
         _ = Task.Run(RefreshAsync);
     }
@@ -87,7 +103,12 @@ public sealed class PriceCacheService : IDisposable
                 Upsert(db, tx, price);
             }
             tx.Commit();
-            lock (gate) consecutiveFailures = 0;
+            lock (gate)
+            {
+                consecutiveFailures = 0;
+                nextAttemptUtc = DateTime.UtcNow.AddMinutes(Math.Max(1, settings.PriceRefreshMinutes));
+                SaveRefreshState();
+            }
         }
         catch (Exception ex)
         {
@@ -96,6 +117,8 @@ public sealed class PriceCacheService : IDisposable
             {
                 consecutiveFailures = Math.Min(consecutiveFailures + 1, 6);
                 nextAttemptUtc = DateTime.UtcNow.AddMinutes(Math.Min(60, 1 << consecutiveFailures));
+                try { SaveRefreshState(); }
+                catch (Exception saveEx) { logger.LogWarning(saveEx, "Unable to persist price refresh backoff"); }
             }
         }
         finally
@@ -172,6 +195,19 @@ public sealed class PriceCacheService : IDisposable
         var db = new SqliteConnection(connectionString);
         db.Open();
         return db;
+    }
+
+    private void SaveRefreshState()
+    {
+        using var db = Open();
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = @"INSERT INTO price_refresh_state (id,next_attempt_utc,consecutive_failures)
+            VALUES (1,$next,$failures)
+            ON CONFLICT(id) DO UPDATE SET next_attempt_utc=excluded.next_attempt_utc,
+                consecutive_failures=excluded.consecutive_failures";
+        cmd.Parameters.AddWithValue("$next", nextAttemptUtc.ToString("O", CultureInfo.InvariantCulture));
+        cmd.Parameters.AddWithValue("$failures", consecutiveFailures);
+        cmd.ExecuteNonQuery();
     }
 
     public void Dispose() => http.Dispose();

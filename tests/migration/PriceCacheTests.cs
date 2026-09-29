@@ -54,6 +54,9 @@ public class PriceCacheTests
             }
             using var reopened = new PriceCacheService(NullLogger<PriceCacheService>.Instance, settings);
             Assert.Equal(12.5m, reopened.GetLatestPrices().Single(p => p.To == "USD").Price);
+            reopened.RefreshInBackgroundIfDue();
+            await Task.Delay(100);
+            Assert.Equal(1, Volatile.Read(ref received)); // Restart preserves the cooldown.
         }
         finally
         {
