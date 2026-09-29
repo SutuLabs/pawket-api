@@ -47,7 +47,8 @@ unknown, duplicated, and empty-generator block heights. See
 
 Three additional positive `records` class cases (`CatV2`, `DidV1`, `NftV1`)
 use narrowly seeded public-mainnet samples around height 9000000. They verify
-classification and selected `analysis` fields. The total suite is 28 tests.
+classification and selected `analysis` fields. Positive hint, multiple puzzle
+hashes, and multiple coin IDs are also covered. The total suite is 31 tests.
 `SampleScanner` is a bounded, read-only C# discovery tool; `SampleSeeder` is a
 separate, narrowly scoped test-database seeder for exactly those three samples.
 Neither is part of the production API or a continuously running Syncer task.
