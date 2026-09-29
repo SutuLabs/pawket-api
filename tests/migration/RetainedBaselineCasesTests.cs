@@ -65,11 +65,7 @@ public class RetainedBaselineCasesTests
             else
             {
                 using var actual = JsonDocument.Parse(payload);
-                Assert.Equal(expected.GetProperty("body").ValueKind, actual.RootElement.ValueKind);
-                if (id == "network")
-                    foreach (var field in new[] { "name", "prefix", "chainId", "symbol", "decimal", "explorerUrl" })
-                        Assert.Equal(expected.GetProperty("body").GetProperty(field).GetRawText(),
-                            actual.RootElement.GetProperty(field).GetRawText());
+                AssertJsonEqual(expected.GetProperty("body"), actual.RootElement, id);
             }
             return;
         }
@@ -80,8 +76,7 @@ public class RetainedBaselineCasesTests
         switch (id)
         {
             case "records-unknown-puzzle":
-                // New mainnet records can appear after the frozen database slice.
-                Assert.Equal(JsonValueKind.Array, root.GetProperty("coins").ValueKind);
+                Assert.Empty(root.GetProperty("coins").EnumerateArray());
                 break;
             case "records-hint-unmatched-in-slice":
                 // The old partial database could be empty while the current chain has matches.
@@ -104,9 +99,15 @@ public class RetainedBaselineCasesTests
                 break;
             case "coin-solution-spent":
                 var spend = Assert.Single(root.GetProperty("coinSpends").EnumerateArray());
-                Assert.Equal(191UL, spend.GetProperty("coin").GetProperty("amount").GetUInt64());
-                Assert.Equal(275528U, spend.GetProperty("confirmed_index").GetUInt32());
-                Assert.Equal(277304U, spend.GetProperty("spent_index").GetUInt32());
+                using (var snapshots = JsonDocument.Parse(File.ReadAllText(Asset("data-snapshot.json"))))
+                {
+                    var old = snapshots.RootElement.EnumerateArray()
+                        .Single(c => c.GetProperty("case").GetString() == id)
+                        .GetProperty("response").GetProperty("body").GetProperty("coinSpends")[0];
+                    Assert.Equal(old.EnumerateObject().Count(), spend.EnumerateObject().Count());
+                    foreach (var field in new[] { "coin", "confirmed_index", "spent_index", "timestamp" })
+                        AssertJsonEqual(old.GetProperty(field), spend.GetProperty(field), id + "." + field);
+                }
                 Assert.StartsWith("0xff", spend.GetProperty("puzzle_reveal").GetString());
                 Assert.StartsWith("0xff", spend.GetProperty("solution").GetString());
                 break;
