@@ -45,12 +45,10 @@ while (scanned < end && found.Count < 3)
             if (type is null || !found.Add(type)) continue;
             using var analysis = JsonDocument.Parse(result.analysis);
             var root = analysis.RootElement;
-            var hint = root.TryGetProperty("hintPuzzle", out var hintPuzzle) ? hintPuzzle.GetString() :
-                root.TryGetProperty("nextCoin", out var nextCoin) && nextCoin.TryGetProperty("hint", out var nextHint) ? nextHint.GetString() : null;
+            var hint = root.TryGetProperty("nextCoin", out var nextCoin) && nextCoin.TryGetProperty("hint", out var nextHint) ? nextHint.GetString() :
+                root.TryGetProperty("hintPuzzle", out var hintPuzzle) ? hintPuzzle.GetString() : null;
+            if (!string.IsNullOrEmpty(hint) && !hint.StartsWith("0x", StringComparison.OrdinalIgnoreCase)) hint = "0x" + hint;
             var children = (await node.GetCoinRecordsByParentIds(new[] { result.coin_name }, true)).ToArray();
-            var hinted = string.IsNullOrEmpty(hint) ? Array.Empty<CoinRecord>() :
-                (await node.GetCoinRecordsByHint(hint, true)).Where(c =>
-                    c.Coin.ParentCoinInfo.Equals(result.coin_name, StringComparison.OrdinalIgnoreCase)).ToArray();
             Console.WriteLine(JsonSerializer.Serialize(new
             {
                 type,
@@ -59,7 +57,6 @@ while (scanned < end && found.Count < 3)
                 mods = result.mods,
                 hint,
                 childIds = children.Select(c => c.Coin.Name).ToArray(),
-                hintedChildIds = hinted.Select(c => c.Coin.Name).ToArray(),
                 analysisLength = result.analysis?.Length ?? 0,
                 analysisSha256 = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(result.analysis ?? ""))).ToLowerInvariant(),
             }));
