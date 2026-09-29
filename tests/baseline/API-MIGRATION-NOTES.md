@@ -23,7 +23,9 @@ The three primary routes do not currently support caller-selected block-height f
 
 For the new implementation, implement effective start/end height filtering for `records`, and add optional start/end height fields to `get-puzzle` and `get-coin-solution`. Requests without the new fields must remain valid. This is an intentional behavior change for requests that supply height fields, so the old ignored-height test describes legacy behavior only, not the future contract.
 
-The additional xUnit tests lock in the ignored height fields, the 301-hash validation, the missing-puzzle error, the legacy single-spend shape, and the unknown coin's empty-array response. All 21 tests passed on the existing test-machine API and PostgreSQL slice.
+Proposed height contract, awaiting confirmation: `startHeight` inclusive and `endHeight` exclusive, both interpreted as **coin confirmation height**, matching the bundled Chia full-node coin-record RPC. Omitted bounds mean no restriction. For `get-puzzle` and `get-coin-solution`, first look up coin records within the interval by ID, then retrieve puzzle/solution using each coin's actual spent height. An optional `spentStartHeight`/`spentEndHeight` pair could be added later only if callers need filtering by spend height. Balance fields in `records` retain their current all-history meaning rather than becoming range totals.
+
+The additional xUnit tests lock in the ignored height fields, the 301-hash validation, the missing-puzzle error, the legacy single-spend shape, and the unknown coin's empty-array response. Block edge cases now cover an unknown height, a duplicate height, and a block with an empty generator.
 
 ## API business data sources (inventory, not migration scope)
 

@@ -147,6 +147,43 @@ public class LegacyApiContractTests
         Assert.Equal(239000UL, spend.GetProperty("spent_index").GetUInt64());
     }
 
+    [Fact]
+    public async Task BlockUnknownHeightReturnsEmptyGroups()
+    {
+        var result = await PostJson("/Wallet/get-block", new { indexes = new[] { 99999999 } });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        Assert.Equal(0, body.RootElement.GetProperty("blocks").GetArrayLength());
+        Assert.Equal(0, body.RootElement.GetProperty("refBlocks").GetArrayLength());
+    }
+
+    [Fact]
+    public async Task BlockDuplicateHeightReturnsOnlyOneBlock()
+    {
+        var result = await PostJson("/Wallet/get-block", new { indexes = new[] { 229001, 229001 } });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var block = Assert.Single(body.RootElement.GetProperty("blocks").EnumerateArray());
+        Assert.Equal(229001UL, block.GetProperty("index").GetUInt64());
+        Assert.Equal(225698U, Assert.Single(block.GetProperty("generator_ref_list").EnumerateArray()).GetUInt32());
+        Assert.Equal(225698UL, Assert.Single(body.RootElement.GetProperty("refBlocks").EnumerateArray()).GetProperty("index").GetUInt64());
+    }
+
+    [Fact]
+    public async Task BlockWithoutGeneratorStillReturnsGzipPayload()
+    {
+        var result = await PostJson("/Wallet/get-block", new { indexes = new[] { 1 } });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var block = Assert.Single(body.RootElement.GetProperty("blocks").EnumerateArray());
+        Assert.Equal(1UL, block.GetProperty("index").GetUInt64());
+        Assert.Equal(0, block.GetProperty("generator_ref_list").GetArrayLength());
+        Assert.Equal(0, body.RootElement.GetProperty("refBlocks").GetArrayLength());
+        using var compressed = new MemoryStream(Convert.FromBase64String(block.GetProperty("generator").GetString()!));
+        using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
+        Assert.Equal(-1, gzip.ReadByte());
+    }
+
     private static async Task<(int Status, string Body)> PostJson(string path, object body)
     {
         using var response = await Client.PostAsJsonAsync(path.TrimStart('/'), body);
