@@ -10,11 +10,14 @@ namespace WalletServer.Helpers;
 public sealed class CoinClassCache
 {
     private readonly string connectionString;
+    private readonly string directory;
     private readonly string processorUrl;
     private readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(30) };
     private readonly SemaphoreSlim[] keyLocks = Enumerable.Range(0, 256)
         .Select(_ => new SemaphoreSlim(1, 1)).ToArray();
     private readonly int maxEntries;
+    private readonly object schemaGate = new();
+    private bool initialized;
     private int writes;
 
     public CoinClassCache(IOptions<AppSettings> options)
@@ -23,8 +26,16 @@ public sealed class CoinClassCache
         processorUrl = settings.CoinProcessorUrl.TrimEnd('/');
         maxEntries = Math.Max(1000, settings.CoinCacheMaxEntries);
         var path = Path.GetFullPath(settings.PriceCachePath);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        directory = Path.GetDirectoryName(path)!;
         connectionString = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+    }
+
+    private void EnsureInitialized()
+    {
+        lock (schemaGate)
+        {
+            if (initialized) return;
+            Directory.CreateDirectory(directory);
         using var db = Open();
         using var cmd = db.CreateCommand();
         cmd.CommandText = @"CREATE TABLE IF NOT EXISTS coin_class_cache (
@@ -49,11 +60,14 @@ public sealed class CoinClassCache
             migrate.CommandText = "ALTER TABLE coin_class_cache ADD COLUMN last_used_utc INTEGER NOT NULL DEFAULT 0";
             migrate.ExecuteNonQuery();
         }
+            initialized = true;
+        }
     }
 
     public async Task<(string Mods, string Analysis)> GetOrAnalyzeAsync(
         FullNodeProxy node, CoinRecord parent, string blockHash)
     {
+        EnsureInitialized();
         var id = parent.Coin.Name;
         var keyLock = keyLocks[(int)((uint)id.GetHashCode() % (uint)keyLocks.Length)];
         await keyLock.WaitAsync();

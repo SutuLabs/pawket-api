@@ -23,7 +23,6 @@ public sealed class FilePushLog
         path = Path.GetFullPath(options.Value.PushLogPath);
         maxBytes = Math.Max(1024, options.Value.PushLogMaxBytes);
         maxFiles = Math.Max(2, options.Value.PushLogMaxFiles);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
     }
 
     public async Task AppendAsync(WalletController.SpendBundleReq bundle, string ip, string? txid,
@@ -46,6 +45,7 @@ public sealed class FilePushLog
         await writeGate.WaitAsync();
         try
         {
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             var encoded = Encoding.UTF8.GetBytes(line);
             if (File.Exists(path) && new FileInfo(path).Length + encoded.Length > maxBytes)
                 Rotate();

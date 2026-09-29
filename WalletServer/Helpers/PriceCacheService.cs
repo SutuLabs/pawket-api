@@ -14,7 +14,10 @@ public sealed class PriceCacheService : IDisposable
     private readonly AppSettings settings;
     private readonly HttpClient http;
     private readonly string connectionString;
+    private readonly string directory;
     private readonly object gate = new();
+    private readonly object initGate = new();
+    private bool initialized;
     private DateTime nextAttemptUtc = DateTime.MinValue;
     private int consecutiveFailures;
     private bool running;
@@ -28,8 +31,16 @@ public sealed class PriceCacheService : IDisposable
             handler.Proxy = new WebProxy(settings.PriceProxy);
         http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(15) };
         var path = Path.GetFullPath(settings.PriceCachePath);
-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+        directory = Path.GetDirectoryName(path)!;
         connectionString = new SqliteConnectionStringBuilder { DataSource = path }.ToString();
+    }
+
+    private void EnsureInitialized()
+    {
+        lock (initGate)
+        {
+            if (initialized) return;
+            Directory.CreateDirectory(directory);
         using var db = Open();
         using var schema = db.CreateCommand();
         schema.CommandText = @"
@@ -58,10 +69,13 @@ public sealed class PriceCacheService : IDisposable
                 DateTimeStyles.RoundtripKind);
             consecutiveFailures = row.GetInt32(1);
         }
+            initialized = true;
+        }
     }
 
     public MiscController.PriceResponse[] GetLatestPrices()
     {
+        EnsureInitialized();
         using var db = Open();
         using var cmd = db.CreateCommand();
         cmd.CommandText = "SELECT source, from_currency, to_currency, price, price_time FROM latest_price WHERE from_currency='XCH' ORDER BY to_currency";
@@ -76,6 +90,7 @@ public sealed class PriceCacheService : IDisposable
 
     public void RefreshInBackgroundIfDue()
     {
+        EnsureInitialized();
         lock (gate)
         {
             if (running || DateTime.UtcNow < nextAttemptUtc) return;
