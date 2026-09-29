@@ -62,6 +62,74 @@ public class LegacyApiContractTests
         AssertJsonEqual(expected.GetProperty("body"), actual, $"{caseId}.body");
     }
 
+    [Fact]
+    public async Task RecordsHeightFieldsDoNotCurrentlyFilterResults()
+    {
+        const string hash = "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2";
+        var basic = await PostJson("/Wallet/records", new { puzzleHashes = new[] { hash }, pageLength = 1 });
+        var withHeights = await PostJson("/Wallet/records", new
+        {
+            puzzleHashes = new[] { hash }, pageLength = 1,
+            startHeight = 999999999, endHeight = 1,
+        });
+        Assert.Equal(200, basic.Status);
+        Assert.Equal(basic, withHeights);
+    }
+
+    [Fact]
+    public async Task RecordsRejectMoreThanThreeHundredPuzzleHashes()
+    {
+        var hashes = Enumerable.Repeat(new string('0', 64), 301).ToArray();
+        var result = await PostJson("/Wallet/records", new { puzzleHashes = hashes });
+        Assert.Equal(400, result.Status);
+        Assert.Equal("Valid puzzle hash number per request is 300", result.Body);
+    }
+
+    [Fact]
+    public async Task PuzzleMissingCoinReturnsCurrentError()
+    {
+        var result = await PostJson("/Wallet/get-puzzle", new
+        {
+            parentCoinId = "0x" + new string('0', 64),
+        });
+        Assert.Equal(400, result.Status);
+        Assert.Equal("Cannot find corresponding coin.", result.Body);
+    }
+
+    [Fact]
+    public async Task CoinSolutionLegacyRequestKeepsSingleCoinSpendShape()
+    {
+        var result = await PostJson("/Wallet/get-coin-solution", new
+        {
+            coinId = "0xb8893cceeb6cdb2281a43491ded917e38ecf4c5fb742e2c2af9425f416ecc0cd",
+        });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        Assert.False(body.RootElement.TryGetProperty("coinSpends", out _));
+        var spend = body.RootElement.GetProperty("coinSpend");
+        Assert.Equal(191UL, spend.GetProperty("coin").GetProperty("amount").GetUInt64());
+        Assert.Equal("", spend.GetProperty("puzzle_reveal").GetString());
+        Assert.Equal("", spend.GetProperty("solution").GetString());
+    }
+
+    [Fact]
+    public async Task CoinSolutionUnknownIdReturnsEmptyArray()
+    {
+        var result = await PostJson("/Wallet/get-coin-solution", new
+        {
+            coinIds = new[] { "0x" + new string('0', 64) },
+        });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        Assert.Equal(0, body.RootElement.GetProperty("coinSpends").GetArrayLength());
+    }
+
+    private static async Task<(int Status, string Body)> PostJson(string path, object body)
+    {
+        using var response = await Client.PostAsJsonAsync(path.TrimStart('/'), body);
+        return ((int)response.StatusCode, await response.Content.ReadAsStringAsync());
+    }
+
     private static string AssetPath(string name) => Path.Combine(AppContext.BaseDirectory, name);
 
     private static JsonElement Find(JsonElement array, string property, string value)

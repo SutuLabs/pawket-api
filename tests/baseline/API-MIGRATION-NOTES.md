@@ -1,0 +1,45 @@
+# API baseline and storage migration notes
+
+Recorded 2026-09-29. This is a planning note, not an API change. Preserve current responses until a separately approved deprecation or migration is implemented.
+
+## Out of scope
+
+- All `/Name/*` and `/Inscription/*` routes are planned for removal. They are still implemented; this note does not remove them.
+- `/Wallet/pushtx`, `/Wallet/offers`, and `/Wallet/network` are not part of the database-read migration.
+- `/Misc/prices` will continue using PostgreSQL.
+
+The existing empty-result baseline cases for `/Name/recent` and `/Inscription/ticks` describe current behavior, but they are not migration gates for retained APIs.
+
+## Important baseline gaps
+
+`POST /Wallet/records` has seven snapshot cases: invalid coin type, spent records, spent filtering, two unspent pages, unmatched hint, and unknown puzzle hash. There is no positive hint or coin-class case, analysis payload, multiple puzzle hashes, or complete-chain balance check. The limited database slice makes current balance and `peekHeight` snapshots unsuitable as proof of complete-mainnet behavior.
+
+`POST /Wallet/get-coin-solution` has two cases: missing IDs and one spent coin. That coin's stored puzzle and solution are empty, so the central nonempty `puzzle_reveal`/`solution` response is not yet protected. Legacy `coinId`, multiple IDs, unknown/unspent coins, and paging also lack cases.
+
+The three primary routes do not currently support caller-selected block-height filtering. `records` accepts `startHeight` and `endHeight`, but neither affects its SQL result (`startHeight` is passed as an unused SQL parameter). `get-puzzle` and `get-coin-solution` do not accept a height field. The SQL for all three applies the internal `sync_state` upper bound; this is not a request filter.
+
+## API business data sources (inventory, not migration scope)
+
+| Route | Current source |
+| --- | --- |
+| `POST /Wallet/records` | PostgreSQL coin, hint, and class tables |
+| `POST /Wallet/get-puzzle` | PostgreSQL coin and class tables |
+| `POST /Wallet/get-coin-solution` | PostgreSQL coin and class tables |
+| `POST /Wallet/get-block` | PostgreSQL block table |
+| `POST /Wallet/analysis` | PostgreSQL parsed coin analysis |
+| `POST /Name/resolve` | PostgreSQL-derived CNS index, cached |
+| `POST /Name/wealthiest` | PostgreSQL-derived CNS index and balances, cached |
+| `GET /Name/all` | PostgreSQL-derived CNS index, cached |
+| `GET /Inscription/holder/{address}` | PostgreSQL-derived inscription index, cached |
+| `GET /Misc/prices` | PostgreSQL price series if `PriceSourceUrl` is blank; otherwise external HTTP |
+| `POST /Wallet/pushtx` | Chia full-node RPC; writes a PostgreSQL push log |
+| `POST /Wallet/offers` | External offer-upload HTTP service |
+| `GET /Wallet/network` | Application configuration |
+| `GET /Misc/taildb` | Local `tails.json` |
+| `GET /Misc/version` | Assembly metadata |
+
+No retained read endpoint currently obtains its business data directly from the Chia full-node RPC. The controller constructs an RPC client, but its puzzle/coin-solution RPC helpers are unused by the live routes.
+
+`DataAccess` opens PostgreSQL in its constructor. `WalletController` and `MiscController` inject it, so even routes whose business data comes from configuration, files, Chia, or an external service currently have an incidental PostgreSQL availability dependency. `WalletController` also injects `PushLogHelper`, which opens PostgreSQL in its constructor. Removing PostgreSQL requires decoupling this initialization and deciding what to do with push logs and stored prices.
+
+Coin and block records are candidates for full-node RPC reads, but exact compatibility requires matching the current filters, ordering, pagination, balance aggregation, peak-height semantics, missing-record behavior, and block generator/reference formatting. The current baseline is insufficient to prove that. CNS names, inscription holdings, and parsed analysis are application-specific derived indexes, not direct full-node RPC lookup fields; replacing those needs on-demand parsing and/or some retained index/cache. Market prices and offer upload are external-service data and cannot be supplied by the Chia full node.
