@@ -108,7 +108,9 @@ public sealed class CoinClassCache
             using var response = await http.PostAsync(processorUrl + "/analyze_tx", content);
             response.EnsureSuccessStatusCode();
             using var parsed = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-            var mods = parsed.RootElement.GetProperty("mods").GetString() ?? "";
+            if (!parsed.RootElement.TryGetProperty("mods", out var modsElement))
+                throw new InvalidDataException($"Processor response missing mods for {id}: {parsed.RootElement.GetRawText()[..Math.Min(256, parsed.RootElement.GetRawText().Length)]}");
+            var mods = modsElement.GetString() ?? "";
             var analysis = parsed.RootElement.GetProperty("analysis").GetString() ?? "";
             using var write = db.CreateCommand();
             write.CommandText = @"INSERT INTO coin_class_cache (coin_id,spent_height,block_hash,mods,analysis,last_used_utc)
