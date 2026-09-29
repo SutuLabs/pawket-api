@@ -3,9 +3,7 @@
 BASEPATH="$(dirname "$PWD")"
 
 mkdir -p $BASEPATH/log
-mkdir -p $BASEPATH/bin/syncer
 mkdir -p $BASEPATH/bin/api
-unzip -o NodeDBSyncer.zip -d $BASEPATH/bin/syncer
 unzip -o WalletServer.zip -d $BASEPATH/bin/api
 
 function start {
@@ -36,4 +34,3 @@ function start {
 }
 
 start pawket-api $BASEPATH/bin/api WalletServer.dll
-start pawket-syncer $BASEPATH/bin/syncer NodeDBSyncer.dll
