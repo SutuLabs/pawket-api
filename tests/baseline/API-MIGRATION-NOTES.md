@@ -17,6 +17,8 @@ The existing empty-result baseline cases for `/Name/recent` and `/Inscription/ti
 
 `POST /Wallet/get-coin-solution` has two snapshot cases plus legacy-shape and unknown-ID tests. The spent coin's stored puzzle and solution are empty, so the central nonempty `puzzle_reveal`/`solution` response is not yet protected. Multiple IDs, unspent coins, and paging also lack cases.
 
+Read-only verification on the baseline test database found 10,919,769 spent `sync_coin_record` rows but zero `sync_coin_class` rows. The empty reveal/solution in the snapshot results from the API's left join to this missing parsed-data table; it is not evidence that a spent coin has no reveal on-chain. A positive test needs a source with populated `sync_coin_class`, or an explicitly approved, narrowly scoped test-data backfill.
+
 The three primary routes do not currently support caller-selected block-height filtering. `records` accepts `startHeight` and `endHeight`, but neither affects its SQL result (`startHeight` is passed as an unused SQL parameter). `get-puzzle` and `get-coin-solution` do not accept a height field. The SQL for all three applies the internal `sync_state` upper bound; this is not a request filter.
 
 For the new implementation, implement effective start/end height filtering for `records`, and add optional start/end height fields to `get-puzzle` and `get-coin-solution`. Requests without the new fields must remain valid. This is an intentional behavior change for requests that supply height fields, so the old ignored-height test describes legacy behavior only, not the future contract.
