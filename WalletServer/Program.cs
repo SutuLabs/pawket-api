@@ -35,7 +35,7 @@ builder.Services.AddCors(options =>
 builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(AppSettings)));
 builder.Services.AddSingleton<FilePushLog>();
 builder.Services.AddSingleton<PriceCacheService>();
-builder.Services.AddSingleton<CoinClassCache>();
+builder.Services.AddSingleton<ChiaCoinStore>();
 builder.Services.AddScoped<ChiaWalletData>();
 builder.Services.AddSingleton<OnlineCounter>();
 

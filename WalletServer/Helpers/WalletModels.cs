@@ -2,13 +2,6 @@ using chia.dotnet;
 
 namespace WalletServer.Helpers;
 
-public enum CoinClassType
-{
-    CatV2,
-    DidV1,
-    NftV1,
-}
-
 public record FullBalanceInfo(long Amount, int CoinCount, long SpentAmount, int SpentCount);
 
 public record CoinDetail(
@@ -22,11 +15,6 @@ public record CoinDetail(
     string? Solution);
 
 public record CoinPuzzleInfo(string CoinName, ulong Amount, string ParentCoinName, string PuzzleReveal);
-
-public record CoinRecordWithAnalysis : CoinRecord
-{
-    public string? Analysis { get; init; }
-}
 
 public record GetBlockResponse(BlockTransactionGeneratorRetrieval[] Blocks, BlockTransactionGeneratorRetrieval[] RefBlocks);
 public record BlockTransactionGeneratorRetrieval(ulong index, byte[] generator, uint[]? generator_ref_list);

@@ -2,7 +2,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using chia.dotnet;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -21,6 +20,7 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
         private readonly ChiaWalletData chiaData;
+        private readonly ChiaCoinStore coinStore;
         private readonly FilePushLog pushLogHelper;
         private readonly OnlineCounter onlineCounter;
         private readonly AppSettings appSettings;
@@ -41,6 +41,7 @@ namespace WalletServer.Controllers
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
             ChiaWalletData chiaData,
+            ChiaCoinStore coinStore,
             FilePushLog pushLogHelper,
             OnlineCounter onlineCounter,
             IOptions<AppSettings> appSettings)
@@ -48,6 +49,7 @@ namespace WalletServer.Controllers
             this.logger = logger;
             this.memoryCache = memoryCache;
             this.chiaData = chiaData;
+            this.coinStore = coinStore;
             this.pushLogHelper = pushLogHelper;
             this.onlineCounter = onlineCounter;
             this.appSettings = appSettings.Value;
@@ -70,32 +72,40 @@ namespace WalletServer.Controllers
             long? pageStart = null,
             int? pageLength = null,
             bool includeSpentCoins = false,
-            bool hint = false,
-            bool includeAnalysis = false,
-            string? coinType = null);
-        public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
-        public record CoinRecordInfo(string puzzleHash, CoinRecordWithAnalysisObject[] records, long? balance, FullBalanceInfo? balanceInfo);
-        public record CoinRecordWithAnalysisObject : CoinRecord
+            bool hint = false)
         {
-            public JsonNode? Analysis { get; init; }
+            [JsonExtensionData]
+            public Dictionary<string, JsonElement>? Extra { get; init; }
         }
+        public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
+        public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, long? balance, FullBalanceInfo? balanceInfo);
+        public record GetRecordsPageRequest(
+            string puzzleHash,
+            bool hint = false,
+            bool includeSpentCoins = false,
+            long? startHeight = null,
+            ulong? endHeight = null,
+            int pageLength = 100,
+            string? cursor = null)
+        {
+            [JsonExtensionData]
+            public Dictionary<string, JsonElement>? Extra { get; init; }
+        }
+        public record GetRecordsPageResponse(long peekHeight, CoinRecordInfo[] coins, string? nextCursor);
+        private record RecordsCursor(string PuzzleHash, bool Hint, bool IncludeSpentCoins,
+            long? StartHeight, ulong? EndHeight, int PageLength, uint SnapshotHeight,
+            string BlockHash, long LastSortHeight, string LastCoinId);
 
         private const int MaxCoinCount = 100;
 
         [HttpPost("records")]
         public async Task<ActionResult> GetRecords(GetRecordsRequest request)
         {
-            if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
+            if (request is null || request.puzzleHashes is null || request.puzzleHashes.Length == 0)
+                return BadRequest("Invalid request");
             if (request.puzzleHashes.Length > 300)
                 return BadRequest("Valid puzzle hash number per request is 300");
             if (!ValidHeights(request.startHeight, request.endHeight)) return BadRequest("Invalid height range");
-            var coinType = (CoinClassType?)null;
-            if (request.coinType != null)
-            {
-                if (!Enum.TryParse<CoinClassType>(request.coinType, out var ct))
-                    return BadRequest("Coin type cannot be recognized.");
-                coinType = ct;
-            }
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
@@ -104,29 +114,89 @@ namespace WalletServer.Controllers
 
             RequestRecordCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
             var peak = await this.chiaData.GetPeakHeight();
+            if (HasDeprecatedFields(request.Extra))
+                return Ok(new GetRecordsResponse(peak, Array.Empty<CoinRecordInfo>()));
 
             var infos = new List<CoinRecordInfo>();
+            using var db = coinStore.Open();
             foreach (var hash in request.puzzleHashes)
             {
-                var coinRecords = await this.chiaData.GetCoins(hash, request.includeSpentCoins,
-                    request.hint, coinType, (uint?)request.startHeight, (uint?)request.endHeight,
-                    request.pageStart, request.pageLength);
-                var ret = coinRecords.Select(_ => new CoinRecordWithAnalysisObject
-                {
-                    Coin = _.Coin,
-                    Coinbase = _.Coinbase,
-                    ConfirmedBlockIndex = _.ConfirmedBlockIndex,
-                    Spent = _.Spent,
-                    SpentBlockIndex = _.SpentBlockIndex,
-                    Timestamp = _.Timestamp,
-                    Analysis = request.includeAnalysis ? ConvertAnalysis(_.Analysis) : null,
-                }).ToArray();
-
-                var balance = coinType != null ? null : await this.chiaData.GetBalance(hash);
-                infos.Add(new CoinRecordInfo(hash, ret, balance?.Amount, balance));
+                var coinRecords = coinStore.GetPage(db, hash, request.hint, request.includeSpentCoins,
+                    (uint?)request.startHeight, (uint?)request.endHeight, checked((uint)peak),
+                    request.pageStart ?? 0, request.pageLength ?? 100);
+                var balance = coinStore.GetBalance(db, hash, checked((uint)peak));
+                infos.Add(new CoinRecordInfo(hash, coinRecords.Select(x => x.Record).ToArray(), balance.Amount, balance));
             }
 
             return Ok(new GetRecordsResponse(peak, infos.Where(_ => _.records.Length > 0).ToArray()));
+        }
+
+        [HttpPost("records-page")]
+        public async Task<ActionResult> GetRecordsPage(GetRecordsPageRequest request)
+        {
+            if (request is null || string.IsNullOrWhiteSpace(request.puzzleHash))
+                return BadRequest("Invalid request");
+            if (!ValidHeights(request.startHeight, request.endHeight)) return BadRequest("Invalid height range");
+            if (request.pageLength is < 1 or > 1000) return BadRequest("Invalid page length");
+
+            var peak = checked((uint)await chiaData.GetPeakHeight());
+            if (HasDeprecatedFields(request.Extra))
+                return Ok(new GetRecordsPageResponse(peak, Array.Empty<CoinRecordInfo>(), null));
+
+            RecordsCursor? previous = null;
+            if (request.cursor != null)
+            {
+                try { previous = DecodeCursor(request.cursor); }
+                catch (Exception ex) when (ex is FormatException or JsonException)
+                { return BadRequest("Invalid cursor"); }
+                if (previous is null || !previous.PuzzleHash.Equals(request.puzzleHash, StringComparison.OrdinalIgnoreCase)
+                    || previous.Hint != request.hint || previous.IncludeSpentCoins != request.includeSpentCoins
+                    || previous.StartHeight != request.startHeight || previous.EndHeight != request.endHeight
+                    || previous.PageLength != request.pageLength || previous.SnapshotHeight > peak)
+                    return BadRequest("Invalid cursor");
+            }
+            var snapshot = previous?.SnapshotHeight ?? peak;
+            var block = await client.GetBlockRecordByHeight(snapshot);
+            if (previous != null && !block.HeaderHash.Equals(previous.BlockHash, StringComparison.OrdinalIgnoreCase))
+                return Conflict("Chain changed; restart pagination");
+
+            using var db = coinStore.Open();
+            byte[]? afterId;
+            try { afterId = previous is null ? null : Convert.FromHexString(previous.LastCoinId); }
+            catch (FormatException) { return BadRequest("Invalid cursor"); }
+            var rows = coinStore.GetPage(db, request.puzzleHash, request.hint, request.includeSpentCoins,
+                (uint?)request.startHeight, (uint?)request.endHeight, snapshot, 0, request.pageLength + 1,
+                previous?.LastSortHeight, afterId);
+            var page = rows.Take(request.pageLength).ToArray();
+            string? next = null;
+            if (rows.Length > request.pageLength)
+            {
+                var last = page[^1];
+                next = EncodeCursor(new RecordsCursor(request.puzzleHash, request.hint, request.includeSpentCoins,
+                    request.startHeight, request.endHeight, request.pageLength, snapshot, block.HeaderHash,
+                    last.SortHeight, Convert.ToHexString(last.CoinId)));
+            }
+            var balance = coinStore.GetBalance(db, request.puzzleHash, snapshot);
+            var groups = page.Length == 0 ? Array.Empty<CoinRecordInfo>() : new[]
+            {
+                new CoinRecordInfo(request.puzzleHash, page.Select(x => x.Record).ToArray(), balance.Amount, balance),
+            };
+            return Ok(new GetRecordsPageResponse(snapshot, groups, next));
+        }
+
+        private static bool HasDeprecatedFields(Dictionary<string, JsonElement>? extra) =>
+            extra?.Keys.Any(key => key.Equals("coinType", StringComparison.OrdinalIgnoreCase)
+                || key.Equals("includeAnalysis", StringComparison.OrdinalIgnoreCase)) == true;
+
+        private static string EncodeCursor(RecordsCursor cursor) =>
+            Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(cursor)).TrimEnd('=')
+                .Replace('+', '-').Replace('/', '_');
+
+        private static RecordsCursor? DecodeCursor(string value)
+        {
+            var encoded = value.Replace('-', '+').Replace('_', '/');
+            encoded = encoded.PadRight((encoded.Length + 3) / 4 * 4, '=');
+            return JsonSerializer.Deserialize<RecordsCursor>(Convert.FromBase64String(encoded));
         }
 
         public record PushTxRequest(SpendBundleReq? bundle);
@@ -477,24 +547,5 @@ namespace WalletServer.Controllers
             throw new ResponseException(lastRequest, $"Failed after {attempts} attempts, last error: {lastError}");
         }
 
-        private JsonNode? ConvertAnalysis(string? rawAnalysis)
-        {
-            if (string.IsNullOrWhiteSpace(rawAnalysis) || rawAnalysis.Trim() == "{}") return null;
-
-            try
-            {
-                return JsonSerializer.Deserialize<JsonNode>(rawAnalysis);
-            }
-            catch (JsonException ex)
-            {
-                logger.LogDebug(ex, $"failed to parse raw analysis: {rawAnalysis}");
-                return null;
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, $"failed to parse raw analysis: {rawAnalysis}");
-                return null;
-            }
-        }
     }
 }
