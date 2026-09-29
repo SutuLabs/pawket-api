@@ -39,6 +39,7 @@ builder.Services.AddScoped<DataAccess>();
 builder.Services.AddScoped<NameResolvingService>();
 builder.Services.AddScoped<InscriptionCacheService>();
 builder.Services.AddScoped<PushLogHelper>();
+builder.Services.AddSingleton<PriceCacheService>();
 builder.Services.AddSingleton<OnlineCounter>();
 
 builder.Services.AddResponseCompression(options =>

@@ -1,7 +1,6 @@
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Prometheus;
 using WalletServer.Helpers;
 
@@ -12,17 +11,15 @@ namespace WalletServer.Controllers;
 public class MiscController : ControllerBase
 {
     private readonly ILogger<MiscController> logger;
-    private readonly DataAccess dataAccess;
-    private readonly AppSettings appSettings;
+    private readonly PriceCacheService priceCache;
 
     private static readonly Counter RequestPriceCount = Metrics.CreateCounter("request_price_total", "Number of Price request.");
     private static readonly Counter RequestTailDbCount = Metrics.CreateCounter("request_taildb_total", "Number of taildb request.");
 
-    public MiscController(ILogger<MiscController> logger, DataAccess dataAccess, IOptions<AppSettings> appSettings)
+    public MiscController(ILogger<MiscController> logger, PriceCacheService priceCache)
     {
         this.logger = logger;
-        this.dataAccess = dataAccess;
-        this.appSettings = appSettings.Value;
+        this.priceCache = priceCache;
     }
 
     public record PriceResponse(string Source, string From, string To, decimal Price, DateTime Time);
@@ -32,26 +29,9 @@ public class MiscController : ControllerBase
     {
         RequestPriceCount.Inc();
 
-        if (string.IsNullOrWhiteSpace(this.appSettings.PriceSourceUrl))
-        {
-            var prices = await this.dataAccess.GetLatestPrices("XCH");
-            return this.Ok(prices.Select(_ => new PriceResponse(_.source, _.from, _.to, _.price, _.time)));
-        }
-        else
-        {
-            using var client = new HttpClient();
-            try
-            {
-                var json = await client.GetStringAsync(this.appSettings.PriceSourceUrl);
-                var prices = JsonConvert.DeserializeObject<PriceResponse[]>(json);
-                return this.Ok(prices);
-            }
-            catch (Exception ex)
-            {
-                this.logger.LogWarning("unable to get prices, ex: " + ex.Message);
-                return this.StatusCode(StatusCodes.Status502BadGateway);
-            }
-        }
+        var prices = this.priceCache.GetLatestPrices();
+        this.priceCache.RefreshInBackgroundIfDue();
+        return this.Ok(prices);
     }
 
     [HttpGet("taildb")]
