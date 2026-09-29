@@ -79,7 +79,7 @@ namespace WalletServer.Controllers
         }
         public record GetRecordsResponse(long peekHeight, CoinRecordInfo[] coins);
         public record CoinRecordInfo(string puzzleHash, CoinRecord[] records, long? balance, FullBalanceInfo? balanceInfo);
-        public record GetRecordsPageRequest(
+        public record GetCoinsRequest(
             string puzzleHash,
             bool hint = false,
             bool includeSpentCoins = false,
@@ -91,7 +91,8 @@ namespace WalletServer.Controllers
             [JsonExtensionData]
             public Dictionary<string, JsonElement>? Extra { get; init; }
         }
-        public record GetRecordsPageResponse(long peekHeight, CoinRecordInfo[] coins, string? nextCursor);
+        public record CoinPageInfo(string puzzleHash, CoinRecord[] records);
+        public record GetCoinsResponse(long peekHeight, CoinPageInfo[] coins, string? nextCursor);
         private record RecordsCursor(string PuzzleHash, bool Hint, bool IncludeSpentCoins,
             long? StartHeight, ulong? EndHeight, int PageLength, uint SnapshotHeight,
             string BlockHash, long LastSortHeight, string LastCoinId);
@@ -131,8 +132,8 @@ namespace WalletServer.Controllers
             return Ok(new GetRecordsResponse(peak, infos.Where(_ => _.records.Length > 0).ToArray()));
         }
 
-        [HttpPost("records-page")]
-        public async Task<ActionResult> GetRecordsPage(GetRecordsPageRequest request)
+        [HttpPost("coins")]
+        public async Task<ActionResult> GetCoins(GetCoinsRequest request)
         {
             if (request is null || string.IsNullOrWhiteSpace(request.puzzleHash))
                 return BadRequest("Invalid request");
@@ -141,7 +142,7 @@ namespace WalletServer.Controllers
 
             var peak = checked((uint)await chiaData.GetPeakHeight());
             if (HasDeprecatedFields(request.Extra))
-                return Ok(new GetRecordsPageResponse(peak, Array.Empty<CoinRecordInfo>(), null));
+                return Ok(new GetCoinsResponse(peak, Array.Empty<CoinPageInfo>(), null));
 
             RecordsCursor? previous = null;
             if (request.cursor != null)
@@ -176,12 +177,11 @@ namespace WalletServer.Controllers
                     request.startHeight, request.endHeight, request.pageLength, snapshot, block.HeaderHash,
                     last.SortHeight, Convert.ToHexString(last.CoinId)));
             }
-            var balance = coinStore.GetBalance(db, request.puzzleHash, snapshot);
-            var groups = page.Length == 0 ? Array.Empty<CoinRecordInfo>() : new[]
+            var groups = page.Length == 0 ? Array.Empty<CoinPageInfo>() : new[]
             {
-                new CoinRecordInfo(request.puzzleHash, page.Select(x => x.Record).ToArray(), balance.Amount, balance),
+                new CoinPageInfo(request.puzzleHash, page.Select(x => x.Record).ToArray()),
             };
-            return Ok(new GetRecordsPageResponse(snapshot, groups, next));
+            return Ok(new GetCoinsResponse(snapshot, groups, next));
         }
 
         private static bool HasDeprecatedFields(Dictionary<string, JsonElement>? extra) =>
