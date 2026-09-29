@@ -11,10 +11,17 @@ these tests.
 
 The six configuration and validation cases are in `static-snapshot.json`; ten
 real-data cases are in `data-snapshot.json`. Run the xUnit integration tests
-against the frozen API and PostgreSQL database:
+against the frozen API and PostgreSQL database. From another machine, first
+create an SSH tunnel to the API's loopback port:
 
 ```sh
-PAWKET_BASELINE_URL=http://127.0.0.1:5057 \
+ssh -N -L 15057:127.0.0.1:5057 1889u
+```
+
+Then run in another terminal:
+
+```sh
+PAWKET_BASELINE_URL=http://127.0.0.1:15057 \
   dotnet test tests/baseline/WalletBackend.BaselineTests.csproj
 ```
 
