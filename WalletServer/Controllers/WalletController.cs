@@ -199,8 +199,10 @@ namespace WalletServer.Controllers
         {
             if (value is null) return false;
             var hex = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? value.AsSpan(2) : value.AsSpan();
-            return hex.Length == 64 && Convert.TryFromHexString(hex, stackalloc byte[32], out var written)
-                && written == 32;
+            if (hex.Length != 64) return false;
+            foreach (var digit in hex)
+                if (!Uri.IsHexDigit(digit)) return false;
+            return true;
         }
 
         private static string EncodeCursor(RecordsCursor cursor) =>
