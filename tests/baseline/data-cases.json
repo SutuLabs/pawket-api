@@ -1,0 +1,79 @@
+[
+  {
+    "id": "records-spent-coin",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9"],
+      "includeSpentCoins": true,
+      "pageStart": 0,
+      "pageLength": 2
+    }
+  },
+  {
+    "id": "records-unspent-filter",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9"],
+      "includeSpentCoins": false,
+      "pageLength": 2
+    }
+  },
+  {
+    "id": "records-unspent-page-0",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2"],
+      "includeSpentCoins": false,
+      "pageStart": 0,
+      "pageLength": 1
+    }
+  },
+  {
+    "id": "records-unspent-page-1",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2"],
+      "includeSpentCoins": false,
+      "pageStart": 1,
+      "pageLength": 1
+    }
+  },
+  {
+    "id": "records-hint-unmatched-in-slice",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0x36691c63e80eeb2d9f1a4e9a949f9a7f16b07abc206531fd95fad7f99d2d9e2c"],
+      "hint": true,
+      "includeSpentCoins": true,
+      "pageLength": 2
+    }
+  },
+  {
+    "id": "records-unknown-puzzle",
+    "method": "POST",
+    "path": "/Wallet/records",
+    "body": {
+      "puzzleHashes": ["0x0000000000000000000000000000000000000000000000000000000000000000"],
+      "pageLength": 2
+    }
+  },
+  {
+    "id": "coin-solution-spent",
+    "method": "POST",
+    "path": "/Wallet/get-coin-solution",
+    "body": {"coinIds": ["0xb8893cceeb6cdb2281a43491ded917e38ecf4c5fb742e2c2af9425f416ecc0cd"]}
+  },
+  {
+    "id": "block-with-generator",
+    "method": "POST",
+    "path": "/Wallet/get-block",
+    "body": {"indexes": [229001, 229003, 238292]}
+  },
+  {"id": "names-recent-empty", "method": "POST", "path": "/Name/recent", "body": {"count": 3}},
+  {"id": "inscription-ticks-empty", "method": "GET", "path": "/Inscription/ticks"}
+]

@@ -1,0 +1,2538 @@
+[
+  {
+    "case": "network",
+    "request": {
+      "id": "network",
+      "method": "GET",
+      "path": "/Wallet/network"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "name": "mainnet",
+        "prefix": "xch",
+        "chainId": "ccd5bb71183532bff220ba46c268991a3ff07eb358e8255a65c30a2dce0e5fbb",
+        "symbol": "XCH",
+        "decimal": 12,
+        "explorerUrl": "https://www.spacescan.io/xch/address/"
+      }
+    }
+  },
+  {
+    "case": "version",
+    "request": {
+      "id": "version",
+      "method": "GET",
+      "path": "/Misc/version"
+    },
+    "response": {
+      "status": 200,
+      "body": "0.0.1.0"
+    }
+  },
+  {
+    "case": "taildb",
+    "request": {
+      "id": "taildb",
+      "method": "GET",
+      "path": "/Misc/taildb"
+    },
+    "response": {
+      "status": 200,
+      "body": [
+        {
+          "id": "c5741ee5b3dd911f86c52952797c6a6f4c6024f7c0027f1c65ec89af01d8ed30",
+          "name": "Naked Emperor",
+          "code": "NKDE",
+          "description": "The clothes made from this wonderful cloth would be invisible to everyone who was unfit for the job he held, or who was very simple in character.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQRSSLywQQkLEvxHLXWdKRY3PmCwHMUKDtfhkXGEscFRB?filename=NKDE.png"
+        },
+        {
+          "id": "1d0d63d3f3384605cb22866a48b7a855938572c5ef02fdbe2f14210ee4c03e0e",
+          "name": "Kaljaviikko",
+          "code": "OLUT",
+          "description": "One kaljaviikko is equivalent to a weeks worth of beer consumption (and apparel such as flame beanie and fast sunglasses). As such, one coin can have no set value as it is unique for each holder, typically ranging from zero to several thousands of USD.\n\nThe total existing supply is 52 weeks worth. A very liquid asset.\n\nParallel asset for those not dealing in bulk lager: https://bit.ly/3QLp9g7",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmd7RDiYfCzbfEG5PL8qai8CpFvq3hVr1PXtHUE4vag1ox?filename=OLUT.png"
+        },
+        {
+          "id": "44a7a9e4666c82465e3429a4600748848e122e55a3de0fbb0bb33caf42b4188a",
+          "name": "Erikoiskalja",
+          "code": "BISSE",
+          "description": "Lahtelainen olut on palannut valikoimaan vuosien jälkeen ilahduttamaan oluenystäviä erikoisen herkullisilla oluillaan.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmcGEAqDej1Quj27DwRUWSbuxA1a46P26rMzDLi8WuoxFq?filename=BISSE.png"
+        },
+        {
+          "id": "ca17ac895f0b560b1bd0db6f794afb98c29a2cfe5c421a7370ea01b664e0416b",
+          "name": "Hedgie Token",
+          "code": "HEJI",
+          "description": "Everyone loves hedgehogs... Am I right? These Chia Asset Tokens will help you absorb all that hedgie cuteness. Plus, you can often trade them for exclusive NFTs or other items from the Zodiacal CATs universe. Snatch these little guys up where and when you can. Only 25,000 were minted, and there will never be any more!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYwg8R4Yay4W5Ten2VzmVEmAUU6hQJgZiJfe2EqFMvBoA?filename=HEJI.png"
+        },
+        {
+          "id": "ee495b3795eebe47c5cbf3cd6e47a2e418e6dc65ce493c626c0cc140fcd2dcf1",
+          "name": "Green Energy",
+          "code": "GEN",
+          "description": "Green Energy (GEN)\t\t\t\nTotal Supply 100 000 000 GEN\n\nCommunity NFT support (50%) 49 656 065\nStrategic Partnership Fund (50%)\t 50 000 000",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmSo94cgAt826SDfoeViRtbApfKcLBdpYeh2JuKJyvZcyb?filename=GEN.png"
+        },
+        {
+          "id": "70fa530ab1f8ed49a5cf93bfbe44bb842d4fbd837a84c1eee377bcfb8f438672",
+          "name": "2022 Mojos",
+          "code": "TT22M",
+          "description": "Limited issuance fungible token in honor of the year Chia Asset Tokens first became tradable. There are 2.022 tokens, so 2,022 indivisible units. Who knows? They may become a collectors item when CATs become the basis of the global carbon market.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmUpBaYibJgoH5B8jG9FSPerG5gxzMG2fvizFGqjRxVGrw?filename=TT22M.png"
+        },
+        {
+          "id": "7a0b3df66ba4eddbcdbb8071b9eba266cd3cb8a38d24f5b4e211e9a8bae0767f",
+          "name": "DUBAI Token",
+          "code": "D210",
+          "description": "A Chia Asset Tokens minted on the Chia Blockchain of appreciation with limited single issuance. Token In honor of Dubai being the best city in the world, for the chia community. This issuance is limited to 210 tokens in existence and there will never be more. Token has its own Value and can be used for different Use-Cases.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZDn5orPae191LySMMsQ4vV7atbKEtM4WPaiaymaZ7kvv?filename=D210.png"
+        },
+        {
+          "id": "3d597f5dd9d9249be84b515dcb22442a773afa2aa210c27624ce3bc612e9c3d3",
+          "name": "$moto",
+          "code": "MOTO",
+          "description": "NOT AN INVESTMENT VEHICLE - THIS TOKEN IS AN ATTEMPT AT UNDERSTANDING HOW PONZI TOKENS WORK AND WILL STEAL ALL YOUR MONEY",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmPUbfeExuTZz1LeojtUJHxtAXqEbFaJYL8vc9wHM3g1xZ?filename=MOTO.png"
+        },
+        {
+          "id": "9f65e250eae02e8a64f1d89952431f369fd667386c19acce95dc217878b2e134",
+          "name": "Treasure Chest",
+          "code": "TCHST",
+          "description": "Dividend stock",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmVrgKHQ99kvVaDNJTmLfFQLHLq7UKNkXNVW5jrLfk1XMX?filename=TCHST.png"
+        },
+        {
+          "id": "1959758d650caff790f6e8b430aed7cd3854a93875c293dbc7cc9ee4841d3f50",
+          "name": "Chialing Twenties",
+          "code": "XL20",
+          "description": "These are the TWENTY token denomination of Chialing currency.  Visit the Chialing website or my Discord to learn more about them! The twitter link here is for Chialing NFT Certificates, for which these CATs can be redeemed...",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmfHvr4Jdu9ontkVd1yQCjrbEJDFuA8aJKsSsEYo6RoBfJ?filename=XL20.png"
+        },
+        {
+          "id": "d7f5081c76d58c3ccf42566bf15b960784f1a686468c58eedd3fa764ef0ada45",
+          "name": "NioStake5",
+          "code": "NIO5",
+          "description": "Official 5% APR Stake Token of NioCoin",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmRWZEh9vZkbKrpUbHRkcJAZQKDQtmmNAn9JJt7F8bqBoz?filename=NIO5.png"
+        },
+        {
+          "id": "0bfbc7095597df453a6e8ab24b2d544f5f288d7e4613e2e0a79c11171572dbea",
+          "name": "Garden",
+          "code": "GDN",
+          "description": " \"Look what we've discovered?\"\n \"GDN! Treasures in the garden!\"",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbGvt2Roc72JZxX1eir3MJRSMXmdu1iJFR656WqJzPc2R?filename=GDN.png"
+        },
+        {
+          "id": "0b3dc46f825f7d0ce0f47879e6d39312a95da956e61446317ce5fe5af564442e",
+          "name": "FCB Fan Token",
+          "code": "FCBT",
+          "description": "Unofficial FCB Token. This token is just for fun and for FCB fans.\nIn the future, FCBT can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmY7LCrzSTjwD6QCSzPicAVEFNdxWUNSQ7g6r6ByEA9ACR?filename=FCBT.png"
+        },
+        {
+          "id": "4f50e6f88fd5765a64ed49b20bf0e81a37b1550ac92c19fbe84e41562f23e60a",
+          "name": "Xtock Token",
+          "code": "XST",
+          "description": "Xtock Token",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmSC8mBt3xtYcKMRcB4BjdfvsCNXshrNHH5w3DjAVh1bkS?filename=XST.png"
+        },
+        {
+          "id": "2b0b9542278bd983d292d4b335460f3ddffd911cff98276fe488bd43f5d3ef7a",
+          "name": "XCOW",
+          "code": "XCOW",
+          "description": "Animal, produced in animal cycle of FarmerVerse",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmV1s1j26UgyYCBasRkorANdLqgwTjEpj53eqQRfcaKmHh?filename=XCOW.png"
+        },
+        {
+          "id": "940613a8af071d5ad8feb65e1eef5aaa3813e5091988734c75689cb2dd1c272b",
+          "name": "XIVI",
+          "code": "XIVI",
+          "description": "The main token of the Xivion project",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmeFN9zCkJw9BfTEwiV2S3EFCXQjTWqmFXjaMSpabJ7wDN?filename=XIVI.png"
+        },
+        {
+          "id": "57138565da3cd7346097bb27ab05e4da3fd588188a6d4ae255fbb84262aae56d",
+          "name": "Collector's Guild Token",
+          "code": "CGT",
+          "description": "A Token issued to those who were able to collect all 4 rare coins enabling the holder to obtain a guild membership pass.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUS23KQdg8we3Kt4kpWJKMimjoMPzmZPN5eyVFC98BPL3?filename=CGT.png"
+        },
+        {
+          "id": "3555671ab090827d983a61fe0b448a66916d122528cb6e5220dba2a115e178b4",
+          "name": "Rumble Ape Squad",
+          "code": "RAS",
+          "description": "Rumble Ape Squad is the native token of the Rumble Ape Squad NFT project.\n\nAn ever evolving NFT project aimed towards the metaverses of the future.\nYield $RAS just by holding an NFT!\nDesign and sell your own Rumble Ape Squad designs!\nFull comercial Licences with each NFT!\nSell your own Rumble Ape Squad products!\n\nLet Rumble Ape Squad be your brand!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmV8wCao61bLh3DhDuNbHgXauvaw5FgCJQK7ihaMj67iKa?filename=RAS.png"
+        },
+        {
+          "id": "7d176bff0ac2e15fe6e5f57352e7c3a467b476a798dd38f30e39af7ef6cc52b4",
+          "name": "Abandoned Land - Ore",
+          "code": "ALORE",
+          "description": "Abandoned Land Ore dug from the mines.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZqnjYwhPyoHXKMigGPHP4WMaDCoLYH18ZWaimms7xYFR?filename=ALORE.png"
+        },
+        {
+          "id": "ce9dfce94a5a65c0207bf3d57b407db559e9cd34f2050f8bd61291b42bead361",
+          "name": "Abandoned Land - Food",
+          "code": "ALFOOD",
+          "description": "Abandoned Land Food",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZhaKE312b2jCode7g7abSp2mSiepeh6RqbrKkS8g5MK8?filename=ALFOOD.png"
+        },
+        {
+          "id": "1d3c0c66804da57f0ef64dd61048be2c52a2fae38b6eb129b1d9e7686b0f8dde",
+          "name": "Ghost Token",
+          "code": "BOO",
+          "description": "Ghost Token is on Chia to protect the community. The strongest memecoin on Chia!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQ73sr24S81LVCddUUga299EmHpCo2cj8mBbQARLdyGNT?filename=BOO.png"
+        },
+        {
+          "id": "0fe711bf57d0222603a8d3e13df54b29382373ab2b05261c69667360a5738d64",
+          "name": "Sappho Lyric",
+          "code": "NOT1",
+          "description": "A coin so rare there is not even one in existence. Like most of Sappho's lyrics it exists only in fragments. Maybe an archaeologist can dig one up for you.",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmZm1fbScWA4h5K4V2CkKSTPUYwSg5ekKrruL4YqVayzMU?filename=NOT1.png"
+        },
+        {
+          "id": "08410d6db9addd81b7c1342c104b27444c1491f51394b6eb6860fe7de3877532",
+          "name": "Space Time Cats",
+          "code": "STC",
+          "description": "Space Time Cats",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmeKHQyWzX6uNDdLihAnMK8vdFQQYscHH1tb2GvXpUXbYX?filename=STC.png"
+        },
+        {
+          "id": "c40c46a1b7238c4a7b68ce3f5967281759349aa340e948e2009ef146628a8a73",
+          "name": "Hugo",
+          "code": "HG",
+          "description": "Hugo est le token officiel de notre meetup hebdomadaire à Auxerre.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmceVUzAee99fXZxN8BTmXQuBTCBwqjzLMzLpgAEUirxtF?filename=HG.png"
+        },
+        {
+          "id": "fa27338829703d9c195f775b28fce529f35dd185cd9df97eaba860c489ac3991",
+          "name": "OnlyFansToken",
+          "code": "OFT",
+          "description": "The NFT trading platform on the chia chain allows creators to get more feedback from buyers, allowing buyers to buy potential NFTs. OFT is the token of our website. The ability to create NFTs with AI will be added in the future.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmQzQ84mNGBNtbPEvt8Kea21SerRZZrhyYxRRgjVLT9dTu?filename=OFT.png"
+        },
+        {
+          "id": "4e34fb4247865a1a644c992a51340aa32f397f094cf1abd9663803ed4e172dfc",
+          "name": "Felix Gold",
+          "code": "FLXG",
+          "description": "Felix Gold 1,000,000 minted in the Felix collection",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQrARsKd8axiCS2G2VQ8kGbDRsAaZyskZqQyVd1hr2xJH?filename=FLXG.png"
+        },
+        {
+          "id": "a7c8135b134e1a477563480febefd2e2091afe15d24ab567045eb8fa024ef597",
+          "name": "DeltaXtrade",
+          "code": "DXT",
+          "description": "Token for payment of the trading platform, trading robot",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmXKrVt9K2zv7A3M4iFVSonDTxDS9J91Q79Tam9y8XUGZn?filename=DXT.png"
+        },
+        {
+          "id": "c3abdd9c4932b34600cd33c998ec813e5b32c6125db301637c0d7f52189fc292",
+          "name": "Comic Book",
+          "code": "COMIC",
+          "description": "Comic Books are collectors items for the Wasteland. There are only 500",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmYP8eAKo78ti1tpg4iKWGLhdQKk91jVP7qK5HwpxS3HVx?filename=COMIC.png"
+        },
+        {
+          "id": "de5c5a1ba2d62a2b29807d47d043f702e11c843c1e2a681b21e596848554dc60",
+          "name": "Hydra Graph Token",
+          "code": "HGT",
+          "description": "Hydra Graph Ecosystem Token",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmZNuyQ2bU5pSEo7AUeoeFo8YQCQr3MXCD94JSwRKWWDFa?filename=HGT.png"
+        },
+        {
+          "id": "49fd76384a4fced922d99d28a646dd0439ab753ad15fcfea8ef50213804112e6",
+          "name": "Solar CAT",
+          "code": "SCAC",
+          "description": "CAT pegged to the Unique Users for the Cactus Fork at the time of this Minting. 35636",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmeoEqCaCTySQ71c1N6nxidER41sD7SrF6tHLEupRiBUxy?filename=SCAC.png"
+        },
+        {
+          "id": "824c71e37ac660006e03f7884561e7a124d930460ae1506a9c234c06ebc6aa1d",
+          "name": "AIR",
+          "code": "AIR",
+          "description": "An Inflationary Rebasable token, from Namesdao, for use in blockchain apps",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYFQ1iXePFZ5xz2wf934he9QoCegxYnZTLQsHo3ADycW4?filename=AIR.png"
+        },
+        {
+          "id": "ca861009baf2c825482504f359c9fc399a0a0af5ad678398eeab92551821d203",
+          "name": "Outer Fields | Booster",
+          "code": "OFAB",
+          "description": "Eligible to exchange for a booster pack of cards for Outer Fields. See https://outerfields.space for details, only send to a verified endpoint address for redemption.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZ1f2WsfaGExmAvLgo4UQTETQsLDyQui5T2X429n5DBWG?filename=OFAB.png"
+        },
+        {
+          "id": "91a48b56d7d4e11e9419b1e2c06859f3f6d9ad4a8408c820a10b2da173abb59d",
+          "name": "Terran Imperial Credit",
+          "code": "TIC",
+          "description": "Primarily used to facilitate bribes, dirty deals, and assassinations in the mirror universe.  These coins are exceptionally rare.  Smuggling them across the mirror universe barrier is near impossible.  If you happen to have one of these coins, count yourself extraordinarily lucky. Even our highest-level members have struggled to get their hands on one and would pay nearly any price to acquire it.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQLYH4BFSz5zxtWRv5RBUiUTFDZ1C7Ke1cx6iz5CjQqXJ?filename=TIC.png"
+        },
+        {
+          "id": "26c29cff746d8d0c01550cebc305b8f9fa4f236dc70fdcdb71dcfbc39e2b71d0",
+          "name": "BCAP RED",
+          "code": "BCRED",
+          "description": "Red bcap tokens represent red bottle caps",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmRT3UHwhmUVbJpLVkqwVPciH9VeGtVepV6SxWudJscxVX?filename=BCRED.png"
+        },
+        {
+          "id": "8f27f8b6aa31e07f4de43e12eea854ab450d56afdd65be4328928f5bd2fa80cb",
+          "name": "Mystery Coin",
+          "code": "XIPM",
+          "description": "Mystery Coin (XIPM), like Fools Gold is a single mint Chia CAT token. What makes it radically different is it's max supply of only 6187 XIPM. Mystery Coin is only distributed inside the Fools Gold community.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmY8caug7gaZpVpT2nRmLbZGYnMZWjnMnYrzZor6vYrzBq?filename=XIPM.png"
+        },
+        {
+          "id": "3a80cd9e78201cc103647b4cae86616b7b85908a1db2839c8d543531fc660b7d",
+          "name": "Billybux",
+          "code": "BBUX",
+          "description": "Collectable, delectable, respectable, injectable 🪤",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYe8bQsrzhrU4mvNdB1cesonRznu5MtysZnyUdkm6Y9dz?filename=BBUX.png"
+        },
+        {
+          "id": "769a1598eb4dbe931f7a9e98ebc8935130769b81131353d1f531ad79f5ecb6be",
+          "name": "XWOOL",
+          "code": "XWOOL",
+          "description": "resources that can be obtained\nthrough the animal cycle and can be exchanged for FBX.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmdLfLrDKk29FLkFYAU5N8J7KQh5868o6ALzb9HhhLgnnc?filename=XWOOL.png"
+        },
+        {
+          "id": "5fd27391e6385e5d4bdc5b7b2df67b2e8698e337d49b94302a3551deda565e58",
+          "name": "Proof Of Treasure Coin",
+          "code": "POTT",
+          "description": "Proof of Treasure Coin (POTT) is the reward coin for proofoftreasure.com; a game where you can win real crypto treasure by guessing the location of the in-game image. We believe POTT is the first CAT (Chia Asset Token) that has a verifiably limited issuance schedule. The amount of POTT that can ever be created per month will steadily decrease over time, with several halvings hard-coded into the coin.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmXVkFYCEsF5ZmarYPFPrcfuGS4K7ur1gEsn41cWeZAnFq?filename=POTT.png"
+        },
+        {
+          "id": "fa18661ee38d938858bf2d1ecf2c8ad5cbed972e09ff6c55f62293d0eaedd1ae",
+          "name": "Time",
+          "code": "TIME",
+          "description": "The most valuable thing in life is time. There are only 8,760 hours in a year, of which 2,920 are spent sleeping. Total 10,000,000 TIME tokens. Don't waste time and good luck !",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmVHCFFyh6UjsYVpcvkyjC2hQ2gV7PdRRCcLcuEpxiYXL8?filename=TIME.png"
+        },
+        {
+          "id": "eb11cb4c71f73e4fedc7f74501b9ec4505bf960fe89924c4952d74a1a204eae1",
+          "name": "Space RatZ NFT",
+          "code": "RATZ",
+          "description": "We have decided to unite with our fellow chia farmers and xch believers. Unique SpaceRatZ NFT collection of 100 NFTs on chia blockchain. Together we are strong as community!!  1RATZ = 1xch you can preorder and reserve the art on discord.",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmWdJAHNsHeGsa71RLJy1LLfZxW1nydEuK2zbqALisGFv2?filename=RATZ.png"
+        },
+        {
+          "id": "98be421bf2afd03bbaa71d7217216837790a9ea7a710f0b684cc9a4cc9f6f153",
+          "name": "Transporter Credits",
+          "code": "TRPC",
+          "description": "A unit of exchange that allowed for use of transporters at Starfleet Academy.  Now defunct, these coins have become highly collectible. Heavily nostalgic for academy graduates, bids have continued to rise at public auction.  No high-end collection is complete without one.  Check the Collector's Guild ledger before they are gone!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmckC3zA9p8ygm63GLtsoLtRbDeNroiiCF9hfcm3e3ZjJk?filename=TRPC.png"
+        },
+        {
+          "id": "afefb47c852838c9f66d5c116f11f1b655371377f6671d952f8253ce828461d0",
+          "name": "Pixel",
+          "code": "PIX",
+          "description": "Pixel is token of the PixPunk NFT's collections.\n\nWe have decided to unite with our fellow chia farmers and xch believers.\nAn ever evolving NFT project aimed towards the metaverses of the future.\n\nEach holder of 1 $PIX will be able to claim its correlating PixPunk NFT.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQ8GqAN8dq9WS9zQ9arqDcRuNZ54GRYEGL9yJVqNUFZu1?filename=PIX.png"
+        },
+        {
+          "id": "a628c1c2c6fcb74d53746157e438e108eab5c0bb3e5c80ff9b1910b3e4832913",
+          "name": "Spacebucks",
+          "code": "SBX",
+          "description": "The galactic monetary standard.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXcowRQMUe3PV7hwArMdYcGJCRcdwUvVKunrZXKx2Nsjd?filename=SBX.png"
+        },
+        {
+          "id": "e24c4b3741140224ba0ddf7bac58c69cdf347e657bf805c97405ede16fc689c4",
+          "name": "Green App Development",
+          "code": "GADBAD",
+          "description": "",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYmtrMtjMm6mkwuvFRkRW5ADiDEmDEmgsTQYdTyVx2WFz?filename=GADBAD.png"
+        },
+        {
+          "id": "948b43068a09895cdfdf3a3eae857eec450a34677fe69fc5ce39df36b3a40fec",
+          "name": "Crew of Eight",
+          "code": "CO8",
+          "description": "This is a pre-sale token for the 3D NFT collection \"Crew of Eight\". Holders of these tokens can redeem them 1:1 for an NFT once it becomes available on the Chia blockchain.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmWLh1ezEgbhGa2LJMZPCb5C24mk8Q1b6MYrfYMfSo8vHK?filename=CO8.png"
+        },
+        {
+          "id": "4275bd94b6913028adc4b183288a873c7cabf65c163e6db7d5686e4ccdc0bb35",
+          "name": "XSEED",
+          "code": "XSEED",
+          "description": "resources that can be obtained through the agriculture \ncan be exchanged for FBX\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmXEvuByvcvJKrHkd18toVcrUnkyXmTe6fxHNasnPcG46j?filename=XSEED.png"
+        },
+        {
+          "id": "0e01b1418f5b8e1c8a636ad625793803088ca1ec62a3e8d883abce05eb0101a5",
+          "name": "Billybug Bounty",
+          "code": "BUG",
+          "description": "Kill a bug,\nGet a hug.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmNb4fjzZF3m8pwB21NajpCNiCFV4B2c1NoM65UW4jxCpn?filename=BUG.png"
+        },
+        {
+          "id": "425881d0271ff45f2b905f21d007f543d8f25ef4ff2c3e81f22a7acb73fcdbc5",
+          "name": "CATMOS ZERO",
+          "code": "CATMSZ",
+          "description": "Rare commemorative token for early Catmosphere supporters. Only 100 minted. Confers advantages in CATMOS events.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNpmNsfgrVDHYThpcC9NXaQpLjRcnxGpQZJ5LjNciSS1t?filename=CATMSZ.png"
+        },
+        {
+          "id": "de6b7e0dec3b3b68779f9331973270f52a4172cd84f47f7742432ab85ca33458",
+          "name": "POTATO",
+          "code": "🥔",
+          "description": "🥔Root of the Chia meme economy and the first stablecoin actually pegged to zero. Taters gonna tate, potatoes gonna potate.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmPxu9r7chxNgGmuFwnnHqt5uhfSHmA3jvATNoRxeC5baL?filename=🥔.png"
+        },
+        {
+          "id": "7d9e10895f967c7fb67eb9b6f866b636d73a336eb50b4097260cad0be70e5b97",
+          "name": "Bram Coin",
+          "code": "BRAM",
+          "description": "Bram Coin is a very limited edition. Only for Bram Cohen fans.  A maximum of 100 $BRAM will be distributed per year. Each holder of 1 $BRAM will be able to claim its correlating NFT.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmVrdEayKZqFxhgZy86xaNJfc4GECDEFVdBiRL5qQ5QKZ5?filename=BRAM.png"
+        },
+        {
+          "id": "d00472f8a4f38efdc41e2f594a9bd6543a1c32a58c98210fbc921817046efd2e",
+          "name": "TWC",
+          "code": "TWC",
+          "description": "TWC",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmXi597fc4sHndXE3gk2t8zXcQoadwC46sUHDTHXTzeQz2?filename=TWC.png"
+        },
+        {
+          "id": "3f346cc3122ff1634b812f43bd122fcf0d532496df16f1edacc1d0b338a55c88",
+          "name": "OMGopo",
+          "code": "GOP",
+          "description": "OMGopo Token is the native token of the OMGopo NFT's collections.\n\nWe have decided to unite with our fellow chia farmers and xch believers.\nAn ever evolving NFT project aimed towards the metaverses of the future.\n\nEach holder of 1 $GOP will be able to claim its correlating NFT.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdTyp2d6WM4UwMWsLgmnLMHG89zoakCUxqenBF8eqyKKT?filename=GOP.png"
+        },
+        {
+          "id": "ec25b77bc54df637392d6a0f542de65f45020405d0f36ced723bff2870c378b1",
+          "name": "MoJo•JoJo",
+          "code": "MJO",
+          "description": "MoJo•JoJo Chia CAT Token! Search for MJO faucet token! Only 1.000.000 MJO's will exist.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWD5CaCmMWSwfMHdsTHUe77j1gqHcjiVGDGgfxsU7VvbQ?filename=MJO.png"
+        },
+        {
+          "id": "bb1de510a86d52a950b56158d1125cda66638221d1335d7d1dd2fcc2ad5cdb2b",
+          "name": "Inverse NGDP Coin",
+          "code": "INGDP",
+          "description": "Pegged to the $2 minus the value of the NGDPLT coin. Dollar value should rise at approximately 5% per year minus the growth of US Nominal GDP.",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmdF678qXEWhK54NDRprY3ccQaWbjuUtZJ3iaAAPM5uAMh?filename=INGDP.png"
+        },
+        {
+          "id": "3b27617d821428052f00199e7a06b1ab666d58a59901540455fe71d36451a00c",
+          "name": "Hairy Bear Honey Jars",
+          "code": "JAR",
+          "description": "Honey Jars from the Hairy Bears. Get yours by contributing to their shaving efforts! JAR holders get weekly HONEY drops.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmVjkBZGHdpGXHjiumyu8vMjWgdsczNkGvUYySQaQAZ9j5?filename=JAR.png"
+        },
+        {
+          "id": "7a66a673b0c26c68fcbe9cc84e5db3eab834d66684fe8c1367a2956df59be83c",
+          "name": "aa",
+          "code": "aa",
+          "description": "aa is a token issued by the chia blockchain",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmcm1ueX8dYdKbKF66q14kuFj7kWRP1bG1PxzECKdRSWNZ?filename=HEM.png"
+        },
+        {
+          "id": "048b1358f3b55a70c4db22114c2f52569c0398ba19e8212b8daf1cb25c90a641",
+          "name": "HonK",
+          "code": "HonK",
+          "description": "HonK",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmerRj8Jxx1gNgJ4vH5CTUk2z68eS5H5CJJwDvqrpX5V7g?filename=HonK.png"
+        },
+        {
+          "id": "9da21774b07828ecf8e55081e647e1f68207f4c9888c7a18a4cb69e862c98f37",
+          "name": "ChakMoon",
+          "code": "XCM",
+          "description": "ChakMoon Coin",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmbgoHEUJyyy4cChuVNs9bQuzK9mPetSav33ZJ9YaJ9XnT?filename=XCM.png"
+        },
+        {
+          "id": "4ac791e72592ec2ed05a2ae871efb30e277ca10ce63ce2f07ef94c7a413095e7",
+          "name": "L33T Coin",
+          "code": "L33T",
+          "description": "",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmXf53Z6FKWnUYKTHSMkLQxbdfFhP9TbtHVXqN9amvsuen?filename=L33T.png"
+        },
+        {
+          "id": "d92268a1df8aa91aa410fcfaaa57583562bdfe9bacb458453f3518c4a3256124",
+          "name": "CheeZe for SpaceRatZNFT",
+          "code": "CHEEZE",
+          "description": "CheeZe - utility token which can be used for Galaxy Dealer Market @ SpaceRatZNFT",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmYRHok5JJF7yC9S3urgZz3Rw797nZwpE76jzGGrW3qiSy?filename=CHEEZE.png"
+        },
+        {
+          "id": "fe65842a8b4f20c212360e22ad3da51d3b30020b29fd0a7b395ae60fcc6f6321",
+          "name": "Collectible Resource Unit",
+          "code": "CRU",
+          "description": "In-Game currency of Crew of Eight (CO8) NFT collection.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmY5n5BXQiYBYcyWhkDbAATmE8RjC1JBEKZGv35mebymGQ?filename=CRU.png"
+        },
+        {
+          "id": "1a8bd94ce5b26ef7fdedec6a21748a747fc8d1f05972efd248b63298c3e5be96",
+          "name": "Pool Coin",
+          "code": "XPC",
+          "description": "PoolCoin is dropped monthly to all farmers farming in XCHPool!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmSxbnqKQCDrzrBKP9SdTW3731qMXFaBNLJKpqvT1HD2qE?filename=XPC.png"
+        },
+        {
+          "id": "2f3a28ba03734b65797df5d5ff0e253606e7fea2e2ee341c39e9a405bce68aa8",
+          "name": "GOT Token",
+          "code": "GOT",
+          "description": "2,000,000 GOT Tokens were produced. 1,000,000 GOT Tokens will be distributed to community members within 2 years. At the end of the project, 300,000 tokens will be locked in the main wallet for the team, 400,000 for community development, and 300,000 for tree planting services in Turkey for 5 years. (xch1q0p6gt8h2qn9zvrg8uscp3y8sn93h302u8astp48k93z3mmzfn0srjszgq) Please stay tuned to earn more tokens",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmUbF53e7NqtCAvkqheVHLnw4FfipJbEDphtNBWskQcPBp?filename=GOT.png"
+        },
+        {
+          "id": "aa3038a70653b03929fa9af938124e04954a1e10ec1d924f968e94dd6b215987",
+          "name": "BRICKs",
+          "code": "BRICK",
+          "description": "Artist, tech enthusiast and cultist of the DefCon badge - chialisp \n\nIntroducing 'BRICK' token for my procedural generated structures of BRICKs. This issuance is limited to 999 CATs where every unit can be swapped with its correlating NFT in the BRICKs collection.\n\n",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/Qmabtm5D4oAnkXxTz73jWUW56gVzeDeChxN7h8N3UNF5Eq?filename=BRICK.png"
+        },
+        {
+          "id": "487d889d0000cb6d7c6c5caf2c30775ef409d3a5b4f5a544e8a6de1c511fae03",
+          "name": "Quatloo",
+          "code": "QTLO",
+          "description": "A quatloo was a monetary unit on the planet Triskelion which was used by the planet's \"Providers\" to bet on thrall competitions. When the currency is held in the hand, it has been known to grant telekinesis to its owner. The currency has since become a very rare and highly collectible commodity. Well known collector \"Kivas Fajo\" was known to have a large amount of the currency, until his arrest and confiscation of his collection. If you have an opportunity to acquire one, do so!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUvqT6DszXgY4xRsToF5nzKVEaa9AdfKiMq5zbMHmmNL3?filename=QTLO.png"
+        },
+        {
+          "id": "af7c58b91d286376b6f3602fa18211e4a0b6abc7edf54f3fa3806730ca5f674b",
+          "name": "CATMOS Paper",
+          "code": "CATPPR",
+          "description": "Represents \"papers\" in Catmosphere Rock-Paper-Scissors games.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmP5M9mCFweb1LMJwAVfA53DXKsE9sGdDexpQHkeNFkhCx?filename=CATPPR.png"
+        },
+        {
+          "id": "22945c6c10f2c1be9f4b2484652768498cf1e4153c015a7bf981913a6b21430a",
+          "name": "Board Game Crypto Intro",
+          "code": "BGCI",
+          "description": "Token free for phase 1 of the Board Game Crypto games.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmXAhRTj9hZjiWHvGCTsnS1PWsnAuTeoYJb5Ex78gaeyFv?filename=BGCI.png"
+        },
+        {
+          "id": "f55fd6a4bc7339e31305e5c23444a7805920110a473cbb2777ff42013eee2cbf",
+          "name": "Let's Coin",
+          "code": "LETSGO",
+          "description": "🌱 The First Video NFT Project on Chia! 🌱 \ndid:chia:1m96xecqtmw3lgxx5zgv2ht3qhn4pdvd22tq5hg5nmncwedmv24pse58hks",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmXb24cEwiZgTDrUYazPnRkXXpv3cySsztAKA1c1KXebVC?filename=LETSGO.png"
+        },
+        {
+          "id": "d0b6098e494db061bf0c28a5c7d94de6c06de23dddd705b29d7857c420b123a2",
+          "name": "ROCKS",
+          "code": "ROCKS",
+          "description": "Voting token for Lonely ROCKS' curation system.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/Qme61dDJeKcTDgEWgJhZCZ39YFv1EiiMBv2gk4fKmUGz2w?filename=ROCKS.png"
+        },
+        {
+          "id": "f9529c59c0cfba364671c927a60a23c3cab9dc5e2b1488ba0c7b858e99a8ae2a",
+          "name": "KATS 2.0",
+          "code": "KATS",
+          "description": "These are 10 teams of 10 characters, who are united by one thing - they are KATS. Each team is unique and unusual in its own way. The total number of NFT tokens is 100. WNFT will expand and KATS teams will take their rightful place in it.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmcve5nwMYf9KyyCkNLbq33Pxp2yn9H1xNvVNWuVawwJnP?filename=KATS.png"
+        },
+        {
+          "id": "099e11465ef07b31b69ecea19589f84502755c4f93d1f74a0e817881065b8f87",
+          "name": "CatGurlCoin",
+          "code": "CGLC",
+          "description": "CatGurlCoin is not your typical cryptocurrency; it's a vibrant and paw-some meme coin built on the Chia blockchain, paying homage to the ingenious creator behind the iconic AnnoyNation NFT's. If you're a crypto enthusiast with a soft spot for feline charm and internet culture, this is the coin you've been waiting for.\n\nConcept and Inspiration:\nAt the heart of CatGurlCoin lies a tribute to the artist responsible for crafting the beloved AnnoyNation NFT's – an artwork that captured the hearts of millions with its adorable and whimsical depiction of a feline-human hybrid. The NFT transcended the digital realm, becoming an emblem of internet art and creativity. CatGurlCoin aims to honor this innovation by merging the world of decentralized finance with the charm of internet sensation, fusing technology and art in a unique way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQesq939fA6xBvyL7cWT72GG4JhcVUSANtPZhU2x5MGDo?filename=CGLC.png"
+        },
+        {
+          "id": "e0ed5a8e325a7dbadfefd760533afb37e89d17a3ffa05e681b1c4b897d5e86b7",
+          "name": "Too Rich GOLD",
+          "code": "TRTG",
+          "description": "Limited Edition of Too Rich GOLD  token , only 1000 milted.\nNow in Chia Blockchain.  Discover our Metaverse TooRichCity",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmZ1CqGa79s9SJFqKMmJyCSKCvYF11YZEpjksXo6vfRYGp?filename=TRTG.png"
+        },
+        {
+          "id": "446f5c3532929f71fa82f1c65f7e93170dcfbf8d59baf82a81b6f8e8f85e8a5c",
+          "name": "Abandoned Land - Gold",
+          "code": "ALGOLD",
+          "description": "Currency for Abandoned Land",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbLkYDY5DrFMMJWt2BQfeJA7M1hGk33e8TKqbLYHUZzkX?filename=ALGOLD.png"
+        },
+        {
+          "id": "f2770d78cdc92f311613db98df81f5cdccd61317d1e838c35d64ef332b4d44da",
+          "name": "WishCoin",
+          "code": "WHC",
+          "description": "Make a wish & Get a miracle！",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmRetjd4pwsvP5XZiPCBZW8AngPJZEtTLzeSfbRqt3mKxE?filename=WHC.png"
+        },
+        {
+          "id": "ce3be095a5d9f22cf286f94ef7a95cfa4afd83267c0d76f9f0e19fc0171d15f1",
+          "name": "Proof of Big DID",
+          "code": "BIGD",
+          "description": "This token is the first to implement the novel consensus method Proof of Big DID. The coin was issued and distributed on 1/14/2023. You could obtain this token by having 1 NFT in a DID associated with your wallet.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQ8E2NQQjPBbXtzLRLyYm3RTybGYZ3QXGEpnvJYMty5gw?filename=BIGD.png"
+        },
+        {
+          "id": "4965fb881379c5d30694e4a6df586295fbee66cb04af352f34c7ab2c19300412",
+          "name": "Did BallDog learn to create CAT?",
+          "code": "DBL",
+          "description": "As you can see, we're code noob, and as you can see this line seems to be working fine",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmceAWWeJfaU5DSbLogPPUq4NgfpynDpLXN6dnvzDDcLpQ?filename=DBL.png"
+        },
+        {
+          "id": "5b0b3a7022db6efc4a104d44ca7847845bbaac30d810e60733c792b61b9706b7",
+          "name": "PSG Fan Token",
+          "code": "PSGT",
+          "description": "Unofficial PSG Token. This token is just for fun and for PSG fans.\nIn the future, PSGT can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmVLpswAy3UvxGmpxcfwRwjRciDEym3J9PjkSYwYqDaveC?filename=PSGT.png"
+        },
+        {
+          "id": "a82b3a2d2b9bb4d9fbdb4bd3bfce4bf56a1d1859a366e56fecf95790aed49094",
+          "name": "Cassandre Fairies Club",
+          "code": "CF1",
+          "description": "15784 CF1 out of 16432 total.\nDiscover at minting which color set you've picked up!\nA Hero Set? Or one of the very few Villain Set?",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmTDLtNFzNDtbdKAW7MgpBy3NFS1BGDvdiWq2XymNe755a?filename=CF1.png"
+        },
+        {
+          "id": "2135d12899cffd0085c49e1c1eb5296e35565bf66cfda1ef2df8d6a7ea08f4aa",
+          "name": "Slip of GP Latinum",
+          "code": "SGPL",
+          "description": "The smallest denomination of the most valued currency in the Alpha quadrant, Gold Pressed Latinum!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmVascNk87BjZyE56qmNYa5xq3Ve3P6R5atsaS61cQT4kW?filename=SGPL.png"
+        },
+        {
+          "id": "97bd6d179cedfff84f4a0e82982765dfeab0eec7c1cef7ead0b5f23360de7a63",
+          "name": "US NGDP Coin",
+          "code": "NGDPLT",
+          "description": "Pegged to US GDP, minus 5% per year, anchored to $1 in 2007Q4. Represents what the dollar would be worth, in terms of goods and services, if the Fed had successfully pursued an NGDP Level Path Target with 5% growth and RGDP had followed its actual path.",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmRdKAK1P7xSFoN2qN3MAScoxP6zN99zu2dFnWC2NWnmuz?filename=NGDPLT.png"
+        },
+        {
+          "id": "efd85235c35cda41c7d58fe0ffed4c54048540d130fe8e6cd645ec5b2aebb9f8",
+          "name": "BallDog",
+          "code": "BDOG",
+          "description": "$BDOG is minted by the Balldog project team as the NFTs community governance token of the Chia blockchain platform Balldog",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmeSDcMhnuRsaWotXYoRVJHwHQvQhMhXM9Vm4qrfPpHQUn?filename=BDOG.png"
+        },
+        {
+          "id": "92ee34a9728f12e889e79da5ccfa13267ca106e85e57ebf3f27232992c80c2e0",
+          "name": "XChangeNFT ProofofAddress",
+          "code": "XPA",
+          "description": "",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXLKscRUb4dAJ3pHXN8xvtixqiKdkbxp1ezzSvGegU9d6?filename=XPA.png"
+        },
+        {
+          "id": "0ed71c399419b16df76ae7cde9fa257f1dbf845bef462b7f9ea6de8d181cdf97",
+          "name": "City Illusion Coin",
+          "code": "CIC",
+          "description": "An urban form based on Web3.0 fantasy\n999 cities with different forms！\nFans token of the ‘’City Illusion’ NFT project\n10000 CIC = 1 NFT",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmYqF5xnS6VkEaHiLWPtXj1WxyxrWUZTgiC6qRPU46GQrq?filename=CIC.png"
+        },
+        {
+          "id": "3490208d3c2048b3f6efbc46cf65de7732ed5a1dd8dd5fcfe02a829a61273230",
+          "name": "MAN Fan Token",
+          "code": "MANT",
+          "description": "Unofficial MAN Token. This token is just for fun and for MAN fans.\nIn the future, MANT can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWaDJZSfhSoTHj2Z1UvTJe2nk1naVe33SWgc2VwHKD5cd?filename=MANT.png"
+        },
+        {
+          "id": "91b049f4d96ed30215c2548b0933fd382eaebe248ad3b25026e78017f6f63649",
+          "name": "Chialing",
+          "code": "XLNG",
+          "description": "These are the ONE token denomination of Chialing currency.  Visit the Chialing website or my Discord to learn more about them! The twitter link here is for Chialing NFT Certificates, for which these CATs can be redeemed...",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmd15rYWf2nVBTWWvM6HJDVZu8zQFwn5KgSPaAKeAaTq9a?filename=XLNG.png"
+        },
+        {
+          "id": "3f8fc05ff6fd799fc49d7616a7d8440435796d95b8f5a80d83a9935130c43e8c",
+          "name": "SeasonsWhiteListToken",
+          "code": "SWLT",
+          "description": "Whitelist token! A reward token for SeasonsHome&Girl holders, used to discount the purchase of Seasons Pass Edition, used as a whitelist for welfare OG holders!",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmXYQUPcxAa2ghc2LwDfKJZwMNR4MHwsrAzLx8WGP6FM9v?filename=SWLT.png"
+        },
+        {
+          "id": "0b597916bbb1c223407accc5ea44753b6c726c3cef45cdd7e65b84347bd74029",
+          "name": "Grinning Goblins Gold",
+          "code": "GGG",
+          "description": "Gold for the Grinning Goblins NFT game on discord.\n\nEarn gold by participating in duels and events and use it to buy new strong or rare goblins!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZQuZkaAocvVe4y7WHMTAavT2jKnycrbhukXpV8N4jUsC?filename=GGG.png"
+        },
+        {
+          "id": "21ab5244a2732e01ebc0491e1cee8e0d9dc203dd63ac73ca6e523d6138e12f18",
+          "name": "APES IN CHIA",
+          "code": "CAPES",
+          "description": "Originally developed by Chia blockchain, chia.net will grow to be managed by The APES IN CHIA comprised of appointed token holders.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/Qmb2noxMcHkmTx7suUtVUQb7Y1zErkUUfJeyTx3xax3MrA?filename=CAPES.png"
+        },
+        {
+          "id": "167558c9bac114cbf7b58f1aa4cad43153e3b06ce292199918268b6f3f46e5bf",
+          "name": "Bark!",
+          "code": "Bark!",
+          "description": "Bark! A Dachshund token",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWZDGG189HjuAN4GMyEAMXDhvRQQTDtoK6eNnJfPs12Nw?filename=Bark!.png"
+        },
+        {
+          "id": "477285dc4f1f2f5ec42ed63ed1ce127cc56646614540fca86b8481f5b5084072",
+          "name": "CHE Fan Token",
+          "code": "CHET",
+          "description": "Unofficial CHE Token. This token is just for fun and for CHE fans.\nIn the future, CHET can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdnP7d71YFNpoLkzurEzL6NNLwPfXyW7QjiWnMLqLat7c?filename=CHET.png"
+        },
+        {
+          "id": "08beac6f8ae466d12e3bb710b775626549e11998d2f79d89708acee497aef1ba",
+          "name": "Fartbucks",
+          "code": "FART",
+          "description": "Fine Art Bucks",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmU9dSSZAzYqsuf7wp1P5ux7vk3vZ6UomiwHFP1wjTYsMo?filename=FART.png"
+        },
+        {
+          "id": "f7495302b0598cb5004377a364bef89fd17575a2c6a1653ac7a68cb304fb980f",
+          "name": "Bottle cap",
+          "code": "BCAP",
+          "description": "Proof of BottleCap! 1 Token equals 1 bottle cap in real life.",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmTZXJ1JcPCJAmS1QeCCwteUJbFs9QCYqdipqGupV1LnFn?filename=BCAP.png"
+        },
+        {
+          "id": "f7ae5eb93781ac90632ce2429be9171b2f3615ac89f70e54a23a1386c910306a",
+          "name": "Undead King",
+          "code": "KING",
+          "description": "The Undead King had his finest craftsghoul forge 1313 of these priceless coins.  Engraved with  \"Rex mortuus est, vivat rex\" (The King is dead, long live the King) and \"\nExsurge inmortui multitudine\" (Arise undead hordes) these rare tokens of loyalty can only be obtained by the most undead of the dead and are exchangeable for an NFT.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQFMWYBbdatF4ryyizUh1uRhmVgUiXFuC32E97nK3V5s1?filename=KING.png"
+        },
+        {
+          "id": "dee835fbd92ea63fe8f192a6f94b80ae5bad7443284d1347c73143cd25a94293",
+          "name": "CNAR Token",
+          "code": "CNAR",
+          "description": "Only 250,000,000 CNAR Tokens can be produced. It aims to reward community tokens and supporters. Rewards are sent every year to GOT, TAU, C2R and KUT Token holders (the top 1000 budget holders who hold the most tokens). You can earn CNAR Token by subscribing to the Discord channel.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmNsqHSoXXN93sBcmgVn4ohQxbD3WSkM35iHTwyxYQnqwu?filename=CNAR.png"
+        },
+        {
+          "id": "ec70426aebe423192cf8d2b90d11f776785b62e351a1e743da6ec8b2e11e86c8",
+          "name": "Ciger Coin",
+          "code": "CGC",
+          "description": "Ciger Coin",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmSrqGYW8cjMNoWg2Uew85DdwaPTsiefvi5wGcgHcpGx8C?filename=CGC.png"
+        },
+        {
+          "id": "730a00819224b961ae0fb9a639a93e5d668a4d66dca40d6b3671b694169764ea",
+          "name": "THANK YOU",
+          "code": "TY",
+          "description": "If you would like to thank somebody for something, just send him or her few THANK YOU tokens. The token was created as one of the first CAT2 tokens.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmUhQigeGBFcCxNVBVGzFVzWecPbKphP6gjpTNoKFhSGLs?filename=TY.png"
+        },
+        {
+          "id": "4c9c99becbb2b4de99e2faf7e1d79789f0b8d91e7986b18f5de73b5957a0c65b",
+          "name": "XEGG",
+          "code": "XEGG",
+          "description": "resources that can be obtained\nthrough the animal cycle and can be exchanged for FBX.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmRweqFB78CcRYdr13xAioegMDCgVVTAuNH9b3tnd83Ptn?filename=XEGG.png"
+        },
+        {
+          "id": "e590e3469100106d41170141260237adb2adb5b3110c316b2e10c13b3a5aceb8",
+          "name": "Chia Classic",
+          "code": "XCHC",
+          "description": "",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmVvoZubn9F5EAGQ84bUwUJmd7qhpyagJwjgFtErwFddnT?filename=XCHC.png"
+        },
+        {
+          "id": "3421ebd1b4bc6617973f165744b49c956ab7a58782062744cc2e451bea894fe5",
+          "name": "XFRUIT",
+          "code": "XFRUT",
+          "description": "resources that can be obtained through the orchard \ncan be exchanged for FBX\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmQeB6mxA8hhnY9xpsAiYZia4M1MhShndyi4QxYbzYDJ2R?filename=XFRUT.png"
+        },
+        {
+          "id": "aa5a61d556dac32483a18564d45a8a1a34d7851ea098ad1f5be517e428edd7e9",
+          "name": "Batch 6 Token",
+          "code": "EVG06",
+          "description": "Token used to claim Batch 6 NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmSo6KKXBWn6a7BJ9NS7wRpctVcnhs6fWjLqsJxahb5uRW?filename=EVG06.png"
+        },
+        {
+          "id": "44479960c96118f7f83d247822a0c9916198ff7256130a7c451cb6549daf9820",
+          "name": "Web3.0",
+          "code": "WEB",
+          "description": "Web3.0 Chia CAT Dev Coin",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmX9g453YdzTPXQdTC5rkXSK1p2BZGHqrfADMi2pvDXTnB?filename=WEB.png"
+        },
+        {
+          "id": "6daab7bb79093ef60f3b83dc3d9def25e91eae55916da8bf95268eda9ee871ea",
+          "name": "Abandoned Land - Wood",
+          "code": "ALWOOD",
+          "description": "Abandoned Land Wood",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/Qmep6C9jh82j5yndZcTC8AY7pM84nTVHm6a5jdHxYqUYYM?filename=ALWOOD.png"
+        },
+        {
+          "id": "79344c6df333dc75da4568495dc61a557a00552a0839012345b53e170e24010a",
+          "name": "ProofOfAnything",
+          "code": "POA",
+          "description": "CAT with a supply of 0.001 is not expected to be traded. It will be a functional token.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmXLKscRUb4dAJ3pHXN8xvtixqiKdkbxp1ezzSvGegU9d6?filename=XPA.png"
+        },
+        {
+          "id": "1502c633aca69108171cba44e473cae15761f5fa7df8eb19d012a6362c4ba72e",
+          "name": "Wasteland Sprites",
+          "code": "SPRITE",
+          "description": "$Sprites are Items to add to Wasteland Guide NFT's. Supply 750",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmYqCnKxvFHHFzGK6DTpZQxmRKJ3JNhXgA25j5Sacqswu4?filename=SPRITE.png"
+        },
+        {
+          "id": "a30ce6074671db2926e00a077ba1471782fb36eb9e2c8072082fb239474b96a7",
+          "name": "Inception Liquidity L1",
+          "code": "INCL1",
+          "description": "We need to go deeper",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmX53GfpgAfVT1JtBRi3TMLrkxGrxtZ1DJP8XgLR1LTZHt?filename=INCL1.png"
+        },
+        {
+          "id": "c4f87b1666b8974907e3a8f3cdfcfc32b0dd820324d7c3302405373e999681e0",
+          "name": "Marvelous Marmot Ticket",
+          "code": "MMT",
+          "description": "A golden ticket, issued by the Marvelous Marmot King",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmaQTKwZfE1Z7Fhp4CqrMmbD116syBqhyJK4kEaLPiH8iw?filename=MMT.png"
+        },
+        {
+          "id": "c81ce4f5875ec8a898ed325a2ea472b9cb06fd5093d99926685a8cbd124a2a78",
+          "name": "Felix Blue",
+          "code": "FLXB",
+          "description": "Felix Blue limited to 10,000 in the Felix collection",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXg2TYZ9uYQ97sDvwtDEopsX5uR6ueQuuuYxWh8r2CimR?filename=FLXB.png"
+        },
+        {
+          "id": "216475ebcf59f28e0fb2f99f9a742a59f42e7906ccaff353e535aa83af3c83bb",
+          "name": "MELT",
+          "code": "MELT",
+          "description": "MELT Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdEdkFmUX7poevyfvX8bGkjNbuYeJFfnqbXrtGGyqYgwp?filename=MELT.png"
+        },
+        {
+          "id": "79f6313fdb6ba66347a5bcad4af6878ac07bf5fafedeb384c3b350d913c8b6b6",
+          "name": "NioCoin",
+          "code": "NIOC",
+          "description": "NioCoin for the future - Proof of Time & Luck consensus. Up to a maximum of 576 Airdrops per day with a halving every 4 years.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZmYVRNTVy1XXHBAgA3GQ1ozAc2q86ot3wpTK4Z27v1PT?filename=NIOC.png"
+        },
+        {
+          "id": "3c75c138fe2fc94c0bae3467e7ae5a457758cb058925424ec2eb327f6b231a18",
+          "name": "Abandoned Land - Weapon",
+          "code": "ALWEAP",
+          "description": "For protecting yourself against the unknown.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmR2NnXn57NGEYHf9CTNKGPNSGpqZcAbkyfxGCFLZJapSk?filename=ALWEAP.png"
+        },
+        {
+          "id": "c22914961cd7dc043276c129acb1414cd8f26b32144497dbe071155a5687f430",
+          "name": "Batch 2 Token",
+          "code": "EVG02",
+          "description": "Token used to claim Batch 2 NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmX1JQD8HVoRJCasQg4AFh3snVyzkfenD8GcZscWrvwzwh?filename=EVG02.png"
+        },
+        {
+          "id": "287b633167f822353444492c96030db71ee78e6ac33897ea4c572623aa4c94d2",
+          "name": "Fools Gold",
+          "code": "XIP",
+          "description": "Fools Gold is a single mint Chia CAT token with a max supply of 1,618,033,988 XIP and has absolutely no monetary value.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmcuk3CruZXGyTS6sQsqH1UAfduap2e5JcfVXyFeEnnRWp?filename=XIP.png"
+        },
+        {
+          "id": "dfb730b31aad9f0b00dd813bcf838579c29ecd9ba76c85ac53940335366c03ac",
+          "name": "Valentine Platinum",
+          "code": "VALP",
+          "description": "Valentine Platinum:\n\nWant to give your Significant Other something special to show them they are the one? Now you can. These tokens will only get distributed in pairs of 2. One for you and one for the person you love!",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmYVAqREgxNd3itrbLQyt1erSqn9WMDuBVXaKUwMhzGH1n?filename=VALP.png"
+        },
+        {
+          "id": "9841225e2372fb4a32791dd96ca231b25e4f7d14e9b59d217b8881a82f858806",
+          "name": "XMEAT",
+          "code": "XMEAT",
+          "description": "resources that can be obtained\nthrough the animal cycle and can be exchanged for FBX.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmPZrBWCgwxSZJoeSRBrmH1pWXucTdehVQRJxMmpymGHYN?filename=XMEAT.png"
+        },
+        {
+          "id": "5a1ddb8379d9547e68a71e870103f9a5cfb049dbf83eec309e4df9e166a01b98",
+          "name": "SquirrelRat NFT",
+          "code": "SQRT1",
+          "description": "SquirrelRat NFT Redemption CAT. Each CAT is exchangeable for 1 NFT. All redemptions need to be completed by 31 Oct 22. After which all SqRt1 will be void.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmReS8zUMFoWoJcZPXNui9sTEGpmDfaDLJZFYMW4ZqHFSX?filename=SQRT1.png"
+        },
+        {
+          "id": "8e97db7777b127a6a13b7ecb33206fd99d82fb59cb4fc456df93633ce00da4ec",
+          "name": "Valentine Gold",
+          "code": "VALG",
+          "description": "Valentine Gold:\n\nThese tokens are golden and they should be used for golden times. You want to give your loved one a token for a dinner? Or you want to have a date with someone? Show them by giving them some special tokens. Same as with the Valentine's tokens you can \"price\" them higher for special occasions: dinner 100 tokens, date night 200 tokens. It is totally up to you!\n",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmZ6SGP3qcy9uwUzJ29fo2zShbYvJ2koeR9q5hqvuVCbJ5?filename=VALG.png"
+        },
+        {
+          "id": "bbbedf8bd9c7b1c2ef8fb211f28eccb84c498809d453a1df6ee494da872be281",
+          "name": "DAT MEME TOKEN",
+          "code": "DMT",
+          "description": "What DAT is it?",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmaCM8rbXH1R3oX92j4nz7eBhP6m6GcFuEGGsY8SkYM5P3?filename=DMT.png"
+        },
+        {
+          "id": "cad26bfe4f41d76b6f2de417d91e4e4090c6e7ceafe519a818c1f1033a6d6ef1",
+          "name": "ROCKY STABLE TOKEN",
+          "code": "ROCKY",
+          "description": "Automatic STABLE token by creation of defence offers.\n\nActual Price is set to 0.00005XCH",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmaSxi5fa3cbvJQ5h4KUZFa4cZhXKY2sycoHoiz8xenuhz?filename=ROCKY.png"
+        },
+        {
+          "id": "2053459a8f479b11cd57c54bdce4818b10b3a4ccea2267e5ab1ff7ae281f5649",
+          "name": "Discount Token",
+          "code": "DSC",
+          "description": "Discount Token",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmQ8KHQrgNCmmZ5FJhN8UAh1fn68HhGR6aQEKq5vAuibDz?filename=DSC.png"
+        },
+        {
+          "id": "6d3d2c9709d8e89d4707fa4f5f3e69269bd0b825a22da4fa45ed517da95136e0",
+          "name": "LLC Asset Token",
+          "code": "LLAT",
+          "description": "LLC Asset Token. A limited supply of 1000000 tokens have been minted. All tokens will be distributed to LLC farmers. The first distribution will be for 250,000 tokens. Each farmer will receive 1000 tokens. There will be a total of 2 distributions during 2022, and 2 distributions in 2023.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmRMAeaGoGu4QQSj6p7N2xdqxDT8t3ch4ncg8MznGbeV1J?filename=LLAT.png"
+        },
+        {
+          "id": "3ee6ab1c8fcf69c8a0c68a03717d40bbc012e2b898edaa733ea8e0bf1146e9d5",
+          "name": "Hema DAO",
+          "code": "HDT",
+          "description": "We are a community driven media & NFT DAO in Chia.",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmSfHChsRteTuu1ekRzyLGZrW9zL3msUeQvhXjCTAuqpFp?filename=HDT.png"
+        },
+        {
+          "id": "04e28f2f24e1a8ba8290b30293976cdee933d1683220014316da6f8ee7753920",
+          "name": "Chiania Coin",
+          "code": "XCC",
+          "description": "Chiania Coin (CC) is the major currency used in Chia Inventory, which is the first RPG Discord MUD game built on Chia blockchain. Players can earn CC from monsters, quests, and dungeons, and withdraw it as on-chain CC (XCC).\n\nTotal supply of XCC is 1,000,000,000, all coins will be distributed through our game (Step 1: Get in-game CC; Step 2: Earn reputation; Step 3: Withdraw CC as XCC). Depositing XCC to Chia Inventory will generate equal amount of in-game CC.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmVdgtduNbE6k7x2SSRQeHEuBsWjS4FGgMNXaA7VK56dhf?filename=XCC.png"
+        },
+        {
+          "id": "660bb2ab6c885276fd6bfdd7c54c038b4cc08b324f20137635bd482fa7c414e2",
+          "name": "Chia in China",
+          "code": "XCHINA",
+          "description": "Chia Community Builder in China.  Free myself in Web 3 world!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWf3AHkuPJV5suFyKvsykToLdkDzaALDPRKenQi3AuaHz?filename=XCHINA.png"
+        },
+        {
+          "id": "a06791271e9b3a8d262aeb1f688aa10adbd60b33e1df24fa057c1172dd0e8214",
+          "name": "RMD Fan Token",
+          "code": "RMDT",
+          "description": "Unofficial RMD Token. This token is just for fun and for RMD fans.\nIn the future, RMDT can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmc3dzLX1PUfFnD5DgxTR4FJkjKmEdxDwLfy1MAFppRkUX?filename=RMDT.png"
+        },
+        {
+          "id": "d332339b36c8ddd329a5e471a279c4f689395723c8d73ae81537fae5937184fd",
+          "name": "APULIA GRAPES",
+          "code": "BUNCH",
+          "description": "GRAPE MAKES BUNCH",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmVJLCWhnQ3hEcrp1mjcW4Xot4ZgfKPa14dsaeKFiwbeJM?filename=BUNCH.png"
+        },
+        {
+          "id": "946ebdd5828503a5239bbefdee10e3b933c92b48f84a0b4ba5c69a7007c402d5",
+          "name": "RADICOLA IQ CAPS",
+          "code": "RADIQ",
+          "description": "RADIQ is a rare CAP in the Wasteland. To valuable to use as currency, there has to be some use for this treasure! There are only 1000 Available.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmeTke7k5YJvWNr2cTmDfUBVMp15RE3m2oKSPaFyC17SKj?filename=RADIQ.png"
+        },
+        {
+          "id": "7f147901d20472fab470543c5eae51309ee54d4aecfa186f7366e2676141e139",
+          "name": "BEAR",
+          "code": "BEAR",
+          "description": "BEAR Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmTC2VXGJjJ6Rzh3pXr6NcNszR13KCmadDKaH6SVgW2QQK?filename=BEAR.png"
+        },
+        {
+          "id": "e816ee18ce2337c4128449bc539fbbe2ecfdd2098c4e7cab4667e223c3bdc23d",
+          "name": "HOA COIN",
+          "code": "HOA",
+          "description": "The HOA COIN was created to spread awareness of HOA COIN (Official Hex Orange Address\n0x7901a3569679AEc3501dbeC59399F327854a70fe) to the Chia Community, spreading #TangGang cross chain.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQfTrTJoK77QZrDqaUHZ3mFHrRaaPuxNxfFkviLKnQVQw?filename=HOA.png"
+        },
+        {
+          "id": "6431a89ee450e0844a3f2a243725a0707b9fbd3f0fef349f485d2de7ecaf3ea9",
+          "name": "The Lisa",
+          "code": "LISA",
+          "description": "Here is a Chia Asset Token to celebrate the greatest of all computer systems. Someday soon, these tokens will be redeemable for an exclusive NFT... Stay tuned!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWtgMXXw4EJKxjrNHVyDDtJMeoLEptmavV2fGXq2c2ZqE?filename=LISA.png"
+        },
+        {
+          "id": "91ffe356c7b3fc89862ec5382cd632a6605bc9b66dc16ec5e3468125727fcfd7",
+          "name": "LIV Fan Token",
+          "code": "LIVT",
+          "description": "Unofficial LIV Token. This token is just for fun and for LIV fans.\nIn the future, LIVT can be staked to earn NFT rewards.\nGrab them via airdrops, winning competitions, staking, purchasing or from being donated.\nFollow us in Twitter to receive your tokens.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWVXGMfo5zqB2C145wxiNt97pxunPhph43CY1HASmh1Ds?filename=LIVT.png"
+        },
+        {
+          "id": "4e47b5051e02e20bcb42f4fdd0c0f036462df06c54c4fd539a35f411128facfc",
+          "name": "Body Of Bram Wafer",
+          "code": "BBW",
+          "description": "Body Of Bram Wafer, A Symbol Of Ones Holy Sacrifice Too The Holy Trinity. Blessed Be The TimeLords!",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmdghhCaH9sRqSGygDmL5BrEHRJWoo4dXXHBLnwhkT7B3J?filename=BBW.png"
+        },
+        {
+          "id": "d060556eb72208cfa0f78394cbe431dabfbba95752dcbca34cbb7d8848c12b09",
+          "name": "WOWATCH",
+          "code": "WOW",
+          "description": "WOWATCH (WOW) Watch to Earn token CAT2 is an innovative platform where users earn tokens by completing tasks or viewing advertisements, such as subscribing to social media or registering on resources. Users choose tasks that match their interests and receive rewards in WOW tokens, which are crypto assets. In addition, these tokens can be used for in-game payments, which adds another layer of utility to the project. The initiative benefits both advertisers and users by offering a new way to monetize advertising interactions, increase social media engagement and facilitate in-game processes.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmdgWjpfmunW8qzyJt69nR7rhtHebKsUN3kHq6jcfouwk5?filename=WOW.png"
+        },
+        {
+          "id": "b9aef34a93278955a976bb71b3916ab67f50797cd9a4cb6c5c3dbbc7b14af665",
+          "name": "Big fan NFT token 2.0",
+          "code": "BONUS",
+          "description": "Reward token to our biggest fans for their activity. Limited series of 10 tokens",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYhF4hxBB4x7npuVCVsBe5mtaMvqBws6r7SteDhW39kPw?filename=BONUS.png"
+        },
+        {
+          "id": "f1f44ff3da039ae26709ed636d6d91c4b2b2e34e8ab974bd5ec862e380fd266b",
+          "name": "Farmer Bucks",
+          "code": "FBX",
+          "description": "Main currency used in FarmerVerse. It is used to\npurchase resources and animals, as well as to invest in the growth\nof the player's farm. FBX can also be earned by exchanging\nresources and completing tasks in the game. It is an essential part\nof the FarmerVerse ecosystem, as it allows players to progress\nand expand their farm",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmRqc1ScydJqFbjAwwbGbwD6taJnLBMQvx67ibgfYAZkFX?filename=FBX.png"
+        },
+        {
+          "id": "34f64cf041a182635d467ecb24348993317fae4371ecadba35397431308c6254",
+          "name": "Find The Key",
+          "code": "FTK",
+          "description": "Token for find the key puzzles.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmcP7XzJwpPa8u9eRj6f9iMTVvTyL8qZVHvTeQpw5HrzAL?filename=FTK.png"
+        },
+        {
+          "id": "5a4743ac88b052f387c1b5f969938c0d122f248616c769bb075dfecbe88ea471",
+          "name": "Stardust",
+          "code": "SDT",
+          "description": "HemaDAO is a  Community Driven Media/Education/Fund DAO  in Chia. SDT is HemaDAO application token.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmeVL8XD6cqbWJcBNrUQkTY87Snnxes32a63f4saaed4Th?filename=SDT.png"
+        },
+        {
+          "id": "5a91c044c2e3f992530a2334c9c8bc3448db304e17546a8ac9bcba01af062f45",
+          "name": "Kiloparsec",
+          "code": "KPC",
+          "description": "1 Kiloparsec (KPC) equals to 1 000 Parsec (PC)",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdLvCvBtE5MHUvezivp2JzcvieyKENXacFPmK1hvRALPk?filename=KPC.png"
+        },
+        {
+          "id": "14b40962dfef81d954ac0d92b51ec21ce7acd8c62dd9fef9303aa51c615cb495",
+          "name": "LLC Burn Token",
+          "code": "LLBT",
+          "description": "LLC Burn Token can only be acquired by burning a Little Lambo Coin. There is a 1 year supplies worth of Little Lambo Coins to be burnt in return for LLC tokens. Burn 1 coin, get 1 token. Once all burn tokens have been acquired there will never be another minted. 13,458,723 tokens have been minted.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWkPnJu3wCdHsoTSPgxVh75vMicMD1NwvgGRHvQHmcRds?filename=LLBT.png"
+        },
+        {
+          "id": "319ad6d73f87f62f446765b03c55af860e2c3dcac9105a78532038f4056a9160",
+          "name": "YELLOWBEARD",
+          "code": "BEARD",
+          "description": "Yellowbeard.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmbQ6wxHWAuRJ6JR3Q7CuZo2BBpp359q9cSdVAbh3Q5AHR?filename=BEARD.png"
+        },
+        {
+          "id": "f3f2b8a1d1480c1d7d241e0fc5e5e3b8a346cb861474fb0b55b512e6f26184e7",
+          "name": "Compassion CAT - Founder",
+          "code": "CCFO",
+          "description": "Founder tokens can be redeemed for Green Wings NFTs.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmfA9ekurrpU7HHzaPppJSjArpFqYWpFKdu1L6288c16SU?filename=CCFO.png"
+        },
+        {
+          "id": "c012fb7c993e11075f7234066ac851b5434d7305ceda871629136dfaac4d54fe",
+          "name": "CATMOS Rock",
+          "code": "CATRCK",
+          "description": "Represents \"rocks\" in Catmosphere Rock-Paper-Scissors games",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZvKqF1DFBxF84oBdZ3ZxsrveHnSitKJeUFcC56d7RnF5?filename=CATRCK.png"
+        },
+        {
+          "id": "d3647f946788b0c29b07d8fbb23d99f1accf1cf6f8f0b2840c85105439d30e63",
+          "name": "THW",
+          "code": "THW",
+          "description": "Tractor Hours Work\ngenerated by Tractors at a rate of 24 THW per 24 hours, used to work on plots",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNoaF2xptF3HeAnkhhZBSKh1fbjw9nyfjwxyA2p8kTdgA?filename=THW.png"
+        },
+        {
+          "id": "32f9989569a6d457c5d2e8c72957709c4e1d7adb186f18b0963c93a9eac5c402",
+          "name": "Run NFT 2.0",
+          "code": "RUN",
+          "description": "NFT is hand-painted by our artists. Limited collection",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmWZRKsXSPykwfFkQ5cfMGG6hRoVpxKE63g7A3Y5QLV7QZ?filename=RUN.png"
+        },
+        {
+          "id": "89f3f718cd4077f1685f338974ec7ee7850444d4e2fb9b5c4dcf02e40e12663f",
+          "name": "NioMint",
+          "code": "NIOT",
+          "description": "Token for NioMinted membership",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/Qmdn5LujDWgqn1uvctdHhwqyoLWfq3d4z1zumwcgLUDB7N?filename=NIOT.png"
+        },
+        {
+          "id": "1065c0b2dd987e634ab3e48c1883e629bf7c475315c892e39138360606ebb00c",
+          "name": "TVS",
+          "code": "TVS",
+          "description": "Monnaie tirée du livre : \"Crypto : une année sur la route pour devenir multimillionnaire ",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmZTgvf7RxopWFagsJonXXUcCMet7LnRJhPUqzKaPaw4pt?filename=TVS.png"
+        },
+        {
+          "id": "1b894664dbdf9eae44d9ede9c8071402ffed19b6fd672bf36e3085df42cdf2f1",
+          "name": "HODL Coin",
+          "code": "HODL",
+          "description": "Compete with other players to see how long you can HODL!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNSQZMoPGGJrThubB2eToP8rBXczYkKRkQsoEVFhn5Sar?filename=HODL.png"
+        },
+        {
+          "id": "7108b478ac51f79b6ebf8ce40fa695e6eb6bef654a657d2694f1183deb78cc02",
+          "name": "Green Wallet Token",
+          "code": "GWT",
+          "description": "Ecosystem of products for Chia network. \n",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmYmtrMtjMm6mkwuvFRkRW5ADiDEmDEmgsTQYdTyVx2WFz?filename=GADBAD.png"
+        },
+        {
+          "id": "db1a9020d48d9d4ad22631b66ab4b9ebd3637ef7758ad38881348c5d24c38f20",
+          "name": "dexie bucks",
+          "code": "DBX",
+          "description": "Platform and Governance Token of dexie",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmPKH3gKx1rnfmNuyh4bKCNuYGot7XAwDFiHqBkCD7gGSD?filename=DBX.png"
+        },
+        {
+          "id": "da8e66534cf2c62851122a2fe327db274790706139c2fcedd7f2f8d8d78e8be1",
+          "name": "BoBo Coin",
+          "code": "BBC",
+          "description": "parent keen insane replace inmate know battle blind tobacco twenty borrow love often equal chalk injury trouble category avocado valve fly announce icon hero",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmWNeSMjBmuyStDP4ptXTJubbWTz7PfwfpHhFqbUmJoaSD?filename=BBC.png"
+        },
+        {
+          "id": "94621bf6d74f26866812a69b9bc7cb2b25507b9f5717ebd768c1ec0ac63796aa",
+          "name": "Felix",
+          "code": "FELIX",
+          "description": "Felix was feeling left out. After all he is a cat. He is now waiting for a problem to fix with his bag of tricks.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmaU4fEuGwM21kHiXWR4ngriVLAS9JhmZueyNKWC3Eiwne?filename=FELIX.png"
+        },
+        {
+          "id": "1a3c66a4cd6aed6b5bf37342f4b59d5d61d50737d4fc8916dd314817810b8db9",
+          "name": "Outer Fields | Starter Pack",
+          "code": "OFAS",
+          "description": " Eligible to exchange for a start pack of cards for Outer Fields. See https://outerfields.space for details, only send to a verified endpoint address for redemption.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmR2r1X5ykUMVd8dfhm5gsXH83UDo6U6qrmhzBRKYfpCxc?filename=OFAS.png"
+        },
+        {
+          "id": "bcee35d7043f02480107a70203e8b483b8404b2eec08efd30ce612bd23343373",
+          "name": "42",
+          "code": "42",
+          "description": "",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmfDETZh2E7HzTrNqQZfNshCEGQdqhJXkmjB8yCemAsdYS?filename=42.png"
+        },
+        {
+          "id": "6beb251f216d8e5a8e6fb0466d76f0c3085d94cd1e5d84aa5b778a9fa7406598",
+          "name": "ChiRex Token",
+          "code": "CRX",
+          "description": "ChiRex Token is a prehistoric token that the ancient ancestors of the mighty ChiRex would trade and barter with, now a supply of 21million have been minted into existence for the new futuristic generation of ChiRex's to make use of.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbpJTjiF8RXJnVDyAZpPFbEkNe6EYRjFhe3AxXwskBRBe?filename=CRX.png"
+        },
+        {
+          "id": "367c6b0d8df5d86e5a06da7e57dc1f339a684516435c6bc86f69af1ec1adddb6",
+          "name": "XPIG",
+          "code": "XPIG",
+          "description": "Animal, produced in animal cycle of FarmerVerse",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNbZWtWCYJxa5VkMLwtMDHoDe63omASVsKXjjkEHqVCft?filename=XPIG.png"
+        },
+        {
+          "id": "6ae636f1eb6f00b72ff015f64bb86af4f46343697ce576173359b329c89f01a8",
+          "name": "PUNK",
+          "code": "PUNK",
+          "description": "PUNK Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZz5omqwgCfgk6XBeUscsLj3Lk8FD7SMkqp76UoJQTBbz?filename=PUNK.png"
+        },
+        {
+          "id": "b866c8075501879ec421062f065467092d20cbbd8cb4b0d3fccba220a16f0656",
+          "name": "Hero 2.0",
+          "code": "HERO",
+          "description": "HERO - Token Hero\nHERO NFT",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNreu4iEEe4jqf1ty833K7Gf8ECSDkQFXxmBHD4zSZGXP?filename=HERO.png"
+        },
+        {
+          "id": "86290de455ae081dfe44c099743cb8eae18c705f461922280d138c24ac8c3110",
+          "name": "Catmosphere",
+          "code": "CATMS",
+          "description": "CATMOS represents experience points in the Catmosphere. Team up, trade rare CATS for CATMOS, battle monsters using your CATMOS and receive rare NFTs that will help you and your friends in battle!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmWZokRPca7KmZvrSShX4jnnTi1PDXvegbFNQ17EdsmuCp?filename=CATMS.png"
+        },
+        {
+          "id": "1db8e4e1d9c7493b880df398444f8c6d4bd976e6de3c1f74181dd071a9e2d498",
+          "name": "Cassandre Fairies Club",
+          "code": "CF3",
+          "description": "8 out of 16432 Total.\nBecome an exclusive CFC Board Member and take part in all of the club's major decisions.\nRoyalties to your own wallet. ",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmduerLEvDy9bVNTm2c4SRMsLrPspZa3UoENanyw6LZCuL?filename=CF3.png"
+        },
+        {
+          "id": "54c151d078f56fe5c6a5e36d8765e43440b3dfba0054d31fc18a0bbca16ae313",
+          "name": "Bitcoin Merch Batch 1 Coin",
+          "code": "BTCM1",
+          "description": "Token used to claim Bitcoin Merch Edition NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmU4ysZ4VaYvgT3mi5XFHGmKNgvBkihMoumaZJEyZEAvmE?filename=BTCM1.png"
+        },
+        {
+          "id": "12cc4ab2ce7ea00fc154456614265a624535e64dccb26fad7d2243ce9a83e973",
+          "name": "Multiplots",
+          "code": "MPLOT",
+          "description": "1 Multiplots CAT equals to 1 k32 Chia Proof of Space and Time plot hosted in our farm. The holder of this CAT gains the outcome created by the rented plots minus transaction fees until the first halving in 2024. Multiplots are capable of co-farming multiple PoST Blockchains.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmfQJt6HgBfRUqDvDANfAgu34nNSRz1u9RCXtJF7kH3ZY6?filename=MPLOT.png"
+        },
+        {
+          "id": "d8f60c8f89cb78a817e2077d1443f9c962904939da42b9a02fc06b69e44ce0db",
+          "name": "Goblin Silver",
+          "code": "GS",
+          "description": "Silver for the Goblins War game on discord. Earn gold by participating in events and use it to buy new Goblins and much more!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmY3MT5pgP5rzt4U97HDVbdeCvRfZYuEjAHwEtfqYEj3uZ?filename=GS.png"
+        },
+        {
+          "id": "054e8c7e593d0e7bab9ec83daa50a3b099e366097d445a0f125eb800c0370e44",
+          "name": "Brick of GP Latinum",
+          "code": "BGPL",
+          "description": "A Brick of Gold Pressed Latinum is the most prized currency across the entire Alpha quadrant!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZQVQzwew4rMAwnRbMMXCK12RkEE1BXuU5AnHjp3BNNhq?filename=BGPL.png"
+        },
+        {
+          "id": "5a7c011e1bea52a87fc72952dfafad0d82fcde0448a2a4fa7fa0bd53d9a4e1c9",
+          "name": "Year of the Tiger",
+          "code": "YOTT",
+          "description": "A Chia Asset Token to commemorate the Year of the Tiger!",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmTXdPEGWPUkmyhKpAPRuQ7G5nh8MQaDJ1Gt2RFRXh15uS?filename=YOTT.png"
+        },
+        {
+          "id": "a8d60e4861f4472d88a82bcdf565fbed633dac508be60722b0be3f5808c73b32",
+          "name": "ECTS Cash",
+          "code": "ECTC",
+          "description": "CAT issued by the ECTS.io ecosystem.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmSb8saCbHWmBvTWyJ2XZKd2nKg2yZNG1JEma2KHtjRcZ9?filename=ECTC.png"
+        },
+        {
+          "id": "7d4de8d69be7a3f661a04284ec96e7ca1c33bf0f5eeacf8740e8d37ff4d698a8",
+          "name": "ChumpCoin",
+          "code": "CHUMP",
+          "description": "Probably gonna dump on you...",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXkwM4A47xavSPaJFXa1cSCHNZ4dhNqdgKYX8kRE5Cytv?filename=CHUMP.png"
+        },
+        {
+          "id": "3aa444277876543e8e643697010d25341b256c400ed7bbd1cafe58cabd2b0038",
+          "name": "BEER coin",
+          "code": "BEER",
+          "description": "270 NFTs - In a Universe where time and space aren't so stable, almost like a parallel universe but with magical powers, there is a Norm who goes to a crypto-bar named Cheers. This story, a story of NORM! NFTs and BEER coin, is a story of a Norm Peterson falling on hard times and finding a way to lift himself up with his own bootstraps.\n\n​Norm was one of the most beloved patrons of the crypto-bar Cheers run by robot bar tenders. He had been going there since the place was built. Norm was the very first customer! He was never into air quotes \"crypto\", it was good ole hard cash that Norm used, and he was known for that kind of attitude. Yet, even though it was a \"crypto-bar\" and everyone there used it but Norm, every time Norm entered Cheers the whole bar would yell out his name. NORM! He was a super star. \n\nBut all that fame did not pay Norm or his bills. In time Norm found himself broke and out of work, and in need of a beer, or a couple of beers. That's when he established a bar tab at crypto-bar Cheers. The hard times seemed to come and go in Norm's life, yet his beer tab at Cheers just kept going up and up. It seemed like fun and games but this debt weighed heavy on Norm's heart. He was too far in to manage paying the tab off quickly.\n\nSo after some time, Norm came up with an idea. Since the crypto-bar Cheers accepted \"crypto\" he would learn about that stuff and see if he could come up with an idea that would help him pay off his bar tab.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdbqwhZZiaBNnbUN4M8Bjv9ZuAmR86a5fjQx7qKLFQYTN?filename=BEER.png"
+        },
+        {
+          "id": "64d1e7e794464053858763f2082eb595ed4416976bed72ca679a553839ff189c",
+          "name": "StellaCoin",
+          "code": "STDG",
+          "description": "The Bulldogs are #1, and Stella is #1 among bulldogs. Though a Georgia fan, she spent most of the last two years on Beacon Hill in Boston and intends to be at the top of the hill of dog coins and CAT coins. ",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUh2wHfZnvR7opuhLNhMvjQL6h44EUGj3nu38k8e1unqa?filename=STDG.png"
+        },
+        {
+          "id": "ed1594af7c0d4ba7685afbe328129481e885cb8adda3ef280f3f499e5015ced2",
+          "name": "Seasons Club Coin",
+          "code": "SCC",
+          "description": "Seasons Club Coin is the core token of the Seasons Club NFT series;\nIt used to enhance and supplement the entire project.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmdUo6dQxuXzxSazUxvavNhTMpwRxbdLPdHD7od99zRwsN?filename=SCC.png"
+        },
+        {
+          "id": "061cc6609d58b443abc4a34f0b77b3fb95215b37024128e39838335c21c226d4",
+          "name": "APULIA WINE",
+          "code": "WINE",
+          "description": "GRAPES MAKE WINE",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmSJackaxRYYEL5TUDSHHDCc9YbfA7ZW4uLP5626jeLREE?filename=WINE.png"
+        },
+        {
+          "id": "ec208bab726f6a2d9411d7330c3ea92f41c2bc9c832e1efdd1679bdcd175ba26",
+          "name": "SSP 1.9 scenario",
+          "code": "SSP",
+          "description": "The SSP1.9 token is a cryptocurrency tied to the Paris Agreement's 1.5°C temperature goal. Built on a decentralized blockchain, it ensures secure transactions. With 1 billion tokens issued, it offers a way for individuals and organizations to invest in climate action and showcase their commitment.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmYYQuwdHpbMfkCMb2vm1FKf1TYAYjUBcgPRDjmntdkAuw?filename=SSP.png"
+        },
+        {
+          "id": "a48574f6ea4245c5e4a208576cc6b10b14a86d2b46618894fdf210c9d5bec950",
+          "name": "Replicator Rations",
+          "code": "RPRT",
+          "description": "Replicator Rations were issued aboard the USS Voyager during their travels in the Delta Quadrant.  When Voyager arrived back to Earth in 2378, many rations were found on board the ship during retrofitting.  These rare collectibles were smuggled out of the San Francisco Fleet Yards and are now in the hands of collectors.  A true memento of one of the most famous crews in all of Starfleet.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmeu4ZVQfZBhaDNTLVqVXBVCC8FXS3fUo9927hYbtHm9QC?filename=RPRT.png"
+        },
+        {
+          "id": "e451f895ab2f499238ba60d0ee0e9a06a604def5c8f3307785959f6623d1fbbf",
+          "name": "Parsec",
+          "code": "PC",
+          "description": "Parsec Coin",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmaa2LqDwmsK2aMW9U3np5KfXz48g5FVJUFwtF1K1x8ak9?filename=PC.png"
+        },
+        {
+          "id": "a32cc6a45b5ade539d96b68d6323691d4437d9a951b8cce8211ae07b904af0e7",
+          "name": "Okra Folk",
+          "code": "OKR1",
+          "description": "Okra Folk | First Okra NFT Release | Released In 4 Waves Of 250",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmYMZD9eEVFihWCATUoAG7djcSiD4HXVmGz9i6XWZZbhLc?filename=OKR1.png"
+        },
+        {
+          "id": "96de47df2c31441efa46d049d2763c750561f0cfa1db3c8bfcb4c72db94a06f6",
+          "name": "Hunter of 8",
+          "code": "HNTR8",
+          "description": "A token to be issued to stage 1 winners of a multi-stage LKY8 scavenger hunt.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZsBWUYJVfHFgpYZ1XVvzxd2MFrgHdqeM6tNChUmKt35B?filename=HNTR8.png"
+        },
+        {
+          "id": "d4f1f6d29e6392c477b84dc65a4379eaba570d29f7930895d89148ab5ed4b343",
+          "name": "SPACE",
+          "code": "SPACE",
+          "description": "SPACE Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmReZgLidLzMaEBki18WqXnmwaKfbwwEBsWnQpD4UTVtG3?filename=SPACE.png"
+        },
+        {
+          "id": "1bc3bdfc30f47f01ca4ca55df8d135ed2b66ad24e8ddd2c114d40d47e5a5d02b",
+          "name": "CATMOS Scissors",
+          "code": "CAT6OR",
+          "description": "Represents \"scissors\" in Catmosphere Rock-Paper-Scissors games.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmPdACze59fcTba3KzakiNq5gzC68iApdLMD7nJWiukzxd?filename=CAT6OR.png"
+        },
+        {
+          "id": "5391cc933ee1b2d56483b90f4db82f78ef26d7b8f1aeedb14af11eb28e919d1b",
+          "name": "Gaerax Custom Characters",
+          "code": "GCC",
+          "description": "Redeemable for 1 custom 3D character NFT made by Gaerax",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmP85eugGUTpjNkhTwJmeX6YdiG2ASAQtsVbkCv7eRUTf3?filename=GCC.png"
+        },
+        {
+          "id": "0389988a8c640c8e0006d0ad3d3055ecfb460d4c78fd9a917af8f3057e4043b0",
+          "name": "King of All Mojos",
+          "code": "KOAM",
+          "description": "Unique. One of the first truly non-fungible entities on the Chia blockchain. The full token is so blindingly awesome that only one one-thousandth of it can even ever exist in this mortal world.  Not a \"smart coin\" in the sense of having special functionality, but hey, you don't necessarily have to be smart to be King!",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmU8eDu5Kh4YoS37xfMt7o68Q64KbV6iJsitPFmPKDS67u?filename=KOAM.png"
+        },
+        {
+          "id": "6c7b32f8f725ca4138ea1a6c3330184d3fd8a8c319946cedd4df18c848565284",
+          "name": "KUT Token",
+          "code": "KUT",
+          "description": "KUT Token was produced as a limited edition and single issue meme coin. On September 08, 2023, the entire supply of 10 million CAT crashed on TibetSwap.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmR5hkAPpBqHT6nEec5TqyuSYa3BPv6Dr8Rx7R6baTRhi1?filename=KUT.png"
+        },
+        {
+          "id": "c9bc89cd1366db4f831f7876dd8cdc2f5c589b1dc7ef0bd448f69b650be7ad67",
+          "name": "from Africa",
+          "code": "ARA",
+          "description": "100,000,000 African ARA tokens.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/Qmdp77jbQLdNLNtFQbGsdzAuHbAAdHpBv4MQGxueE8LQbT?filename=ARA.png"
+        },
+        {
+          "id": "fda5aa3b13fa50288101c68f67a7cb3a92949ee0eecab122d1e980e74c5bd99b",
+          "name": "KitCat 2.0",
+          "code": "KITCAT",
+          "description": "KitCat ($KitCat) - 50 tokens. 1 token is equal to 1 NFT. Have the highest value.\nLimit offer.",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmTpNghN8Tci4c5eSihS3fxoa1PoaSZ5navf5YpaSCriX4?filename=KITCAT.png"
+        },
+        {
+          "id": "482b49902d310c53065c3531d398d41808f1390590d566815d67040f6a32d124",
+          "name": "Catkchi",
+          "code": "CTK",
+          "description": "Our vision is to connect millions of people by presenting them with the opportunity to obtain, create and offer a suite of digital products and services through Chia, the most revolutionary cryptocurrency blockchain in existence. Our token, Catkchi, is the medium of exchange for using all these products and services.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmfWxP2hphi5VLSRiwTPK5tf6hcewnw7v5peJ2gwUAxVGR?filename=CTK.png"
+        },
+        {
+          "id": "2b5cb14992f19cc37508854b14defb7a16fead8ab502925e9bbbdd1ae4d53b56",
+          "name": "Digital Mine",
+          "code": "DGM",
+          "description": "We initially created 100 000 DGM in total.\n\nThis want to be an asset token, and we decided to connect it with our mining and staking activities on multiple blockchains.\n\nWe are currently operating, and producing:\n1) Chia (XCH)\n2) Tron (TRX)\n3) Hive\n4) Steem\n5) Phala (PHA)\n6) Evmos\n \nWe are planning to add Cosmos (ATOM) and Osmosis (OSMO) very soon.\n\nWe will offer a weekly payout to all the DGM holders, that will hold a minimum of 100 DGM in their wallet. The payout will be in Chia (XCH) token, and it will be calculated based on the total number of DGM holders, the total amount in circulation, and our mining results.\n\nWe are confident of being able to offer a generous APR from 30% to 50%, but the effective APR will vary based on the mining results, that are really unpredictable variables.\n\nWe will convert all the coins we produce in XCH in order to perform the weekly payout to our holders.\n\nWe will release 1 000 DGM on the internal decentralized XCH exchange each time until the whole batch will go sold out, and we will keep doing this until the whole supply will be sold out, after that we will decide together with the holders if creating another 100 000 DGM or not.\n\nFor more information please join us on discord:  https://discord.gg/TUZjFwQknB/8UtTcqFC5d",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmZR1tRfvXyaE4AP45uF16sbQnT9m276xVCwpLBNKUU7Tm?filename=DGM.png"
+        },
+        {
+          "id": "e014d6ad9e56181aace636b348721aee6af8a37504de8aaab6efb3aee506afc2",
+          "name": "Wasteland Tails",
+          "code": "TAILS",
+          "description": "Wasteland Tails: These will be released in sets of 10 with only\n10 Tokens available",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/Qmb7Nz9Z2ZjfGLhHjmzBPkXVLA7TfeRnsrqs5M3TEPKi15?filename=TAILS.png"
+        },
+        {
+          "id": "061cf8381b419c6ad6879e53b32d0d8c05855f2a43187fae3fcaf96def5a4247",
+          "name": "Genesis Pickle Token",
+          "code": "GPT",
+          "description": "Genesis Pickle Token, redeemable for a Powerful Pickles NFT",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZd3yH5FwZ3K2fctWmucZVrFabBYQBvQfyYxZGn7CfbyM?filename=GPT.png"
+        },
+        {
+          "id": "9995f30b83e7d3f3ea0eec7e450dbcade83f76516da79daa9a84a9daafec2329",
+          "name": "Abandoned Land - Work",
+          "code": "ALWORK",
+          "description": "Represents time spent working in Abandoned Land",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmVzSbJt28azoq9y2nAi16GG8nfVyjZFtAyBUw4ZjntpzW?filename=ALWORK.png"
+        },
+        {
+          "id": "00535a3707d006d91221cb70eaa00f4b707bcd8ddf01b2a8bc4498875559832a",
+          "name": "XHAY",
+          "code": "XHAY",
+          "description": "resources that can be obtained through the agriculture \ncan be exchanged for FBX\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmYkavbScHxMRnFYGfz5mfvX8G7invfyiJE7heJY19eZCH?filename=XHAY.png"
+        },
+        {
+          "id": "ea3e045df9fe9a7844cbb56f500bd146354d9e6f8c970b2ff8f8842d77442e97",
+          "name": "RADICOLA CAPS",
+          "code": "RAD",
+          "description": "RAD Caps are a cash for the Wasteland and somewhat rare with only 100,000 in supply. Look out for the rarer RADIQ!!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWLm8AcdmGpiZV69BdzQ7EZorZnZY4KPxLuwdUZaPet9y?filename=RAD.png"
+        },
+        {
+          "id": "c06ee27f9bd92f751987e9d43b1709ef664e6aee0df63f040d00605826b54a67",
+          "name": "XFUEL",
+          "code": "XFUEL",
+          "description": "A utility token that is used as an additional cost when using\nthe tractor.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmZyg9cruthd7w7JUsLUDFH77bca3DKBn6nLJAD7DK4HDZ?filename=XFUEL.png"
+        },
+        {
+          "id": "84e8664b6273cc4d5f30f0240b605cfdbaa9bae13deb3aad3170c3f5120247f0",
+          "name": "Automatic Kalashnikov 47",
+          "code": "AK-47",
+          "description": "100 000 Tokens AK-47",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmcjc1DMbzbqTrATvZGfWbVadUEngHxkD4h4Kt7Nk8aXBD?filename=AK-47.png"
+        },
+        {
+          "id": "2ed236fe3fa979eaad87d89d10f9156539526f8b6c60d6f341f9de5b1f7c19f5",
+          "name": "Soon to moon",
+          "code": "SMOON",
+          "description": "CAT backed in a ratio of 1:42 by the number of messages in Chia´s official keybase team sent by moderators in the first year of mainnet that contained the word \"soon\"",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUtEhNuDperg8gR2Gp5TfQe6jgYZmzSPkaY1y66etkZxz?filename=SMOON.png"
+        },
+        {
+          "id": "482c11cbb96f98ca61423ad17827747a10025a265358f1ff9f7c5bbd06f5426b",
+          "name": "Depozit Token",
+          "code": "DPZT",
+          "description": "Dpzt is a decentralized deposit protocol used for securing rentals, contracts and securing the sale of good and services.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmSL67REZrk3dvsq2P6j9BRmmFagEUap2fsgz4oEY2LYvQ?filename=DPZT.png"
+        },
+        {
+          "id": "35dc1493baac0efeda494cb8599c3815ab0537eb7743b81425dcde8e3bde199e",
+          "name": "HippopotamusArt",
+          "code": "HP",
+          "description": "",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmeeU6MJVGUxiXZGEEibLyuo7p9bHBozCr8h83Cwzmnqnc?filename=HP.png"
+        },
+        {
+          "id": "772a41a72c91471fcfdb6d74ddc1bd47b25de4536be770a09fe29ec063f14a33",
+          "name": "Brave Seedling Coin",
+          "code": "BRS",
+          "description": "The total circulation of BRS is 1,000,000 tokens, which is the only token for the Brave Seedling community.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmTXhxQ8R4qBnXmRXqBnQCvvjjE6w9WoWyhhVLES1TbLvM?filename=BRS.png"
+        },
+        {
+          "id": "b8edcc6a7cf3738a3806fdbadb1bbcfc2540ec37f6732ab3a6a4bbcd2dbec105",
+          "name": "Monkeyzoo Token",
+          "code": "MZ",
+          "description": "Monkeyzoo Token is the native token of the Monkeyzoo NFT project.\n\nAn ever evolving NFT project aimed towards the metaverses of the future.\nYield $MZ just by holding an NFT!\nDesign and sell your own Monkeyzoo designs!\nFull comercial Licences with each NFT!\nSell your own Monkeyzoo products!\n\nLet Monkeyzoo be your brand!\n\nwww.monkeyzoo.net\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbTYVmnDKez8e2kGiPNYuwPyKZguyPbmBBWbRd6sVCJcm?filename=MZ.png"
+        },
+        {
+          "id": "69776ba48bada66d8be4a4dd97290e73197fe20f1cfb294429be5304bd3527ed",
+          "name": "XCHDOG",
+          "code": "BYTE",
+          "description": "XCHDOG is Chia's best friend. There are total of 1024 BYTE's, and as of now they're  for collectors. Who want's a BYTE from the XCHDOG?",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYBVeKv3Mskdskgaie2wpf7J8B6jXfApVxxPg7oBD4YpU?filename=BYTE.png"
+        },
+        {
+          "id": "88c30463dbc67745c3eb85f0a8b3df1bf4b7ae117926d7dc77042e04ad367077",
+          "name": "CCC",
+          "code": "CCC",
+          "description": "\"Chia Cats Coin (CCC) is an eye-catching token on the Chia blockchain, seamlessly combining the enchanting world of digital cats with blockchain technology. As a digital asset on the Chia blockchain, CCC represents innovation, value, and creativity. Each CCC token is a masterpiece of digital art, showcasing unique cat images and rich personalities.\nThrough the security and transparency of the Chia blockchain, CCC tokens provide users with unparalleled trading experiences and digital asset management. They embody the essence of the digital cat world, making them a unique choice for digital art collectors and cat enthusiasts. By interacting with CCC tokens, you will explore the charm of digital art, embrace the power of innovative technology, and share fun and value with the global digital cat community.\nWhether you're seeking personalized investments or looking to join the wave of digital art, CCC tokens offer endless possibilities. Join our ranks, become part of the digital cat world, and embark on a journey of innovation, creation, and limitless charm with CCC tokens!\"",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWHvDXWdLYhxV1JHvKYdut19DvQh9oGfw3LmHp4zenttM?filename=CCC.png"
+        },
+        {
+          "id": "ccbb3643aef0282727e9a3f3d6d6a7e1c7ebdf4a2b7f18372b19558e18277121",
+          "name": "Goblin Gold",
+          "code": "GG",
+          "description": "Gold for the Goblins War game on discord. Earn gold by participating in events and use it to buy new Goblins and much more!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/Qmf6EP7uhS6T8twtsMmp2RK13Wc7MoysRV9edRyfmshSiD?filename=GG.png"
+        },
+        {
+          "id": "1af35863d6b110eb70150b10f6bb1f72863a79934d6851cdbf3315bb0a258c20",
+          "name": "ChakMoon",
+          "code": "CHM",
+          "description": "Tokens of the planet where ChakMoon lives. Participate in research and get coins.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/Qmc2F7Tgj7iLbwbsCRoDqkxjtRNzehXhUc8QuPAjBEDG6S?filename=CHM.png"
+        },
+        {
+          "id": "50ff267b6710475da8a4744879401cb111b20242803a8a6c69a0fed70c2feb50",
+          "name": "Omega Molecule",
+          "code": "OMEGA",
+          "description": "A very rare molecule which is also known to the Borg as Particle 010.  It is rumored to be unfathomably powerful, and even a single molecule has enough energy to rupture a hole in subspace.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXdw1SCv7V8PU2T4maaPBc5YZ4zZm7ttT78pwGuuD4zjH?filename=OMEGA.png"
+        },
+        {
+          "id": "e1a97afddabfb1a87fb7df4f90488f44028a57173b9340a6644ae659a7575831",
+          "name": "STARRO FUN",
+          "code": "STRRO",
+          "description": "STARRO FUN  TOKEN 500.000.000 STRRO produced. In order to control every people in universe(!) , purchase offers will be opened at dexi(100.000.000) .They can be purchased via Tibet Swap (20.000.000 every mounth for one year). 40.000.000 will be distributed . 100.000.000 will stay to the devolopment team . Starro will come and control you !!!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdqUpghQiKmw4jJJa4p8a42nZfzzB29QbgrYZVmeyRumE?filename=STRRO.png"
+        },
+        {
+          "id": "209fd79450d51856eaa980af5d14bbc0d4312e692817f6c014820733d5902ba7",
+          "name": "Farmer Diamonds",
+          "code": "DIAS",
+          "description": "The hardest asset token",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmbkaxHaSjFpZfEstvxEvmpGJ5qZa7rcPJeYMcSdfkLsg7?filename=DIAS.png"
+        },
+        {
+          "id": "dc77ba1f5599fa63c126b8e512573eacd3496b3e4f6712d1252b119f1e6bec2d",
+          "name": "FHW",
+          "code": "FHW",
+          "description": "Farmer Hours Work\ngenerated by Farmers at a rate of 8 FHW per 24 hours, used to work on plots\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmPw4FkhU95uy6VrQPrWL16tVbSGii4yaK6VPy4svDzDHz?filename=FHW.png"
+        },
+        {
+          "id": "efe7422b247b43107970bcffda4c88bf7ae9766984e67430ce969e5aa3f4fada",
+          "name": "Batch 5 Token",
+          "code": "EVG05",
+          "description": "Token used to claim Batch 5 NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmV6TShKVe1NMsQgADuRrkfqiSEqKop9dQBHEAYcNqhMLB?filename=EVG05.png"
+        },
+        {
+          "id": "cf62db954959f58f6db511e928d8c23cd7561676023bbbdbd790bfc7b7626b0f",
+          "name": "LAMBOSS COIN",
+          "code": "LBSS",
+          "description": "Lamboss Coin is the native token of the Lamboss Nft collections.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYASdGFRVkvooZsBBViXqgAh4hviCreFb9sGQrmbEGfJL?filename=LBSS.png"
+        },
+        {
+          "id": "bd960d5a150ed1b4f2242fc5761097b017b530d19dc2943f5e1907a6be1a0d09",
+          "name": "Cassandre Fairies Club",
+          "code": "CF2",
+          "description": "640 out of 16432 total\nBeautiful Bicolor Fairies.\nEven the Villain ones are not that bad, royalties to a different charity fund each month.",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmduerLEvDy9bVNTm2c4SRMsLrPspZa3UoENanyw6LZCuL?filename=CF3.png"
+        },
+        {
+          "id": "48d3f1627c3576a73af4d969b235300af741ac9fbc4e172c8bea9fdf94d3390e",
+          "name": "WATxCH",
+          "code": "WAT",
+          "description": "$WAT utility token for watch community. Probably nothing.\n",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmRGEfwKbrYZs9SNtRDCfcaYoDcVbEMn7Td4wcSsGuqMHT?filename=WAT.png"
+        },
+        {
+          "id": "9b86601d7a4690a38df7a28c68b02497de7578d5e23b127da1ce67e52946d1a9",
+          "name": "TestCoiner2",
+          "code": "TSTCN",
+          "description": "TestCoiner2",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmRNvUymHvq9TY1WxYfVzAFJL7vBo3h3k2zenbTsFyHPLj?filename=TSTCN.png"
+        },
+        {
+          "id": "46664f9b76f388065d6c523d09797d4568b6c4cb91f3685560a795af4dfaf87c",
+          "name": "HOOVE Coin classic",
+          "code": "HOOVEC",
+          "description": "",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmcvjzcUwviWWH7wGaUtoCGqDmyTapWXoM3Cx3ZE1rBus6?filename=HOOVEC.png"
+        },
+        {
+          "id": "1dadf5b097d2e1257d375759aaa15298ed3e0f70b6de275d9c70dc2f7eca14a8",
+          "name": "Marmots.io",
+          "code": "MIO",
+          "description": "Marmots.io is an online browser game in which you compete with other players for the opportunity to collect the $MIO cryptocurrency. Therefore, Marmots.io allows you to keep a sense of progress and value that you can control and compare, unlike other .io games which forget your progress after you finished. We are developing a relaxing and entertaining game and want to support the adoption of Chia.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmR8DAy1QbkdCktW46VsriQDTGL1kfY4RCRFW6SMC5RJ3T?filename=MIO.png"
+        },
+        {
+          "id": "0a039f753ba4387869fc001771518d802bff1123d2aad5a885cca57a78492241",
+          "name": "Farmer Diamonds - Plot",
+          "code": "PLOT",
+          "description": "1 Plot CAT equals to 1 k32 Chia Proof of Space and Time plot hosted in our farm. The holder of this CAT gains the pool outcome created by the rented plots minus transaction fees until the first halving in 2024.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmUwvi4oFpnttThXhmmK38CMyVzf6Udra7y85pACatSkuK?filename=PLOT.png"
+        },
+        {
+          "id": "daf1390497969e647289b9f596248c0b1f6d91a7ece190a8954f28cd694d5f77",
+          "name": "Star Coin",
+          "code": "STAR",
+          "description": "The stars are beautiful. It is said that each star represents a person……",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmfGSkEnpUx9Sg1BJ5RZLGxH7oLcD39L4N5E9LsRTUv9wU?filename=STAR.png"
+        },
+        {
+          "id": "5ceb7442d9168f0fc0d459011f39129d8fd137f1900e9895fd791351cb105030",
+          "name": "Tiny Chik Token",
+          "code": "TCT",
+          "description": "Chik Token On Chia Blockchain",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmb9845F3bMmLgu2ccVebgcv9WhSLRR7X13RNDkpLQsJGz?filename=TCT.png"
+        },
+        {
+          "id": "443005e9430528b29586bc0164f2b4159b588c22f99bb029abe7e685de985035",
+          "name": "Poor Man's Chia Farm 500",
+          "code": "POR5",
+          "description": "This is a re-issuance as CAT2 of this token on 28/7/22. The CAT1 was originally minted on 25/04/2022 to celebrate reaching over 500 followers. Slightly customised containing a thank you message that has no affect on execution. This coin was available and to all my followers as of 25/04/2022 (which is 553) 560 (560000 mojos) coins have been minted. This coin will be redeemable in the future. so watch this space.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmZGUqAwUpBuvmVevLAdQmdDDFmmWFbTkcTnVSNj3p9vFs?filename=POR5.png"
+        },
+        {
+          "id": "87492d7499e9f5a884c9c7a5db21c05a5644b7f53208a1bd8916dce056b9ec16",
+          "name": "Cash Basic Defence Self",
+          "code": "CBDS",
+          "description": "100 000 000 tokens for the Chia Community. All 100% of the coin issue will be publicly traded on https://dexie.space/offers/CBDS/xch",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmSc7RcLiqBdW33Q4kkMLBWEiu7c8Mu63vbAH1TPER98Hz?filename=CBDS.png"
+        },
+        {
+          "id": "0570076f3c2cd8d6e65f9b56f96ab92079d3ce7ab7372c751e1c19fdb42b25d4",
+          "name": "APULIA GRAPE",
+          "code": "GRAPE",
+          "description": "APULIA GRAPE",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmbKnZoi4BvF1QJungKrXcBgagYR5m7yummUdQcrzPLiTf?filename=GRAPE.png"
+        },
+        {
+          "id": "b0eee4ddb9e5c4dd868fb834ae987d504f0faa46becc79db6968ffe248422d35",
+          "name": "XWOOD",
+          "code": "XWOOD",
+          "description": "resources that can be obtained through the orchard \ncan be exchanged for FBX\n",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmS7SfUkcF7hBkhKNXu5cE35vuJZZDasFecRsHDR66yQc7?filename=XWOOD.png"
+        },
+        {
+          "id": "7852eddc5b8a909046a8a2cbf5aac99ffb44b57940f39bd9db176dcad181d71d",
+          "name": "BCAP GREEN",
+          "code": "BCGRN",
+          "description": "Green bcap tokens represent green bottle caps",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmbxPyCoxY94kcmzXHbKAwNf3iB2UfRePk1fhdqKRH344w?filename=BCGRN.png"
+        },
+        {
+          "id": "cdd97d5bb1aa1e069590d29a61278fd0e659dcf35fbc11e8f3f70ed4659a640c",
+          "name": "GIFT Token",
+          "code": "GIFT",
+          "description": "GIFT Token",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmbnQp6rDVdVdrbK2gdCATFAsrLmWGkRgaWdpa8u3jHGMp?filename=GIFT.png"
+        },
+        {
+          "id": "e5a8af7124c2737283838e6797b0f0a5293fc81aca1ffd2720f8506c23f2ad88",
+          "name": "Lucky 8 NFT",
+          "code": "LKY8",
+          "description": "8 Lucky. More 8 more lucky. 8,888,888 issuance.\n\nEach holder of 888,888 tokens has an opportunity to claim one of 8 unique NFTs.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXbPcFCBLkDmsV4v3aFBD93SfCV8Zrnqa97AKgCgynvvb?filename=LKY8.png"
+        },
+        {
+          "id": "3857a99b531acdebca632c48111d811bafde58b093658efbf1a9d8e09521926d",
+          "name": "Help Ukraine NFT 2.0",
+          "code": "HELP",
+          "description": "To receive NFT, create an offer of at least 0.05 xch and send the offer to Discord in private messages\nhttps://discord.gg/FzTeCvZZg4\nAddress for donations: \nxch10j43mdukzvghtednyh0ehdr8gr0l7nlga9ws2y7jtxsy738kjljq70900r",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmYQX4kMK75EEae7153g56Tzr9yb2D9UiecTwXeLQ3sXu8?filename=HELP.png"
+        },
+        {
+          "id": "9e04d998a90bca05bdbc301548c83104d79256f1b00bb2542104e6c6c37f2421",
+          "name": "Big Brain Token",
+          "code": "BBT",
+          "description": "It's Big Brain Time",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWKMbyQgVCRwci6BL4EFq3QyhazGdvQPcuHHA1we4vpPZ?filename=BBT.png"
+        },
+        {
+          "id": "ce3e3a641461be16571944ac597a179fa0ed75fbd0ed48ec1e45cdc8eb0943d7",
+          "name": "Million Minus 8",
+          "code": "XMM8",
+          "description": "A fun challenge token for games in the Lucky8 ecosystem.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUo5dNbTdCo77E4LvwZ4xt7sMhTaXWbTKLh6vpuxKLEQt?filename=XMM8.png"
+        },
+        {
+          "id": "ea830317f831a23b178aa653e50484568d30d2c5b34d8140e71247ead05961c7",
+          "name": "Caesar Coin",
+          "code": "CC",
+          "description": "Gaius Iulius Caesar",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmeEhRydsCuH4ncphxCgV9LbhQsnBsaVPbHHJ17rsFj23Z?filename=CC.png"
+        },
+        {
+          "id": "aa15228b460f978dba6342bf95ad69a137cdc5e9826ddc6d05ca084ffc51238f",
+          "name": "Batch 3 Token",
+          "code": "EVG03",
+          "description": "Token used to claim Batch 3 NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmRC69G5wQ2b37KzkN3syQ6hY5b2wPLMZSDG4YeoSFyGrE?filename=EVG03.png"
+        },
+        {
+          "id": "1698907709fcf295b7771a27a5dff24fa9d817a8f70889a413ede07cd9eb8507",
+          "name": "Magickal Billys",
+          "code": "MGKB",
+          "description": "HOOOIOOOHNOOO IDID TOOMANNY TAILS OF A NWEWT!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmdDL3UETRdgrVTeFxJnjSXHYrbtuU4q3jNR1hZKpiNc7m?filename=MGKB.png"
+        },
+        {
+          "id": "80f3eea06bdb757c219e164eb66a305daf84e97d2954f9e3ea4fc50080af2e46",
+          "name": "Friends Key",
+          "code": "KEY",
+          "description": "5000 keys as a gift from Hippo Friends. Coin chest keys.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmWAYcZTPAhJmwHNVEqbUp8AQ7yaxujyY7UY2uGEmcuv9K?filename=KEY.png"
+        },
+        {
+          "id": "9c09a4ca57065cadce8f3194f985056773360968a1e90a70dbe37f3630deff1e",
+          "name": "CMT Gold",
+          "code": " CMTG",
+          "description": "The currency in the Chia Monster Tower World. You need it to heal you hero and buy resources.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmTYzYaUbh54sj2p5L9F5pJhkv1h9RPszapd7JiVojSbtW?filename= CMTG.png"
+        },
+        {
+          "id": "abd03d855cb2c11bcb67427ad63480eec4c36091bd291018041cc1dce173a000",
+          "name": "CrunchCoin",
+          "code": "CRCH",
+          "description": "Another dog coin",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/Qmc73bzcWi3bWRKBfr7Nm7XZQsbF9BPZUEjRMTEL4HkW5S?filename=CRCH.png"
+        },
+        {
+          "id": "8cf1c0d1a196d307dc63d0bc1a8be1d996847c0f81756f8b6e6ae2bae0ecc50a",
+          "name": "Megaparsec",
+          "code": "MPC",
+          "description": "1 Megaparsec (MPC) equals to 1 000 Kiloparsec (KPC)\n1 Megaparsec (MPC) equals to 1 000 000 Parsec (PC)",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmbFJ2s9hw7sspKpGJLdHwDWiFYvbs69jvxurYMswiFY27?filename=MPC.png"
+        },
+        {
+          "id": "6e1815ee33e943676ee437a42b7d239c0d0826902480e4c3781fee4b327e1b6b",
+          "name": "Brother Shiwan",
+          "code": "BSH",
+          "description": "Brother Shiwan is a Chia meme coin issued to commemorate a legendary figure named Shiwan Brother in Chinese Chia Community (Shiwan means $100K in Chinese ). Brother Shiwan persistently believes that XCH will one day to be $100K!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmRU7jq8TKWgNW4Yc9FkHdzyofNfV8PbjJhw5B9xhd1DVK?filename=BSH.png"
+        },
+        {
+          "id": "ee6ad2b7b8643d7fe944f2d94f8a14d07e94c072b75c7b74c0ca5d0a9c2c1c94",
+          "name": "Need For Token 2.0",
+          "code": "NFT",
+          "description": "Need For Token ! NFT token for chia blockchain",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmcdKuJbYvAEsRAuUXFUKk2CRL976xfTprWWbcJBw92hyv?filename=NFT.png"
+        },
+        {
+          "id": "58d525df69cd72ec149266eae04ef7f57a6a9cce64bd42742242e31c8d6ea1c5",
+          "name": "DAT GOLD",
+          "code": "DATG",
+          "description": "THE GOLD STANDARD OF THE DAT COMMUNITY",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmNSa3YGPVnB4iwz453vZZhnL7Npss6mM9LYhkNBiF87YH?filename=DATG.png"
+        },
+        {
+          "id": "62ddc5ed7bb626baa27703c29b8523f9032292559463dade21d0f5265c8cdd37",
+          "name": "CAT King Cole",
+          "code": "CKC",
+          "description": "This is a coin for lovers of classical jazz and smoke-filled bars. Hand-crafted from a single minting of 1 million tokens. Get yours before the music stops!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUPvtpHvmE2FwGDCsyw222CknNL383VCcdx1ekXQQHJ3M?filename=CKC.png"
+        },
+        {
+          "id": "4c4380af7d15c896d9e6266f322ac494c398803032eef56f2ab65877956d007f",
+          "name": "Namesdao NAME",
+          "code": "NAME",
+          "description": "Namesdao .xch Name Service",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmYqtnv6iDXZej97jQZyN2Hi9s7LV31BQqdqACGW8dy2Hz?filename=NAME.png"
+        },
+        {
+          "id": "e9afb5ce4f89074cf84a5f3b872055e479c397e5f0acc16e917903b9991479a2",
+          "name": "Spork",
+          "code": "SPORK",
+          "description": "Exchange your Chia Fork tokens for the Spork Chia Asset Token",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmZxccQVfzjd6BDe1rkDgUDXKCmFVHMABzFifrMgVsExN4?filename=SPORK.png"
+        },
+        {
+          "id": "407002a9b1c3917b1d3d0cc79f622c22a9b91fa56990cbee56af6384fca2fd46",
+          "name": "Counter-Economics Capital Token",
+          "code": "CECT",
+          "description": "did:chia:1yjnk7rw94545060wpefjeh6racmglrf77qeeg6lsqr6nz8dw4eequsm4tc",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmQtRCSCpb1TcMcqG5Tthb8q1P7kJZWG7ueFBnineiizMk?filename=CECT.png"
+        },
+        {
+          "id": "69326954fe16117cd6250e929748b2a1ab916347598bc8180749279cfae21ddb",
+          "name": "VersaceFerrariVegasApartmentPatek9000Inu",
+          "code": "$CHIA",
+          "description": "ticker is $CHIA\na single issuance rug with a total supply of 10,000,000",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWGE14PFs51qHDUzCdAvJsQBMjAwjoXNyY3sGQDptYyyZ?filename=$CHIA.png"
+        },
+        {
+          "id": "125ef688c3200d4a82248c31f6dcfe2dc45d549b779c0b3b1ef35568fea840b6",
+          "name": "A Golden Caesar",
+          "code": "AGIC",
+          "description": "A golden Caesar out of 100",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmY1Yk7JAMZ2eLstxiELznwC9SrFSwJunCvawByJbrYZeJ?filename=AGIC.png"
+        },
+        {
+          "id": "009feb6bfa505c023a3d7e127e8ef1cf8631ff8e919c66ecf504588df17b3c28",
+          "name": "Quirky Giraffes Coin",
+          "code": "QGC",
+          "description": "The Quirky Giraffes Coin is a coin that can be earned through buying Quirky giraffes NFT's",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmatU2AkoNZnXToxbiatvWsRbASFPNPtUKm86379MCshQH?filename=QGC.png"
+        },
+        {
+          "id": "afc15038e0bc7226c4ebd37f7dd642f5d6a8f3f27075b70877273e126ec6939f",
+          "name": "Batch 4 Token",
+          "code": "EVG04",
+          "description": "Token used to claim Batch 4 NFTs",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/Qmb73Bf1pGAws1KPcKWR8YQB2sKRRraJUXLXw62gUd2v8n?filename=EVG04.png"
+        },
+        {
+          "id": "593c68c3f0c2061ea384ff30d9f3bef15039c6d5fbd46b555c73b2e9b490fca5",
+          "name": "Abandoned Land - Tool",
+          "code": "ALTOOL",
+          "description": "Tools to help with gathering in Abandoned Land",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmcMBDWrbdWQgR3RpXwLLeCGHKoB2NzWQZU1VzCiEqNhR1?filename=ALTOOL.png"
+        },
+        {
+          "id": "14142d7922b2487d1a145db198f7cc232a99a2798ec7da90279af45270e53465",
+          "name": "GOLD",
+          "code": "GOLD",
+          "description": "GOLD Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmagqfWZCkuNLBYBWwsFNAWvgxGxUCAcTuF7puZ3qzwz3Q?filename=GOLD.png"
+        },
+        {
+          "id": "2e28b8334c17ce291a29159be092dd7723d59534eab41a0a0b974e6db1183e5a",
+          "name": "Spriggan Founder",
+          "code": "SPRIGF",
+          "description": "Holders of this Founders token will be exempt from paying all fees on the Spriggan PC gaming marketplace. This will effectively be a 5% discount on every game sold on Spriggan.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmcuyDQsKYBgfN5ab8GCpZQ8zBAovw5x5mPaAfaobS9Jnq?filename=SPRIGF.png"
+        },
+        {
+          "id": "6e55e6dde6bf3fd9e474f2c45cb63e30af64f74285b7ef0b92bbf3503aa14e42",
+          "name": "BTF v1",
+          "code": "BTF",
+          "description": "BTF (Blockchain Traded Fund) is a fully-backed, scalable, and cost-effective investment solution designed to provide investors with diversified exposure to top-tier primary blockchain assets. \nBy leveraging a trend-biased rebalancing strategy, BTF aims to capture the upside potential of high-performing assets while mitigating downside risks. \nWith a focus on security, compliance, and transparency, BTF serves as an attractive investment opportunity in the evolving cryptocurrency market.",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmPzWA4utCJq8noHExFzj2vkkLGBy54rBQbb8epTGLShBC?filename=BTF.png"
+        },
+        {
+          "id": "51ef89a35fa316c0f2747696b2483c9203da3155b603ea3f194640ada374907f",
+          "name": "farmingDCH",
+          "code": "DCH",
+          "description": "To contribute to Chia's ecology, the DCH mine has steadily increased farming equipment, and put the mine block reward 0.25XCH into the market to give back to the majority of DCH holders.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/Qme7jiU3dSHbSdaFTmGV8ZUqsM96Xmw8T98jpeLa1miBir?filename=DCH.png"
+        },
+        {
+          "id": "29320e8cfbc13684e9f5471b65e7d99684b369c91bbadb11b0a56c20f76917c5",
+          "name": "Zomb",
+          "code": "ZOMB",
+          "description": "We are a community engaged project of Zombie and Horror Graphic Art NFT enthusiasts, utilizing the ZOMB Chia Asset Token (CAT2) to generate interest in our community and NFT artists.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWCSMDgirucnZvvB6SPqJEmmAeKoFWXZkNRZnPqds5rfj?filename=ZOMB.png"
+        },
+        {
+          "id": "bd8331db67ba6e1343b79d6b8ad7ca9bc403bd9148bcfac9ee6a5617b9f4907f",
+          "name": "Valuto",
+          "code": "VLT",
+          "description": "Valuto token on the Chia blockchain",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmSsF4HpGPoxidWSjAovsS2r6JJrMPrt2bZnSpVZExRvTG?filename=VLT.png"
+        },
+        {
+          "id": "d5cfbfadf873554d5184ebcb9dee86e69f8b11f44a0cc4e417871c4f7fb17b9a",
+          "name": "UFC Genesis",
+          "code": "UFCG",
+          "description": "The Ultimate Farmers Club (UFC) is one of the first NFT projects built on the Chia blockchain. The genesis collection contains 250 uniquely hand drawn profile pictures of farm animals.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmeYHSgEFBajZx1nkXJir6yVesLsoGnsZLQJCrsnoQdtf9?filename=UFCG.png"
+        },
+        {
+          "id": "0f8676bd61b83d8cc8543cf75a54bb6963ea7c9465eb2da4b84901778ad37d3f",
+          "name": "XCHPool Discount Coupon",
+          "code": "XPCD",
+          "description": "You can redeem this CAT for up to 50% fee discount for the duration of 30 days at XCHPool!\n\nFor more info check out https://explorer.xchpool.org/coupon\n",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmRRi7ZBcMhdzjszeTpZ9TEA7b35JCQTRYtAbRPpyokUdc?filename=XPCD.png"
+        },
+        {
+          "id": "4ec438355a6b7506cb85e7d330e758d7b30d0bcf44021517f094ed878f74afe0",
+          "name": "Valentine",
+          "code": "VAL",
+          "description": "Valentine:\n\nThese tokens are like those real world Valentine's Tokens that say \"a hug\" or \"a Kiss\" like in the picture below. You can also make activities \"priced\" higher. Like a hug costs 1000 VAL. A kiss costs 2000 VAL.\nThen you give it to your loved ones and they can give it back to you. Or they can trade it for something else. It is totally up to you and your loved ones how to use them.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmdLoNAK3Hx9NLBRhwXNap59k2JopwXniZUzLXGyeKVDR5?filename=VAL.png"
+        },
+        {
+          "id": "953615110fa1f1a2680a5106d5c47aec35e9c0f543034c994686862e16091f99",
+          "name": "Cute Aliens",
+          "code": "UFO",
+          "description": "Cute Aliens",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZh3LRkV5W94Hi1hxSdz4G9nQ51M2TLCPt9sNYo4m65Gm?filename=UFO.png"
+        },
+        {
+          "id": "d773501c5a28b57d465d6b36fdd7562766460950f745ce88b3a611101d6227ce",
+          "name": "Unidentified Space Phenom",
+          "code": "USPP",
+          "description": "a token of great advantage but nobody to know what its meme is",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZEJ2GjjHdd4DbvN6Qcb9gwfxkq7r6Numc97dxzy9SQM9?filename=USPP.png"
+        },
+        {
+          "id": "a1001eb23ea19fd18a6294d949aeee78e622b7bc3f92e29596a268ec0c38f9c0",
+          "name": "Genesis, Inc.",
+          "code": "GENINC",
+          "description": "Genesis, Inc. is the first self-published book that is only available via Chia Offer Files. One token grants user ability to read the final book on the Catmosphere website as well as previews of chapters as they are written. Only 1000 minted. Can be traded or sold after finished reading. Preview here: https://twitter.com/endertown/status/1485351549203513346",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmNSQZMoPGGJrThubB2eToP8rBXczYkKRkQsoEVFhn5Sar?filename=GENINC.png"
+        },
+        {
+          "id": "e8e94a2eea7e330f0207f274761ad15bd8c3066fcf7727b7458ce6f91ef9875b",
+          "name": "HooveDAO coin",
+          "code": "HOOVE",
+          "description": "Official coin of the HooveDAO.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmW95inBfGdCcUDBgCNR9Y6Dp6fGy3jXNH7rme9vJoSPJz?filename=HOOVE.png"
+        },
+        {
+          "id": "0bf20840681f1b1d71e54cf49f0cd5269f4cc405b347409d5e2e325a226c8804",
+          "name": "CoinTail",
+          "code": "TAIL",
+          "description": "Tail",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmagmrJpc3sMDRZAqUqDJYc2dd3jCztUUTEmYkxxpwurBq?filename=TAIL.png"
+        },
+        {
+          "id": "13f1e28d66064a17fe5b7155e17927c491493b9d42717debaaf9e219bf58fc9a",
+          "name": "Ballzcoin",
+          "code": "BALLZ",
+          "description": "Single issuance meme coin. Fair launch. Entire supply of 1bn CATs dropped on TibetSwap on 17 July 2023.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmVczcxTEtNJFgYxQ7XP18LPrngniKUh2DGj1zGRLAkdrU?filename=BALLZ.png"
+        },
+        {
+          "id": "509deafe3cd8bbfbb9ccce1d930e3d7b57b40c964fa33379b18d628175eb7a8f",
+          "name": "Chia Holiday 2021",
+          "code": "CH21",
+          "description": "This token was airdropped into every wallet that received a farmer reward for a block between the launch of Mainnet on March 19th, 2021 and Christmas Day 2021.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmWwKnEghVfNrvek3Q1UtYU2UstYknnprZYSFxQLxicdbv?filename=CH21.png"
+        },
+        {
+          "id": "652829318a1cecc6c640ccb0aba8947833a80ca2274708f90ab44b14b8d74e32",
+          "name": "BIKER",
+          "code": "BIKER",
+          "description": "BIKER Token\nStep into the enchanting world of \"Tang Bears\" by the extraordinary Alfonso, where whimsical charm and warm camaraderie reign supreme. These digital bears are not just art, they're a testament to the tight-knit Tang Gang community's spirit. With each adorable bear representing a unique burst of energy, from \"Tangy Tangerine\" to \"Zesty Lemon,\" this collection radiates positivity and enthusiasm, reflecting the very essence of the Tang Gang itself. With \"Tang Bears,\" you're not just acquiring NFTs, you're embracing a heartwarming community and supporting its growth, all while having an absolute blast along the way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmQDpvovtfgqxF3WDki3b5kdGi4jP3QVHaTYiTQeswUNdo?filename=BIKER.png"
+        },
+        {
+          "id": "15e436bc1d59221bd5331ce6cfdfd5bae6aa827347bb7304284c62972a3f4c97",
+          "name": "Outer Fields | OUTR Token",
+          "code": "OUTR",
+          "description": "Outer Fields - Multi Issuance Token",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmW8yeMckum82hJr4f4dAeYNnWtw6VpzwxAFE4YtRjLRs6?filename=OUTR.png"
+        },
+        {
+          "id": "ec9d874e152e888231024c72e391fc484e8b6a1cf744430a322a0544e207bf46",
+          "name": "PepeCoin",
+          "code": "PEPE",
+          "description": "The PepeCoin for the degenerates of the Chia blockchain. When PEPE hits influencers quit!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWYNXTsT3zMiU4D8E352RgCJDJgtncBhAVRyKaGV9spAu?filename=PEPE.png"
+        },
+        {
+          "id": "f74008e2cfa9c6ebf88a3c473c2603c53b17a3c48a365fbdc752430a07e3921b",
+          "name": "XMILK",
+          "code": "XMILK",
+          "description": "resources that can be obtained\nthrough the animal cycle and can be exchanged for FBX.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmYYK2UxyphrRuCGPhTmfFXmfRLcGXzuka7cSx2unTatKA?filename=XMILK.png"
+        },
+        {
+          "id": "b4c8025254a1a6ffff1a05c9cb9d0521dd42f1efcb9e091ddd6b47d29150c8c3",
+          "name": "MoneyPenny",
+          "code": "MPNY",
+          "description": "Introducing Moneypenny - the ultimate cryptomemetoken dedicated to celebrating the iconic character, Moneypenny! Inspired by the world of espionage and the famous James Bond franchise, MoneyPenny combines the excitement of cryptocurrency with the charm and allure of the beloved character. Holders of MoneyPenny gain exclusive access to a vibrant community of Bond enthusiasts, where they can engage in thrilling discussions, share Bond-themed memes, and participate in unique events. Embrace your inner secret agent and join the MoneyPenny revolution today!",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmW64ShrzxnFffBoWcvtYxcb7yQt1QgTByzsKymDpGpsHr?filename=MPNY.png"
+        },
+        {
+          "id": "55a944c8cdf92d08df244af84fd334e7d2730264b88a406ce6f03f977e6d76b6",
+          "name": "PEPE NFT 3D claim",
+          "code": "Pep3D",
+          "description": "The meme PEPE frog landed on chia blockchain !\n\nWhen the Pepe hits the influencers quit ! LFG chia PEPE army \n\nEach regular chia PEPE NFT will come with 0.2 of PEPE 3d NFT token and will be priced as little as 0.2xch\n\nAfter collection 5 regular NFT's you will have a 1 Pepe 3d NFT token and you will be able to redeem for a exclusive 3d PEPE NFT",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmSxHVSwZJoBNr6gMmrF7rr9tYyWyhyFUJdzDZtoQdPUGk?filename=Pep3D.png"
+        },
+        {
+          "id": "96b1c5fef756484b81490c2ebe97b0ac15b5871dd6900c12ca97769633196f3d",
+          "name": "BCAP BLUE",
+          "code": "BCBLU",
+          "description": "Blue bcap tokens represent blue bottle caps",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmPqaCPJUAxc9uKNHAk3t3i2nuBR4oHmvZQfppWe5MZ1GC?filename=BCBLU.png"
+        },
+        {
+          "id": "5c8eab03c9f7e58881539363c15afedbfe884e3b3d57fa96d2607780d7b0b419",
+          "name": "XCHICKEN",
+          "code": "XCHIN",
+          "description": "Animal, produced in animal cycle of FarmerVerse",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmdiygzLF1sx39dAxbbqyp6m7zsumMVfrRhwdQzo9uWohh?filename=XCHIN.png"
+        },
+        {
+          "id": "cf03376948a71102deb621b7e22aa41a63ec4607053e691c7f347c8093589af4",
+          "name": "Oxygen",
+          "code": "O2",
+          "description": "Healthy tokens on Chia Blockchain",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmeCMPauSZ8K75LuGajmJWcHwpmFH4XycxWUP7BM6wW1Ut?filename=O2.png"
+        },
+        {
+          "id": "048b1495819237bc5ef3dddf3872f3c2143771066530ea847302cc235c9b219f",
+          "name": "Gigaparsec",
+          "code": "GPC",
+          "description": "1 Gigaparsec (GPC) equals to 1 000 Megaparsec (MPC)\n1 Gigaparsec (GPC) equals to 1 000 000 Kiloparsec (KPC)\n1 Gigaparsec (GPC) equals to 1 000 000 000 Parsec (PC)",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmPwMJsW3D6iudC4cJLRzGYd4VTn6ytPvKSX6y4tDnzU7j?filename=GPC.png"
+        },
+        {
+          "id": "5b92ea70bee515a8092679b751ce894e1ad309563e79c440fd93f109210f5dcc",
+          "name": "test0",
+          "code": "TEST0",
+          "description": "test 0",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbhxUFLszBzju6FDfCwug5CAgKdDE5rfkpCkCamUA6nHg?filename=TEST0.png"
+        },
+        {
+          "id": "444bddca5815027bf4118da0501a619aab689bb707b895f3e576e94f2c55195c",
+          "name": "PUMP",
+          "code": "PUMP",
+          "description": "This coin's purpose is to educate users of the Chia blockchain on how to do a proper token launch on an AMM",
+          "category": "education",
+          "uri": "https://storage.pawket.app/ipfs/QmSwfstpqQTnDj7y82steD97sqaTLoyEnJyPtpm91yAQLD?filename=PUMP.png"
+        },
+        {
+          "id": "39527b8859d3acfb2dcad3956106207d880c2020c3deb0960ab88c337f6dc14a",
+          "name": "Nuts",
+          "code": "NUTS",
+          "description": "Nuts",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmW9AGoRAuJ1sTPjmSxumyuSsDJQdcqPWJxxCbXSExWyXJ?filename=NUTS.png"
+        },
+        {
+          "id": "950ecbc2f34449c0e083bfc22b087ef3a794642acfb760d1fd00612ba1c9955f",
+          "name": "MED - Games Token",
+          "code": "MED",
+          "description": "Chives MED - Game: Game with MED token on Chia network\n\nImmerse yourself in the exciting world of the apiary with Chives MED - Game, where the MED game token becomes a key element of your adventure experience. In this exciting browser game, you will take on the role of a beekeeper and immerse yourself in the unique world of honey production.\n\nYour task is to manage your apiary and provide the bees with everything they need to produce the most delicious honey. But attention! On your way you will also meet bears who will try to steal your treasures and challenge you to a battle in the arena.\n\nFor the sake of MED and glory, you must develop your apiary, improve beekeeping and prepare for exciting fights with bears in the arena. Each successful round earns you valuable MED tokens that can be exchanged and traded on the Chia network.\n\nChives MED - Game is not only an exciting game, but also an opportunity to earn from your devotion to the world of bees and delicious honey. Get ready for adventure and battle, build your own apiary and show everyone your skill in Chives MED - Game!",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmTzi6pZZJktQTihpm2ddXaCztuW7oB5p9i9XoCWgroGDH?filename=MED.png"
+        },
+        {
+          "id": "0e3db26887c5d8659baba5e42c1c47c99580112e42a343c42357d4fa5e07a222",
+          "name": "MarmotBox",
+          "code": "MB",
+          "description": "These 300 tokens represent exclusive access to our graphic card NFTs on the ChiaNetwork. Each token traded leads to a random mining NFT. A unique opportunity to explore blockchain in an innovative way.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmUMcCuihRMBYHqWNfxXMammu5BgcgJrDbqz9Aq9uWpS3z?filename=MB.png"
+        },
+        {
+          "id": "b7c0b9c3a59898a8a9e9be1e9d77d63be558bc57060257a2a667c8ca7ab687a8",
+          "name": "Hairy Bear Honey",
+          "code": "HONEY",
+          "description": "HONEY is the official currency of the Hairy Bear Social Club. HONEY is distributed through recurring airdrops to JAR owners.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmaexazLPuz2DdncxnRv6LPdTNR74jF6iVEXarFTsFYMBY?filename=HONEY.png"
+        },
+        {
+          "id": "30abf6a6b8faf714201fb6a7167463b429e4a795308668976f70e94697f87619",
+          "name": "Four DAO",
+          "code": "FDAO",
+          "description": "We are 4444DAO, focusing on the development of Chia game.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmbmRAigNjdm4GNWobkaLNFLxQsmNc3Vjt6eGcdexgyq6R?filename=FDAO.png"
+        },
+        {
+          "id": "1f9fd0d4a1221241df986f042e014c056571062c82a5ba9b88c866c92808e1a9",
+          "name": "test 123",
+          "code": "TE1G",
+          "description": "test 123",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmQVqbT6PtgMwLdAuTidqTS1gPHhQAx3xuhTTh5Ujo4Lys?filename=TE1G.png"
+        },
+        {
+          "id": "dd1fc964af97877cc992cccac1a50f5173043e559c0c0998256874902c11d94c",
+          "name": "NORM! coin",
+          "code": "NORM!",
+          "description": "NORM! coin - coin distributed in early 2022. It was a CAT coin that represented the value of one NORM! NFT. All holders of NORM! coin can redeem one coin for one nft. There were only 27 total ever distributed.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXNYu4dZ4qi15qmDsr9zygSgzVmuvuzWPgQehYkQ9TD2T?filename=NORM!.png"
+        },
+        {
+          "id": "6d95dae356e32a71db5ddcb42224754a02524c615c5fc35f568c2af04774e589",
+          "name": "Stably USD",
+          "code": "USDS",
+          "description": "Stablecoin pegged to USD.",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmaDrAPVgYxp2TJoqaudjjRy9TqFDmyrTvy3MUEdW6YXt1?filename=USDS.png"
+        },
+        {
+          "id": "2d38e7c2d98d3f5fb9cc404a8aad52dab8dc6b066ad190f1c61857ff03d17512",
+          "name": "NioStake25",
+          "code": "NIO25",
+          "description": "Official 2.5% APR Stake Token of NioCoin",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmRWZEh9vZkbKrpUbHRkcJAZQKDQtmmNAn9JJt7F8bqBoz?filename=NIO25.png"
+        },
+        {
+          "id": "efb8116946878cabd50804dba22a35344ef7d83fc227ee8aad4e2548b997fdde",
+          "name": "BLOCK",
+          "code": "BLOCK",
+          "description": "Farmers grow & harvest $BLOCK, but are threatened by Mugglers. So they make a pact & pay tribute in exchange for peace. But Mugglers' greed seems insatiable...",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmXemhvkEsDwnG52a7DS5pvZHcJYaqw8Di6aeprdTozfgr?filename=BLOCK.png"
+        },
+        {
+          "id": "2655201e2fdc84fc08ef19e4d6b971110d750a9dadac1359d4ee4d44ddf7c51f",
+          "name": "Chia Lotto Nft",
+          "code": "CLN",
+          "description": "The first lotto project in the Chia network, where every holder of the \"Chia Lotto NFT\" NFT project always has a chance to make a profit!!!The CLN token is a platform management token. All distribution rules and tokenomics can be viewed on the project website.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmbWXjACgVDCkoKvhrrxFkg99Hnh1LkuMnXVvsim8N12F7?filename=CLN.png"
+        },
+        {
+          "id": "320b869bc8d293cca8784187312da1a61cf43b9cf0724b47d8e027dcca1dd501",
+          "name": "ChiFi Degens Redemption Token",
+          "code": "DEGEN",
+          "description": "A Single Issuance of 500 Tokens, each of which can be exchanged for a ChiFi Degen NFT at launch.\n\nDistributed via once-off airdrop [TUE 15:00 GMT Feb 28th 2023], giveaways, and in return for trade-in and burning of Proof of Synth and Time NFT's",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWddzdUaZDUjGdZNZBMG3WCK2xhs3RNBJbKgyUVf64uT2?filename=DEGEN.png"
+        },
+        {
+          "id": "bfcfab5d13381531d45a0aa73ff846e13e7b7f90f682e939f87c38a7b57bace6",
+          "name": "XSHEEP",
+          "code": "XSHEP",
+          "description": "Animal, produced in animal cycle of FarmerVerse",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmayGGo95YZBaYX6MxCPmFP7WLACdeoifitFfktNQHzGa4?filename=XSHEP.png"
+        },
+        {
+          "id": "eb461b8af32975adbdf426d22e77e41547a7081a28663da61fd07fae2933c393",
+          "name": "GRAND THEFT HARDDRIVE",
+          "code": "GTH",
+          "description": "In order to plan the biggest Heist ever perpetrated in the world of PoST, XCH farmers will setup an unexpected new commercial venture as a front, a bankrupt hosting business property shrouding the nerve center within where Heist operations are staged and rehearsed. While the business runs above, down below you can practice making plots or finding deals on hard drives, 3d printing new farming racks, and owners of existing farms can add a Master Plotting Terminal to handle all current operations.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmPk9LY5or1t3zySL6r9gfXRSjcEejqx9rw1z3aZESSyjr?filename=GTH.png"
+        },
+        {
+          "id": "895d30090a17116d282af37cedec585613d4ee0faec3eaa7e19eb3f2bcd236e1",
+          "name": "Taichia DAO",
+          "code": "TICA",
+          "description": "\nThe first DAO as a Service platform on Chia blockchain. Start your business with out AWS like services.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmWW41nReitWdq14tQoKLcumhrYmPoKCSJFqWRMCdw2wJt?filename=TICA.png"
+        },
+        {
+          "id": "fc7bfd37a13bf524552a7e3c9f60fcfff8c557b1859dd59f71206396f989681e",
+          "name": "Space RatZ NFT GEN2",
+          "code": "RATZ2",
+          "description": "Second Generation of the Unique @SpaceRatZNFT collection. New superb extraordinary and customised attributes hand drawn arts.",
+          "category": "wrapped",
+          "uri": "https://storage.pawket.app/ipfs/QmWdJAHNsHeGsa71RLJy1LLfZxW1nydEuK2zbqALisGFv2?filename=RATZ.png"
+        },
+        {
+          "id": "fa78ff512fda2a53840cf125eb5db2db1ada9e9d47a6b78128ef99a37b406078",
+          "name": "Leaf Token",
+          "code": "LT",
+          "description": "Leaf Tokens as part of the Chia Leaf Project",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmXFABoXTWsDmeGSjZBjGuDbLky8KgtUAyjpN9FSLCdmgr?filename=LT.png"
+        },
+        {
+          "id": "36dcbca61c10913b454187cec3b98023562f225617af4d4e32c09e946ebe2a44",
+          "name": "Felix Red",
+          "code": "FLXR",
+          "description": "Limited edition of (1000) in the Felix collection.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmesSVW2AxSqysmCVvoKbCAfNE1AF8r2uSrt4ZBpHNeddg?filename=FLXR.png"
+        },
+        {
+          "id": "8ebf855de6eb146db5602f0456d2f0cbe750d57f821b6f91a8592ee9f1d4cf31",
+          "name": "Marmot Coin",
+          "code": "MRMT",
+          "description": "Marmot coins are issued in return for providing a proof of Marmot. This is achieved by sending a photograph of yourself with a live Marmot, or by donating a toy Marmot to a children's charity and providing evidence of this, or by donating $100 or more to the Marmot Recovery Foundation.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmZinXyyCvjYG6HSDD4T8pafN6upQwKww4cni4EMscZpf2?filename=MRMT.png"
+        },
+        {
+          "id": "aec6d94a32b8a544da7c04fd281e5ccb0abb1f825b7cee29feb985a4b3238153",
+          "name": "Test CAT",
+          "code": "TCAT",
+          "description": "testing CAT creation",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmWR7CtupXWB6aoLpc3bwXUm3jugcmb1q7K3FKqGBrXpAr?filename=TCAT.png"
+        },
+        {
+          "id": "fab2f11b14c3bdfa549508494921c6518595ed0425f0a308eb40072ccd92eb9a",
+          "name": "Board Game Crypto NFT",
+          "code": "BGCN",
+          "description": "Token that will be exchangeable for 1 NFT at the end of phase 1 of the game.",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmcQGbeu4rCqFcd15VgVMkppj4iwyPpkmZHNG532PajQyg?filename=BGCN.png"
+        },
+        {
+          "id": "38b75773894844794eb22765bb4d6b0637644d1280c90e9e1f47e731f6ceab10",
+          "name": "$",
+          "code": "$",
+          "description": "10 000 $  Eco-friendly on the Chia Network blockchain.   The maximum number of coins that will ever exist during the lifetime of a cryptocurrency.",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/QmTjeAyNdw1Ri3Ya2ngahHiSWvGUzr3q2fEn2Do22p9QSs?filename=$.png"
+        },
+        {
+          "id": "aa76e97f2a17e90cea2f026286ef5f4f5ccbe92b4a2215d59fadf6bf14df85ce",
+          "name": "Marmot Token",
+          "code": "MRT",
+          "description": "This innovative project, operating on the ChiaNetwork, offers a limited collection of 300 NFTs representing unique graphic cards. These NFTs have the ability to \"mine\" tokens on the ChiaNetwork blockchain. The NFTs are of three types - blue, purple, and gold, with different mining capabilities. Over the course of three years, a total of 120,200,000 tokens will be mined, with a mining rate decreasing each year to promote balanced distribution. Any substantial profits from the project will be donated to the Marmot Recovery Fdn",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmP5fWjAVmAddzEcSUy1wz9FYuPuaA92N14HSoePx26jSa?filename=MRT.png"
+        },
+        {
+          "id": "a1b036efdc6767f612dc2c8f9a1107c7e879f7d02881c67085ba37f79ef23536",
+          "name": "Dred Pirate Roberts",
+          "code": "DPR",
+          "description": "DPR+XCH=?",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmZuBsTPpYVceELHLPaNLenQXNYALesuGaSLkkz6R4Ke7T?filename=DPR.png"
+        },
+        {
+          "id": "ad0406a6f9aac4b4682cec430f728d6002401330c326cb0a99ab496c32924093",
+          "name": "PawnShop",
+          "code": "PS",
+          "description": "89 161 615 Tokens. Tokens backed by XCH coins.",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmQHmCDVrwxSY79t2QqUmnXkFNAK5MbUAYWFFGLUH84bNk?filename=PS.png"
+        },
+        {
+          "id": "450d89e992449b10ff510dde612488046ec9560e4b5559a48d343a6b75a4b427",
+          "name": "STAKE 2.0",
+          "code": "STAKE",
+          "description": "The token is designed to receive income from all token buyers. The faster the more income. All token owners get animated NFT for FREE!",
+          "category": "event",
+          "uri": "https://storage.pawket.app/ipfs/QmZ3zDJNA7wcFGtd5tmzFR3g5NBY4ysu8VE3DU5Xb7hneA?filename=STAKE.png"
+        },
+        {
+          "id": "1c009be94c996222ef28d4f7a2c1e38f8699542ee14ef9d26a853ff0a9540a6d",
+          "name": "TAU Token",
+          "code": "TAU",
+          "description": "TAU Token created in the chia ecosystem, representing each of the union of 35,000,000 planets connected to the TAU star system. With the extinction of the TAU star, perhaps a piece of star fragments randomly scattered throughout the universe has fallen into your wallet.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmYDiGEKm7SoJFcJEvahr1eTBQKwdA4gjGx4WaJhRo5hx3?filename=TAU.png"
+        },
+        {
+          "id": "b121d01fe25c0f6097c269d0598c6cad99360d1674bb79bc29f8c4f7b9009951",
+          "name": "Dachshund",
+          "code": "DACH",
+          "description": "Dachshund Token",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmNWMYdD1byNWWYjyEVZwUXPxJkbUaoRgCSSTqGouJwSis?filename=DACH.png"
+        },
+        {
+          "id": "265bd83e40da62ba95330c737be25245255c9b5a0c3102daa35c60ba01acfe06",
+          "name": "Skully",
+          "code": "SKULLY",
+          "description": "Native Utility Token of The Ninth Extinction Project 9E.",
+          "category": "stablecoin",
+          "uri": "https://storage.pawket.app/ipfs/Qmatg2SZyejw3dR9AqSCm1crRtvb8gghYwTZBM7JZHC1or?filename=SKULLY.png"
+        },
+        {
+          "id": "e0005928763a7253a9c443d76837bdfab312382fc47cab85dad00be23ae4e82f",
+          "name": "Moonbucks",
+          "code": "MBX",
+          "description": "If you're joining Chia on its way to the moon, better take a few Moonbucks with you!\n4,200,000,000 MBX tokens were minted as single issuance Chia CAT (v2) tokens.\nA selection of 99 individuals consisting of Chia employees and prominent members of the Chia community each received 1%.\nThe remaining 1% was deposited to TibetSwap (v2). All liquidity tokens were airdropped to the 99 persons in equal parts.\nThis token is launched as a community effort and is not affiliated with Chia Network Inc.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmSN35EeAiLZDLyYZBq2jggNoRCqY3zig8sVpdKkGckzNg?filename=MBX.png"
+        },
+        {
+          "id": "ebd153f3a00b159a0e251514866c86eafbb0e74a5304659f256a1517b7319573",
+          "name": "Hardi Bux",
+          "code": "HBX",
+          "description": "The ultimate hard drive based currency, which can be exchanged for limited Hardi Boi releases.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmfT476xLygsSuJr1Kr6jJGvS6gsa88UYi8NhdRF4PhZzv?filename=HBX.png"
+        },
+        {
+          "id": "dc5c2bde27d1f73f655b360eceab68150b28c335d81b4fc1a1069ee6441ef886",
+          "name": "Gene",
+          "code": "GENE",
+          "description": "This CAT represents Gene! It lives inside the custody solution.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmNRGg4b4x47wqrkAq4LGPr9XoznQPjmiiga1b3S3eWwYE?filename=GENE.png"
+        },
+        {
+          "id": "eaef46c78384488c9b0b1062e96e057ba16b9836c17960731d574b071196bb73",
+          "name": "CAT 2 RESERVE TOKEN",
+          "code": "C2R",
+          "description": "CAT 2 RESERVE TOKEN 843,500,000 C2R produced. In order to improve the CAT 2 Token trading in the Chia ecosystem, purchase offers will be opened for the CAT2 Tokens that are published every year.",
+          "category": "meme",
+          "uri": "https://storage.pawket.app/ipfs/QmcDkUWsGSgVAfGUSEczokY8J7kr2dBVL9rLMLEr8W9EQw?filename=C2R.png"
+        },
+        {
+          "id": "1397080ca3d0b477b2f6a5ed06750a63b6eea11931e948ee074ad12307fe782e",
+          "name": "CoinHead",
+          "code": "HEAD",
+          "description": "Head",
+          "category": "gaming",
+          "uri": "https://storage.pawket.app/ipfs/QmS78rDXztqE5jnTbksphoJFfZG3SfDcwu82eF6xhswVFS?filename=HEAD.png"
+        },
+        {
+          "id": "d12fbf63bb015fa0e988509b971ad4c9da7cc5fc30f2499d3aab38c3fadc531c",
+          "name": "DAT GOVERNANCE TOKEN",
+          "code": "DAT",
+          "description": "The DAT Community governance token.",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/QmbNowmzujfGThxcV6154P5i5dh2zhdmc7GZKgSKEGkFQ3?filename=DAT.png"
+        },
+        {
+          "id": "d76af742cbe799c03793c547ab535c1b776a41e19cf56adcf41d74a244a417fc",
+          "name": "DELTAXTRADES",
+          "code": "200",
+          "description": "A trading platform built on the chia blockchain for decentralized trading with dividend payments of up to 10% per annum",
+          "category": "platform",
+          "uri": "https://storage.pawket.app/ipfs/Qmd7Zqhmb1jSVFCSrgDa5ZhD16ZD5YZk27ALZswiC68tKM?filename=200.png"
+        }
+      ]
+    }
+  },
+  {
+    "case": "records-invalid-type",
+    "request": {
+      "id": "records-invalid-type",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "coinType": "not-a-coin-type"
+      }
+    },
+    "response": {
+      "status": 400,
+      "body": "Coin type cannot be recognized."
+    }
+  },
+  {
+    "case": "solution-missing-id",
+    "request": {
+      "id": "solution-missing-id",
+      "method": "POST",
+      "path": "/Wallet/get-coin-solution",
+      "body": {}
+    },
+    "response": {
+      "status": 400,
+      "body": "Invalid request"
+    }
+  },
+  {
+    "case": "block-missing-indexes",
+    "request": {
+      "id": "block-missing-indexes",
+      "method": "POST",
+      "path": "/Wallet/get-block",
+      "body": {}
+    },
+    "response": {
+      "status": 400,
+      "body": "Invalid request"
+    }
+  }
+]

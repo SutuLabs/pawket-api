@@ -1,0 +1,354 @@
+[
+  {
+    "case": "records-spent-coin",
+    "request": {
+      "id": "records-spent-coin",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9"
+        ],
+        "includeSpentCoins": true,
+        "pageStart": 0,
+        "pageLength": 2
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": [
+          {
+            "puzzleHash": "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9",
+            "records": [
+              {
+                "coin": {
+                  "parentCoinInfo": "0xb6c3f8af83683a922c1842ee13ef3687f708b032443ec57f01c26c28fe4b15c0",
+                  "puzzleHash": "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9",
+                  "amount": 1576,
+                  "amountHex": "0628",
+                  "name": "09BEA6B46E9102A4828F1583DFBCCCA31F3C8E29033387D285A46B015464FC3D"
+                },
+                "confirmedBlockIndex": 323878,
+                "spentBlockIndex": 324844,
+                "spent": true,
+                "coinbase": false,
+                "timestamp": 1621763321,
+                "dateTimestamp": "2021-05-23T09:48:41Z"
+              },
+              {
+                "coin": {
+                  "parentCoinInfo": "0x1155fdd19ef275e795d0c865680a0d7ed9cc6c0b3e648fd0a0c9c6441c292b8f",
+                  "puzzleHash": "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9",
+                  "amount": 191,
+                  "amountHex": "BF",
+                  "name": "E390DB236DBC092172AE263114FD15713715A74E3B3B7F7C1061F16EDDCBCB85"
+                },
+                "confirmedBlockIndex": 275528,
+                "spentBlockIndex": 277304,
+                "spent": true,
+                "coinbase": false,
+                "timestamp": 1620924704,
+                "dateTimestamp": "2021-05-13T16:51:44Z"
+              }
+            ],
+            "balance": 0,
+            "balanceInfo": {
+              "amount": 0,
+              "coinCount": 0,
+              "spentAmount": 1767,
+              "spentCount": 2
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "records-unspent-filter",
+    "request": {
+      "id": "records-unspent-filter",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9"
+        ],
+        "includeSpentCoins": false,
+        "pageLength": 2
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": []
+      }
+    }
+  },
+  {
+    "case": "records-unspent-page-0",
+    "request": {
+      "id": "records-unspent-page-0",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2"
+        ],
+        "includeSpentCoins": false,
+        "pageStart": 0,
+        "pageLength": 1
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": [
+          {
+            "puzzleHash": "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2",
+            "records": [
+              {
+                "coin": {
+                  "parentCoinInfo": "0xccd5bb71183532bff220ba46c268991a00000000000000000000000000036681",
+                  "puzzleHash": "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2",
+                  "amount": 1750000000000,
+                  "amountHex": "01977420DC00",
+                  "name": "AE4AD4D23BE30AD9EBF2482C456705645E33A0942D657816421C604CE79F7FAB"
+                },
+                "confirmedBlockIndex": 222853,
+                "spentBlockIndex": 0,
+                "spent": false,
+                "coinbase": true,
+                "timestamp": 1620012783,
+                "dateTimestamp": "2021-05-03T03:33:03Z"
+              }
+            ],
+            "balance": 4000000000000,
+            "balanceInfo": {
+              "amount": 4000000000000,
+              "coinCount": 4,
+              "spentAmount": 0,
+              "spentCount": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "records-unspent-page-1",
+    "request": {
+      "id": "records-unspent-page-1",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2"
+        ],
+        "includeSpentCoins": false,
+        "pageStart": 1,
+        "pageLength": 1
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": [
+          {
+            "puzzleHash": "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2",
+            "records": [
+              {
+                "coin": {
+                  "parentCoinInfo": "0x3ff07eb358e8255a65c30a2dce0e5fbb00000000000000000000000000036681",
+                  "puzzleHash": "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2",
+                  "amount": 250000000000,
+                  "amountHex": "3A35294400",
+                  "name": "CEF637C29988E3859348E9901531BAD1894DBAEAF32C1CB7329EB67C82BA399A"
+                },
+                "confirmedBlockIndex": 222853,
+                "spentBlockIndex": 0,
+                "spent": false,
+                "coinbase": true,
+                "timestamp": 1620012783,
+                "dateTimestamp": "2021-05-03T03:33:03Z"
+              }
+            ],
+            "balance": 4000000000000,
+            "balanceInfo": {
+              "amount": 4000000000000,
+              "coinCount": 4,
+              "spentAmount": 0,
+              "spentCount": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "records-hint-unmatched-in-slice",
+    "request": {
+      "id": "records-hint-unmatched-in-slice",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0x36691c63e80eeb2d9f1a4e9a949f9a7f16b07abc206531fd95fad7f99d2d9e2c"
+        ],
+        "hint": true,
+        "includeSpentCoins": true,
+        "pageLength": 2
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": []
+      }
+    }
+  },
+  {
+    "case": "records-unknown-puzzle",
+    "request": {
+      "id": "records-unknown-puzzle",
+      "method": "POST",
+      "path": "/Wallet/records",
+      "body": {
+        "puzzleHashes": [
+          "0x0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "pageLength": 2
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "peekHeight": 9259554,
+        "coins": []
+      }
+    }
+  },
+  {
+    "case": "coin-solution-spent",
+    "request": {
+      "id": "coin-solution-spent",
+      "method": "POST",
+      "path": "/Wallet/get-coin-solution",
+      "body": {
+        "coinIds": [
+          "0xb8893cceeb6cdb2281a43491ded917e38ecf4c5fb742e2c2af9425f416ecc0cd"
+        ]
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "coinSpends": [
+          {
+            "coin": {
+              "amount": 191,
+              "parent_coin_info": "0x1155fdd19ef275e795d0c865680a0d7ed9cc6c0b3e648fd0a0c9c6441c292b8f",
+              "puzzle_hash": "0xb669ed4a9b6adc4522a4a07f0592f5e49829b88784455a2eaf713877720963e9"
+            },
+            "puzzle_reveal": "",
+            "solution": "",
+            "confirmed_index": 275528,
+            "spent_index": 277304,
+            "timestamp": 1620924704
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "block-with-generator",
+    "request": {
+      "id": "block-with-generator",
+      "method": "POST",
+      "path": "/Wallet/get-block",
+      "body": {
+        "indexes": [
+          229001,
+          229003,
+          238292
+        ]
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "blocks": [
+          {
+            "index": 238292,
+            "generator": "gzip-content-sha256:7df4fd79d3b9a120cdd32dc266c2e194af752bfba0460add9853c6ae9d0367a3",
+            "generator_ref_list": [
+              232886
+            ]
+          },
+          {
+            "index": 229003,
+            "generator": "gzip-content-sha256:a0045207231a8bdbec5a471f6c5588571ebc5ad15ca6f773c93f90a0c1455767",
+            "generator_ref_list": [
+              225698
+            ]
+          },
+          {
+            "index": 229001,
+            "generator": "gzip-content-sha256:047f37ef6eaf21f39d3eba8d867587517c88588d8b163ee1a7e5af66760f82b9",
+            "generator_ref_list": [
+              225698
+            ]
+          }
+        ],
+        "refBlocks": [
+          {
+            "index": 225698,
+            "generator": "gzip-content-sha256:6dec77f1963acb98ec4c9a75d804680fd2512100f4a2effe8814f9992a3c42a6",
+            "generator_ref_list": []
+          },
+          {
+            "index": 232886,
+            "generator": "gzip-content-sha256:f777d1b90122ef60c073296c5694e7482b477c6c0cf28af025be7a73148af0c7",
+            "generator_ref_list": []
+          }
+        ]
+      }
+    }
+  },
+  {
+    "case": "names-recent-empty",
+    "request": {
+      "id": "names-recent-empty",
+      "method": "POST",
+      "path": "/Name/recent",
+      "body": {
+        "count": 3
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "names": []
+      }
+    }
+  },
+  {
+    "case": "inscription-ticks-empty",
+    "request": {
+      "id": "inscription-ticks-empty",
+      "method": "GET",
+      "path": "/Inscription/ticks"
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "ticks": []
+      }
+    }
+  }
+]

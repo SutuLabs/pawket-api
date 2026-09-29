@@ -1,0 +1,8 @@
+[
+  {"id": "network", "method": "GET", "path": "/Wallet/network"},
+  {"id": "version", "method": "GET", "path": "/Misc/version"},
+  {"id": "taildb", "method": "GET", "path": "/Misc/taildb"},
+  {"id": "records-invalid-type", "method": "POST", "path": "/Wallet/records", "body": {"puzzleHashes": ["0x0000000000000000000000000000000000000000000000000000000000000000"], "coinType": "not-a-coin-type"}},
+  {"id": "solution-missing-id", "method": "POST", "path": "/Wallet/get-coin-solution", "body": {}},
+  {"id": "block-missing-indexes", "method": "POST", "path": "/Wallet/get-block", "body": {}}
+]
