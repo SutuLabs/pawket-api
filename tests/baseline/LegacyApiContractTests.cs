@@ -184,6 +184,40 @@ public class LegacyApiContractTests
         Assert.Equal(-1, gzip.ReadByte());
     }
 
+    [Theory]
+    [InlineData("CatV2", "0x1a68b05cf7e480a16283ae003d405972b95f6bd53fbb12ff5b6b09f7e12a3352",
+        "EFFC41C56DCC22D1CB3AAA60197BAE18DAAC0F521B2CE9751F91F7D543252167", 9000600U, 9000703U,
+        4, "tailProgramHash", "0x46ef568a4ec5f5656adb630bb90ceabbd73557fbf654fcd1144d70f0642287aa")]
+    [InlineData("NftV1", "0x82b7ad4c410fa706301cc4a1fc3cc0b34f1808813f8ab3a0e6774aed7b0f7131",
+        "AC102D11A3B4073CA19856A368FB98BF0F7B5019DAF3E3D388FBD546D3B4F89F", 9000688U, 9007817U,
+        19, "launcherId", "0x1746d5de2f1a5db40929070073aa15d82b39eceb9307e26b1da38ea84c3cbcd0")]
+    [InlineData("DidV1", "0x82b7ad4c410fa706301cc4a1fc3cc0b34f1808813f8ab3a0e6774aed7b0f7131",
+        "FD283BBD98369889395AC5C92DFC9B35D2B0E16D91B92E93541C61DD044C2F62", 9000688U, 9010330U,
+        13, "launcherId", "0x0b67d60ed13ad40c9f9005e7b649bda88b884732d813b38b377b09de91c9b970")]
+    public async Task RecordsCoinTypeReturnsRealClassAndAnalysis(
+        string coinType, string hint, string expectedCoin, uint confirmed, uint spent,
+        int analysisFieldCount, string analysisField, string analysisValue)
+    {
+        var result = await PostJson("/Wallet/records", new
+        {
+            puzzleHashes = new[] { hint }, coinType, includeAnalysis = true,
+            includeSpentCoins = true, pageLength = 5,
+        });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var group = Assert.Single(body.RootElement.GetProperty("coins").EnumerateArray());
+        Assert.Equal(hint, group.GetProperty("puzzleHash").GetString());
+        Assert.False(group.TryGetProperty("balance", out _));
+        Assert.False(group.TryGetProperty("balanceInfo", out _));
+        var record = Assert.Single(group.GetProperty("records").EnumerateArray());
+        Assert.Equal(expectedCoin, record.GetProperty("coin").GetProperty("name").GetString());
+        Assert.Equal(confirmed, record.GetProperty("confirmedBlockIndex").GetUInt32());
+        Assert.Equal(spent, record.GetProperty("spentBlockIndex").GetUInt32());
+        var analysis = record.GetProperty("analysis");
+        Assert.Equal(analysisFieldCount, analysis.EnumerateObject().Count());
+        Assert.Equal(analysisValue, analysis.GetProperty(analysisField).GetString());
+    }
+
     private static async Task<(int Status, string Body)> PostJson(string path, object body)
     {
         using var response = await Client.PostAsJsonAsync(path.TrimStart('/'), body);
