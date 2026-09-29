@@ -98,6 +98,8 @@ public class RetainedBaselineCasesTests
                 Assert.Equal(191UL, spend.GetProperty("coin").GetProperty("amount").GetUInt64());
                 Assert.Equal(275528U, spend.GetProperty("confirmed_index").GetUInt32());
                 Assert.Equal(277304U, spend.GetProperty("spent_index").GetUInt32());
+                Assert.StartsWith("0xff", spend.GetProperty("puzzle_reveal").GetString());
+                Assert.StartsWith("0xff", spend.GetProperty("solution").GetString());
                 break;
             case "block-with-generator":
                 Assert.Equal(new ulong[] { 238292, 229003, 229001 }, root.GetProperty("blocks")
