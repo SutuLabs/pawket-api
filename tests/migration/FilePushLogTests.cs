@@ -18,7 +18,10 @@ public class FilePushLogTests
         try
         {
             var path = Path.Combine(directory, "pushtx.jsonl");
-            var log = new FilePushLog(Options.Create(new AppSettings { PushLogPath = path }));
+            var log = new FilePushLog(Options.Create(new AppSettings
+            {
+                PushLogPath = path, PushLogMaxBytes = 1024, PushLogMaxFiles = 2,
+            }));
             var bundle = new WalletController.SpendBundleReq("signature", Array.Empty<WalletController.CoinSpendReq>());
             await log.AppendAsync(bundle, "127.0.0.1", null, 3,
                 new DateTime(2026, 9, 29, 0, 0, 0, DateTimeKind.Utc), "sample error");
@@ -31,6 +34,12 @@ public class FilePushLogTests
             using var reader = new StreamReader(gzip, Encoding.UTF8);
             using var original = JsonDocument.Parse(await reader.ReadToEndAsync());
             Assert.Equal("signature", original.RootElement.GetProperty("aggregated_signature").GetString());
+            for (var index = 0; index < 20; index++)
+                await log.AppendAsync(bundle, "127.0.0.1", null, 3, DateTime.UtcNow, "sample error");
+            Assert.True(File.Exists(path + ".1"));
+            Assert.False(File.Exists(path + ".2"));
+            if (!OperatingSystem.IsWindows())
+                Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite, File.GetUnixFileMode(path));
         }
         finally
         {

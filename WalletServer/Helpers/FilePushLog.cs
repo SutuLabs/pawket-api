@@ -10,11 +10,15 @@ namespace WalletServer.Helpers;
 public sealed class FilePushLog
 {
     private readonly string path;
+    private readonly long maxBytes;
+    private readonly int maxFiles;
     private readonly SemaphoreSlim writeGate = new(1, 1);
 
     public FilePushLog(IOptions<AppSettings> options)
     {
         path = Path.GetFullPath(options.Value.PushLogPath);
+        maxBytes = Math.Max(1024, options.Value.PushLogMaxBytes);
+        maxFiles = Math.Max(2, options.Value.PushLogMaxFiles);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
     }
 
@@ -38,11 +42,29 @@ public sealed class FilePushLog
         await writeGate.WaitAsync();
         try
         {
-            await File.AppendAllTextAsync(path, line, Encoding.UTF8);
+            var encoded = Encoding.UTF8.GetBytes(line);
+            if (File.Exists(path) && new FileInfo(path).Length + encoded.Length > maxBytes)
+                Rotate();
+            await using var file = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read);
+            if (!OperatingSystem.IsWindows())
+                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            await file.WriteAsync(encoded);
+            await file.FlushAsync();
         }
         finally
         {
             writeGate.Release();
+        }
+    }
+
+    private void Rotate()
+    {
+        for (var index = maxFiles - 1; index >= 1; index--)
+        {
+            var destination = path + "." + index;
+            var source = index == 1 ? path : path + "." + (index - 1);
+            if (File.Exists(destination)) File.Delete(destination);
+            if (File.Exists(source)) File.Move(source, destination);
         }
     }
 }
