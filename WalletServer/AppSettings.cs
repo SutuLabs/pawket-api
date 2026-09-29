@@ -10,6 +10,7 @@
     public string PriceCachePath { get; set; } = "data/prices.sqlite";
     public int PriceRefreshMinutes { get; set; } = 10;
     public string PushLogPath { get; set; } = "data/pushtx.jsonl";
+    public string CoinProcessorUrl { get; set; } = "http://127.0.0.1:3030";
     public string CnsCreatorPuzzleHash { get; set; } = "0x0eb720d9195ffe59684b62b12d54791be7ad3bb6207f5eb92e0e1b40ecbc1155";
     public uint CnsGracePeriodDays { get; set; } = 90;
 }

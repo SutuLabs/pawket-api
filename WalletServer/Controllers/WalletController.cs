@@ -22,6 +22,7 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
         private readonly DataAccess dataAccess;
+        private readonly ChiaWalletData chiaData;
         private readonly FilePushLog pushLogHelper;
         private readonly OnlineCounter onlineCounter;
         private readonly AppSettings appSettings;
@@ -43,6 +44,7 @@ namespace WalletServer.Controllers
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
             DataAccess dataAccess,
+            ChiaWalletData chiaData,
             FilePushLog pushLogHelper,
             OnlineCounter onlineCounter,
             IOptions<AppSettings> appSettings)
@@ -50,6 +52,7 @@ namespace WalletServer.Controllers
             this.logger = logger;
             this.memoryCache = memoryCache;
             this.dataAccess = dataAccess;
+            this.chiaData = chiaData;
             this.pushLogHelper = pushLogHelper;
             this.onlineCounter = onlineCounter;
             this.appSettings = appSettings.Value;
@@ -68,7 +71,7 @@ namespace WalletServer.Controllers
         public record GetRecordsRequest(
             string[] puzzleHashes,
             long? startHeight = null,
-            [property: Obsolete("don't need end height to restrict, as currently is using database instead of api")] ulong? endHeight = null,
+            ulong? endHeight = null,
             long? pageStart = null,
             int? pageLength = null,
             bool includeSpentCoins = false,
@@ -90,6 +93,7 @@ namespace WalletServer.Controllers
             if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
             if (request.puzzleHashes.Length > 300)
                 return BadRequest("Valid puzzle hash number per request is 300");
+            if (!ValidHeights(request.startHeight, request.endHeight)) return BadRequest("Invalid height range");
             var coinType = (CoinClassType?)null;
             if (request.coinType != null)
             {
@@ -104,20 +108,14 @@ namespace WalletServer.Controllers
                 + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
 
             RequestRecordCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
-            var peak = await this.dataAccess.GetPeakHeight();
+            var peak = await this.chiaData.GetPeakHeight();
 
             var infos = new List<CoinRecordInfo>();
             foreach (var hash in request.puzzleHashes)
             {
-                var coinRecords = await this.dataAccess.GetCoins(
-                    new[] { hash },
-                    request.includeSpentCoins,
-                    GetCoinOrder.AnyIndexDesc,
-                    request.coinType != null ? GetCoinMethod.Class : request.hint ? GetCoinMethod.Hint : GetCoinMethod.PuzzleHash,
-                    request.startHeight,
-                    request.pageStart,
-                    request.pageLength,
-                    coinType);
+                var coinRecords = await this.chiaData.GetCoins(hash, request.includeSpentCoins,
+                    request.hint, coinType, (uint?)request.startHeight, (uint?)request.endHeight,
+                    request.pageStart, request.pageLength);
                 var ret = coinRecords.Select(_ => new CoinRecordWithAnalysisObject
                 {
                     Coin = _.Coin,
@@ -129,7 +127,7 @@ namespace WalletServer.Controllers
                     Analysis = request.includeAnalysis ? ConvertAnalysis(_.Analysis) : null,
                 }).ToArray();
 
-                var balance = coinType != null ? null : await this.dataAccess.GetBalance(hash);
+                var balance = coinType != null ? null : await this.chiaData.GetBalance(hash);
                 infos.Add(new CoinRecordInfo(hash, ret, balance?.Amount, balance));
             }
 
@@ -231,19 +229,21 @@ namespace WalletServer.Controllers
             }
         }
 
-        public record GetParentPuzzleRequest(string parentCoinId);
+        public record GetParentPuzzleRequest(string parentCoinId, long? startHeight = null, ulong? endHeight = null);
         public record GetParentPuzzleResponse(string parentCoinId, ulong amount, string parentParentCoinId, string puzzleReveal);
 
         [HttpPost("get-puzzle")]
         public async Task<ActionResult> GetParentPuzzle(GetParentPuzzleRequest request)
         {
             if (request == null || request.parentCoinId == null) return BadRequest("Invalid request");
+            if (!ValidHeights(request.startHeight, request.endHeight)) return BadRequest("Invalid height range");
             RequestPuzzleCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request puzzle {request.parentCoinId}");
 
-            var coins = await dataAccess.GetParentPuzzle(new[] { request.parentCoinId });
+            var coins = await chiaData.GetParentPuzzle(request.parentCoinId,
+                (uint?)request.startHeight, (uint?)request.endHeight);
             if (coins.Length != 1) return BadRequest("Cannot find corresponding coin.");
             var c = coins.Single();
 
@@ -269,7 +269,9 @@ namespace WalletServer.Controllers
             [property: Obsolete("legacy compatibility api")] string? coinId,
             string[]? coinIds,
             int? pageStart = null,
-            int? pageLength = null);
+            int? pageLength = null,
+            long? startHeight = null,
+            ulong? endHeight = null);
         [Obsolete("legacy compatibility api")]
         public record GetCoinSolutionLegacyResponse(CoinSpendReq CoinSpend);
         public record GetCoinSolutionResponse(CoinSpendReq[] CoinSpends);
@@ -280,6 +282,7 @@ namespace WalletServer.Controllers
             if (request == null) return BadRequest("Malformat request");
             var coinIds = request.coinId != null ? new[] { request.coinId } : request.coinIds != null ? request.coinIds : null;
             if (coinIds == null) return BadRequest("Invalid request");
+            if (!ValidHeights(request.startHeight, request.endHeight)) return BadRequest("Invalid height range");
 
             RequestCoinSolutionCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
 
@@ -287,7 +290,8 @@ namespace WalletServer.Controllers
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request coin solution {request.coinId}");
 
 
-            var coins = await dataAccess.GetCoinDetails(coinIds);
+            var coins = await chiaData.GetCoinDetails(coinIds,
+                (uint?)request.startHeight, (uint?)request.endHeight, request.pageStart, request.pageLength);
             if (request.coinId != null)
             {
                 if (coins.Length != 1) return BadRequest("Cannot find corresponding coin.");
@@ -317,7 +321,7 @@ namespace WalletServer.Controllers
             var remoteIpAddress = this.HttpContext.GetRealIp();
             this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request block {string.Join(",", request.indexes)}");
 
-            var blocks = await dataAccess.GetBlock(request.indexes);
+            var blocks = await chiaData.GetBlock(request.indexes);
             blocks = blocks with
             {
                 Blocks = blocks.Blocks.Select(_ => _ with { generator = _.generator.CompressGzip() }).ToArray(),
@@ -442,6 +446,11 @@ namespace WalletServer.Controllers
 
         const uint MaxRetries = 3;
         const uint RetryWait = 100;
+
+        private static bool ValidHeights(long? start, ulong? end) =>
+            (start == null || start is >= 0 and <= uint.MaxValue)
+            && (end == null || end <= uint.MaxValue)
+            && (start == null || end == null || (ulong)start.Value <= end);
 
         private async Task<T> RetryAsync<T>(Func<CancellationToken, Task<T>> function, CancellationToken cancellationToken = default, uint? maxRetries = null)
         {

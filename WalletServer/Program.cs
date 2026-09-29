@@ -40,6 +40,8 @@ builder.Services.AddScoped<NameResolvingService>();
 builder.Services.AddScoped<InscriptionCacheService>();
 builder.Services.AddSingleton<FilePushLog>();
 builder.Services.AddSingleton<PriceCacheService>();
+builder.Services.AddSingleton<CoinClassCache>();
+builder.Services.AddScoped<ChiaWalletData>();
 builder.Services.AddSingleton<OnlineCounter>();
 
 builder.Services.AddResponseCompression(options =>
