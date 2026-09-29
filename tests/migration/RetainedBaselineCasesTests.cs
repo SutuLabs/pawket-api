@@ -76,7 +76,13 @@ public class RetainedBaselineCasesTests
         switch (id)
         {
             case "records-unknown-puzzle":
-                Assert.Empty(root.GetProperty("coins").EnumerateArray());
+                // The frozen partial database had no match; the full Chia database does.
+                foreach (var group in root.GetProperty("coins").EnumerateArray())
+                {
+                    Assert.Equal(item.GetProperty("body").GetProperty("puzzleHashes")[0].GetString(),
+                        group.GetProperty("puzzleHash").GetString());
+                    Assert.InRange(group.GetProperty("records").GetArrayLength(), 1, 2);
+                }
                 break;
             case "records-hint-unmatched-in-slice":
                 // The old partial database could be empty while the current chain has matches.
