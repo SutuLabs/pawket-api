@@ -25,7 +25,7 @@ public class MiscController : ControllerBase
     public record PriceResponse(string Source, string From, string To, decimal Price, DateTime Time);
 
     [HttpGet("prices")]
-    public async Task<IActionResult> GetPrice()
+    public IActionResult GetPrice()
     {
         RequestPriceCount.Inc();
 

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Text.Json;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Options;
@@ -11,7 +12,7 @@ public sealed class PriceCacheService : IDisposable
 {
     private readonly ILogger<PriceCacheService> logger;
     private readonly AppSettings settings;
-    private readonly HttpClient http = new() { Timeout = TimeSpan.FromSeconds(15) };
+    private readonly HttpClient http;
     private readonly string connectionString;
     private readonly object gate = new();
     private DateTime nextAttemptUtc = DateTime.MinValue;
@@ -22,6 +23,10 @@ public sealed class PriceCacheService : IDisposable
     {
         this.logger = logger;
         this.settings = options.Value;
+        var handler = new HttpClientHandler();
+        if (!string.IsNullOrWhiteSpace(settings.PriceProxy))
+            handler.Proxy = new WebProxy(settings.PriceProxy);
+        http = new HttpClient(handler) { Timeout = TimeSpan.FromSeconds(15) };
         var path = Path.GetFullPath(settings.PriceCachePath);
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         connectionString = new SqliteConnectionStringBuilder { DataSource = path }.ToString();

@@ -6,6 +6,7 @@
     public NetworkSettings Network { get; set; } = new NetworkSettings();
     public uint OnlineUserStaySeconds { get; set; } = 90;
     public string? PriceSourceUrl { get; set; }
+    public string? PriceProxy { get; set; }
     public string PriceCachePath { get; set; } = "data/prices.sqlite";
     public int PriceRefreshMinutes { get; set; } = 10;
     public string PushLogPath { get; set; } = "data/pushtx.jsonl";
