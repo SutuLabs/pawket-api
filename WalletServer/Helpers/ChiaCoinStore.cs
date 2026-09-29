@@ -27,22 +27,44 @@ public sealed class ChiaCoinStore
     public SqliteConnection Open()
     {
         var db = new SqliteConnection(connectionString);
-        db.Open();
-        using var queryOnly = db.CreateCommand();
-        queryOnly.CommandText = "PRAGMA query_only=ON";
-        queryOnly.ExecuteNonQuery();
-        lock (schemaGate)
+        try
         {
-            if (!schemaChecked)
+            db.Open();
+            using var queryOnly = db.CreateCommand();
+            queryOnly.CommandText = "PRAGMA query_only=ON";
+            queryOnly.ExecuteNonQuery();
+            lock (schemaGate)
             {
-                using var schema = db.CreateCommand();
-                schema.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('coin_record','hints')";
-                if ((long)schema.ExecuteScalar()! != 2)
-                    throw new InvalidDataException("Unsupported Chia database: coin_record/hints tables are missing");
-                schemaChecked = true;
+                if (!schemaChecked)
+                {
+                    using var version = db.CreateCommand();
+                    version.CommandText = "SELECT version FROM database_version LIMIT 1";
+                    if (Convert.ToInt64(version.ExecuteScalar()) != 2)
+                        throw new InvalidDataException("Unsupported Chia database version");
+                    RequireColumns(db, "coin_record", "coin_name", "coin_parent", "puzzle_hash", "amount",
+                        "confirmed_index", "spent_index", "coinbase", "timestamp");
+                    RequireColumns(db, "hints", "coin_id", "hint");
+                    schemaChecked = true;
+                }
             }
+            return db;
         }
-        return db;
+        catch
+        {
+            db.Dispose();
+            throw;
+        }
+    }
+
+    private static void RequireColumns(SqliteConnection db, string table, params string[] names)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = $"PRAGMA table_info({table})";
+        using var reader = cmd.ExecuteReader();
+        var found = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        while (reader.Read()) found.Add(reader.GetString(1));
+        if (names.Any(name => !found.Contains(name)))
+            throw new InvalidDataException($"Unsupported Chia database schema: {table}");
     }
 
     public PageRow[] GetPage(SqliteConnection db, string hash, bool hint, bool includeSpent,
