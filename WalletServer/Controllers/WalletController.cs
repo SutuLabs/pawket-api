@@ -117,6 +117,8 @@ namespace WalletServer.Controllers
             var peak = await this.chiaData.GetPeakHeight();
             if (HasDeprecatedFields(request.Extra))
                 return Ok(new GetRecordsResponse(peak, Array.Empty<CoinRecordInfo>()));
+            if (request.puzzleHashes.Any(hash => !IsValidHash(hash)))
+                return BadRequest("Invalid puzzle hash");
 
             var infos = new List<CoinRecordInfo>();
             using var db = coinStore.Open();
@@ -143,14 +145,19 @@ namespace WalletServer.Controllers
             var peak = checked((uint)await chiaData.GetPeakHeight());
             if (HasDeprecatedFields(request.Extra))
                 return Ok(new GetCoinsResponse(peak, Array.Empty<CoinPageInfo>(), null));
+            if (!IsValidHash(request.puzzleHash)) return BadRequest("Invalid puzzle hash");
 
             RecordsCursor? previous = null;
             if (request.cursor != null)
             {
+                if (request.cursor.Length > 4096) return BadRequest("Invalid cursor");
                 try { previous = DecodeCursor(request.cursor); }
                 catch (Exception ex) when (ex is FormatException or JsonException)
                 { return BadRequest("Invalid cursor"); }
-                if (previous is null || !previous.PuzzleHash.Equals(request.puzzleHash, StringComparison.OrdinalIgnoreCase)
+                if (previous is null || !IsValidHash(previous.PuzzleHash)
+                    || !IsValidHash(previous.BlockHash) || !IsValidHash(previous.LastCoinId)
+                    || previous.LastSortHeight < 0 || previous.LastSortHeight > previous.SnapshotHeight
+                    || !previous.PuzzleHash.Equals(request.puzzleHash, StringComparison.OrdinalIgnoreCase)
                     || previous.Hint != request.hint || previous.IncludeSpentCoins != request.includeSpentCoins
                     || previous.StartHeight != request.startHeight || previous.EndHeight != request.endHeight
                     || previous.PageLength != request.pageLength || previous.SnapshotHeight > peak)
@@ -187,6 +194,14 @@ namespace WalletServer.Controllers
         private static bool HasDeprecatedFields(Dictionary<string, JsonElement>? extra) =>
             extra?.Keys.Any(key => key.Equals("coinType", StringComparison.OrdinalIgnoreCase)
                 || key.Equals("includeAnalysis", StringComparison.OrdinalIgnoreCase)) == true;
+
+        private static bool IsValidHash(string? value)
+        {
+            if (value is null) return false;
+            var hex = value.StartsWith("0x", StringComparison.OrdinalIgnoreCase) ? value.AsSpan(2) : value.AsSpan();
+            return hex.Length == 64 && Convert.TryFromHexString(hex, stackalloc byte[32], out var written)
+                && written == 32;
+        }
 
         private static string EncodeCursor(RecordsCursor cursor) =>
             Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(cursor)).TrimEnd('=')
