@@ -37,3 +37,8 @@ validates the gzip and compares the SHA-256 of its decompressed content;
 all other response fields are compared exactly.
 
 These cases do not exercise transaction submission or offer upload.
+
+Five additional C# xUnit tests cover the currently ignored `records` height fields,
+the 301-hash limit, a missing puzzle, the legacy single-coin solution shape, and an
+unknown coin solution. The suite has 21 tests in total. See `API-MIGRATION-NOTES.md`
+for migration scope and unresolved coverage gaps.

@@ -14,9 +14,11 @@ The existing empty-result baseline cases for `/Name/recent` and `/Inscription/ti
 
 `POST /Wallet/records` has seven snapshot cases: invalid coin type, spent records, spent filtering, two unspent pages, unmatched hint, and unknown puzzle hash. There is no positive hint or coin-class case, analysis payload, multiple puzzle hashes, or complete-chain balance check. The limited database slice makes current balance and `peekHeight` snapshots unsuitable as proof of complete-mainnet behavior.
 
-`POST /Wallet/get-coin-solution` has two cases: missing IDs and one spent coin. That coin's stored puzzle and solution are empty, so the central nonempty `puzzle_reveal`/`solution` response is not yet protected. Legacy `coinId`, multiple IDs, unknown/unspent coins, and paging also lack cases.
+`POST /Wallet/get-coin-solution` has two snapshot cases plus legacy-shape and unknown-ID tests. The spent coin's stored puzzle and solution are empty, so the central nonempty `puzzle_reveal`/`solution` response is not yet protected. Multiple IDs, unspent coins, and paging also lack cases.
 
 The three primary routes do not currently support caller-selected block-height filtering. `records` accepts `startHeight` and `endHeight`, but neither affects its SQL result (`startHeight` is passed as an unused SQL parameter). `get-puzzle` and `get-coin-solution` do not accept a height field. The SQL for all three applies the internal `sync_state` upper bound; this is not a request filter.
+
+The additional xUnit tests lock in the ignored height fields, the 301-hash validation, the missing-puzzle error, the legacy single-spend shape, and the unknown coin's empty-array response. All 21 tests passed on the existing test-machine API and PostgreSQL slice.
 
 ## API business data sources (inventory, not migration scope)
 
