@@ -21,7 +21,6 @@ namespace WalletServer.Controllers
     {
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
-        private readonly DataAccess dataAccess;
         private readonly ChiaWalletData chiaData;
         private readonly FilePushLog pushLogHelper;
         private readonly OnlineCounter onlineCounter;
@@ -38,12 +37,10 @@ namespace WalletServer.Controllers
         private static readonly Counter RequestCoinSolutionCount = Metrics.CreateCounter("request_coin_solution_total", "Number of CoinSolution request.", refererLabels);
         private static readonly Counter RequestBlockCount = Metrics.CreateCounter("request_block_total", "Number of Block request.", refererLabels);
         private static readonly Counter RequestOfferUploadCount = Metrics.CreateCounter("request_offer_upload_total", "Number of offer upload request.", refererLabels);
-        private static readonly Counter RequestAnalysisCount = Metrics.CreateCounter("request_analysis_total", "Number of analysis record request.", refererLabels);
 
         public WalletController(
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
-            DataAccess dataAccess,
             ChiaWalletData chiaData,
             FilePushLog pushLogHelper,
             OnlineCounter onlineCounter,
@@ -51,7 +48,6 @@ namespace WalletServer.Controllers
         {
             this.logger = logger;
             this.memoryCache = memoryCache;
-            this.dataAccess = dataAccess;
             this.chiaData = chiaData;
             this.pushLogHelper = pushLogHelper;
             this.onlineCounter = onlineCounter;
@@ -421,27 +417,6 @@ namespace WalletServer.Controllers
 
             var net = this.appSettings.Network;
             return Ok(new GetNetworkInfoResponse(net.Name, net.Prefix, net.ChainId, net.Symbol, net.Decimal, net.ExplorerUrl));
-        }
-
-        public record GetAnalysisRequest(string[] puzzleHashes);
-        public record GetAnalysisResponse(CoinAnalysis[] analyses);
-
-        [HttpPost("analysis")]
-        public async Task<ActionResult> GetAnalysis(GetAnalysisRequest request)
-        {
-            if (request is null || request.puzzleHashes is null) return BadRequest("Invalid request");
-            if (request.puzzleHashes.Length > 200)
-                return BadRequest("Valid puzzle hash number per request is 300");
-
-            //var remoteIpAddress = this.HttpContext.GetRealIp();
-            //this.onlineCounter.Renew(remoteIpAddress, request.puzzleHashes[0], request.puzzleHashes.Length);
-            //this.logger.LogDebug($"[{DateTime.UtcNow.ToShortTimeString()}]From {remoteIpAddress} request {request.puzzleHashes.FirstOrDefault()}"
-            //    + $"[{request.puzzleHashes.Length}], includeSpent = {request.includeSpentCoins}");
-
-            RequestAnalysisCount.WithLabels(this.HttpContext.GetReferer(logger)).Inc();
-
-            var analyses = await this.dataAccess.GetCoinAnalysis(request.puzzleHashes);
-            return Ok(new GetAnalysisResponse(analyses));
         }
 
         const uint MaxRetries = 3;
