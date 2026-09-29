@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using chia.dotnet;
 using NodeDBSyncer.Functions.ParseTx;
 
@@ -47,7 +49,8 @@ while (scanned < end && found.Count < 3)
                 blockHeight = block.Height,
                 coinId = result.coin_name,
                 mods = result.mods,
-                analysis = result.analysis,
+                analysisLength = result.analysis?.Length ?? 0,
+                analysisSha256 = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(result.analysis ?? ""))).ToLowerInvariant(),
             }));
             if (found.Count == 3) break;
         }
