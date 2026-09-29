@@ -111,7 +111,9 @@ public sealed class CoinClassCache
             if (!parsed.RootElement.TryGetProperty("mods", out var modsElement))
                 throw new InvalidDataException($"Processor response missing mods for {id}: {parsed.RootElement.GetRawText()[..Math.Min(256, parsed.RootElement.GetRawText().Length)]}");
             var mods = modsElement.GetString() ?? "";
-            var analysis = parsed.RootElement.GetProperty("analysis").GetString() ?? "";
+            if (!parsed.RootElement.TryGetProperty("analysis", out var analysisElement))
+                throw new InvalidDataException($"Processor response missing analysis for {id}: {parsed.RootElement.GetRawText()[..Math.Min(256, parsed.RootElement.GetRawText().Length)]}");
+            var analysis = analysisElement.GetString() ?? "";
             using var write = db.CreateCommand();
             write.CommandText = @"INSERT INTO coin_class_cache (coin_id,spent_height,block_hash,mods,analysis,last_used_utc)
                 VALUES ($id,$height,$hash,$mods,$analysis,$now)
