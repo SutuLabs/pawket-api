@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Microsoft.Data.Sqlite;
 using WalletServer.Helpers;
 using Xunit;
 
@@ -10,6 +11,36 @@ namespace WalletBackend.MigrationTests;
 
 public class PriceCacheTests
 {
+    [Fact]
+    public void RemovesObsoleteClassificationTableWithoutLosingPrices()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "pawket-price-cleanup-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var path = Path.Combine(directory, "prices.sqlite");
+        try
+        {
+            using (var db = new SqliteConnection($"Data Source={path}"))
+            {
+                db.Open();
+                using var cmd = db.CreateCommand();
+                cmd.CommandText = "CREATE TABLE coin_class_cache (id BLOB); INSERT INTO coin_class_cache VALUES (x'01');";
+                cmd.ExecuteNonQuery();
+            }
+            using (var cache = new PriceCacheService(NullLogger<PriceCacheService>.Instance,
+                Options.Create(new AppSettings { PriceCachePath = path })))
+                Assert.Equal(3, cache.GetLatestPrices().Length);
+            using var verify = new SqliteConnection($"Data Source={path}");
+            verify.Open();
+            using var check = verify.CreateCommand();
+            check.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='coin_class_cache'";
+            Assert.Equal(0L, check.ExecuteScalar());
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
     [Fact]
     public async Task FailedRefreshKeepsLastKnownPricesAndBackoffAfterRestart()
     {

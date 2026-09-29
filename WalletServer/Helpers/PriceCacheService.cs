@@ -59,6 +59,21 @@ public sealed class PriceCacheService : IDisposable
                 consecutive_failures INTEGER NOT NULL
             );";
         schema.ExecuteNonQuery();
+        try
+        {
+            using var obsolete = db.CreateCommand();
+            obsolete.CommandText = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='coin_class_cache'";
+            if ((long)obsolete.ExecuteScalar()! != 0)
+            {
+                using var cleanup = db.CreateCommand();
+                cleanup.CommandText = "DROP TABLE coin_class_cache; VACUUM; PRAGMA wal_checkpoint(TRUNCATE);";
+                cleanup.ExecuteNonQuery();
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Unable to reclaim obsolete coin classification cache");
+        }
         SeedIfEmpty(db);
         using var state = db.CreateCommand();
         state.CommandText = "SELECT next_attempt_utc, consecutive_failures FROM price_refresh_state WHERE id=1";
