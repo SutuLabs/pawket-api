@@ -1,7 +1,9 @@
 using System.IO.Compression;
+using System.Security.Cryptography;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Xunit;
 
 namespace WalletBackend.MigrationTests;
@@ -109,13 +111,12 @@ public class RetainedBaselineCasesTests
                 Assert.StartsWith("0xff", spend.GetProperty("solution").GetString());
                 break;
             case "block-with-generator":
-                Assert.Equal(new ulong[] { 238292, 229003, 229001 }, root.GetProperty("blocks")
-                    .EnumerateArray().Select(b => b.GetProperty("index").GetUInt64()));
-                foreach (var block in root.GetProperty("blocks").EnumerateArray())
+                using (var snapshots = JsonDocument.Parse(File.ReadAllText(Asset("data-snapshot.json"))))
                 {
-                    using var compressed = new MemoryStream(Convert.FromBase64String(block.GetProperty("generator").GetString()!));
-                    using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
-                    Assert.True(gzip.ReadByte() >= 0);
+                    var expected = snapshots.RootElement.EnumerateArray()
+                        .Single(c => c.GetProperty("case").GetString() == id)
+                        .GetProperty("response").GetProperty("body");
+                    AssertJsonEqual(expected, NormalizeBlockGenerators(root), id);
                 }
                 break;
             default:
@@ -124,4 +125,54 @@ public class RetainedBaselineCasesTests
     }
 
     private static string Asset(string name) => Path.Combine(AppContext.BaseDirectory, name);
+
+    private static JsonElement NormalizeBlockGenerators(JsonElement body)
+    {
+        var normalized = JsonNode.Parse(body.GetRawText())!;
+        foreach (var group in new[] { "blocks", "refBlocks" })
+        {
+            foreach (var block in (JsonArray)normalized[group]!)
+            {
+                using var compressed = new MemoryStream(Convert.FromBase64String(block!["generator"]!.GetValue<string>()));
+                using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
+                using var plain = new MemoryStream();
+                gzip.CopyTo(plain);
+                block["generator"] = "gzip-content-sha256:"
+                    + Convert.ToHexString(SHA256.HashData(plain.ToArray())).ToLowerInvariant();
+            }
+        }
+        using var document = JsonDocument.Parse(normalized.ToJsonString());
+        return document.RootElement.Clone();
+    }
+
+    private static void AssertJsonEqual(JsonElement expected, JsonElement actual, string path)
+    {
+        Assert.True(expected.ValueKind == actual.ValueKind, $"{path}: JSON kind differs");
+        switch (expected.ValueKind)
+        {
+            case JsonValueKind.Object:
+                Assert.Equal(expected.EnumerateObject().Count(), actual.EnumerateObject().Count());
+                foreach (var field in expected.EnumerateObject())
+                {
+                    Assert.True(actual.TryGetProperty(field.Name, out var value), $"{path}: missing {field.Name}");
+                    AssertJsonEqual(field.Value, value, path + "." + field.Name);
+                }
+                break;
+            case JsonValueKind.Array:
+                Assert.Equal(expected.GetArrayLength(), actual.GetArrayLength());
+                for (var i = 0; i < expected.GetArrayLength(); i++)
+                    AssertJsonEqual(expected[i], actual[i], $"{path}[{i}]");
+                break;
+            case JsonValueKind.String:
+                Assert.Equal(expected.GetString(), actual.GetString());
+                break;
+            case JsonValueKind.Number:
+                Assert.Equal(expected.GetRawText(), actual.GetRawText());
+                break;
+            case JsonValueKind.True:
+            case JsonValueKind.False:
+                Assert.Equal(expected.GetBoolean(), actual.GetBoolean());
+                break;
+        }
+    }
 }
