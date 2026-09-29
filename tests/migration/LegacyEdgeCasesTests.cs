@@ -84,6 +84,19 @@ public class LegacyEdgeCasesTests
     }
 
     [Fact]
+    public async Task RepeatedPuzzleHashKeepsBothGroupsAndBalances()
+    {
+        using var body = await Post("Wallet/records", new
+        {
+            puzzleHashes = new[] { KnownHash, KnownHash }, pageLength = 1,
+        });
+        var groups = body.RootElement.GetProperty("coins").EnumerateArray().ToArray();
+        Assert.Equal(2, groups.Length);
+        Assert.Equal(groups[0].GetProperty("balance").GetRawText(), groups[1].GetProperty("balance").GetRawText());
+        Assert.Equal(groups[0].GetProperty("balanceInfo").GetRawText(), groups[1].GetProperty("balanceInfo").GetRawText());
+    }
+
+    [Fact]
     public async Task PaginationReturnsDistinctDescendingCoins()
     {
         using var first = await Post("Wallet/records", new
