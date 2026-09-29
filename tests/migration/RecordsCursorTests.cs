@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using Xunit;
 
@@ -13,6 +14,38 @@ public class RecordsCursorTests
         Timeout = TimeSpan.FromSeconds(90),
     };
     private const string LargeHint = "0x82b7ad4c410fa706301cc4a1fc3cc0b34f1808813f8ab3a0e6774aed7b0f7131";
+
+    [Theory]
+    [InlineData("xyz")]
+    [InlineData("0x00")]
+    [InlineData("")]
+    public async Task InvalidHashReturnsBadRequest(string hash)
+    {
+        using var coins = await Client.PostAsJsonAsync("Wallet/coins", new { puzzleHash = hash });
+        Assert.Equal(400, (int)coins.StatusCode);
+        using var records = await Client.PostAsJsonAsync("Wallet/records", new { puzzleHashes = new[] { hash } });
+        Assert.Equal(400, (int)records.StatusCode);
+    }
+
+    [Theory]
+    [InlineData("{}")]
+    [InlineData("{\"PuzzleHash\":null}")]
+    public async Task IncompleteCursorReturnsBadRequest(string json)
+    {
+        var cursor = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+        using var response = await Client.PostAsJsonAsync("Wallet/coins", new { puzzleHash = LargeHint, cursor });
+        Assert.Equal(400, (int)response.StatusCode);
+    }
+
+    [Fact]
+    public async Task OversizedCursorReturnsBadRequest()
+    {
+        using var response = await Client.PostAsJsonAsync("Wallet/coins", new
+        {
+            puzzleHash = LargeHint, cursor = new string('A', 4097),
+        });
+        Assert.Equal(400, (int)response.StatusCode);
+    }
 
     [Fact]
     public async Task OldPageRouteIsNotExposed()
