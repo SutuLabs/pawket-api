@@ -76,6 +76,11 @@ public class LegacyEdgeCasesTests
         var groups = body.RootElement.GetProperty("coins").EnumerateArray().ToArray();
         Assert.Contains(groups, g => g.GetProperty("puzzleHash").GetString() == KnownHash);
         Assert.All(groups, g => Assert.Single(g.GetProperty("records").EnumerateArray()));
+        Assert.All(groups, g =>
+        {
+            Assert.True(g.TryGetProperty("balance", out _));
+            Assert.True(g.TryGetProperty("balanceInfo", out _));
+        });
     }
 
     [Fact]

@@ -15,6 +15,13 @@ public class RecordsCursorTests
     private const string LargeHint = "0x82b7ad4c410fa706301cc4a1fc3cc0b34f1808813f8ab3a0e6774aed7b0f7131";
 
     [Fact]
+    public async Task OldPageRouteIsNotExposed()
+    {
+        using var response = await Client.PostAsJsonAsync("Wallet/records-page", new { puzzleHash = LargeHint });
+        Assert.Equal(404, (int)response.StatusCode);
+    }
+
+    [Fact]
     public async Task CursorRetrievesEveryLargeHintCoinWithoutDuplicates()
     {
         string? cursor = null;
@@ -23,7 +30,7 @@ public class RecordsCursorTests
         var pages = 0;
         do
         {
-            using var response = await Client.PostAsJsonAsync("Wallet/records-page", new
+            using var response = await Client.PostAsJsonAsync("Wallet/coins", new
             {
                 puzzleHash = LargeHint, hint = true, includeSpentCoins = true,
                 pageLength = 1000, cursor,
@@ -37,6 +44,8 @@ public class RecordsCursorTests
             foreach (var group in body.RootElement.GetProperty("coins").EnumerateArray())
             {
                 Assert.Equal(LargeHint, group.GetProperty("puzzleHash").GetString());
+                Assert.False(group.TryGetProperty("balance", out _));
+                Assert.False(group.TryGetProperty("balanceInfo", out _));
                 foreach (var record in group.GetProperty("records").EnumerateArray())
                 {
                     Assert.True(record.GetProperty("confirmedBlockIndex").GetUInt32() <= height);
@@ -54,14 +63,14 @@ public class RecordsCursorTests
     [Fact]
     public async Task CursorRejectsChangedQuery()
     {
-        using var first = await Client.PostAsJsonAsync("Wallet/records-page", new
+        using var first = await Client.PostAsJsonAsync("Wallet/coins", new
         {
             puzzleHash = LargeHint, hint = true, includeSpentCoins = true, pageLength = 1,
         });
         Assert.True(first.IsSuccessStatusCode);
         using var body = JsonDocument.Parse(await first.Content.ReadAsStringAsync());
         var cursor = body.RootElement.GetProperty("nextCursor").GetString();
-        using var changed = await Client.PostAsJsonAsync("Wallet/records-page", new
+        using var changed = await Client.PostAsJsonAsync("Wallet/coins", new
         {
             puzzleHash = LargeHint, hint = false, includeSpentCoins = true, pageLength = 1, cursor,
         });
@@ -71,7 +80,7 @@ public class RecordsCursorTests
     [Fact]
     public async Task CursorHonorsConfirmationHeightFilter()
     {
-        using var response = await Client.PostAsJsonAsync("Wallet/records-page", new
+        using var response = await Client.PostAsJsonAsync("Wallet/coins", new
         {
             puzzleHash = LargeHint, hint = true, includeSpentCoins = true,
             startHeight = 9000688, endHeight = 9000689, pageLength = 1000,
