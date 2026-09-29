@@ -121,13 +121,19 @@ namespace WalletServer.Controllers
                 return BadRequest("Invalid puzzle hash");
 
             var infos = new List<CoinRecordInfo>();
+            var balances = new Dictionary<string, FullBalanceInfo>(StringComparer.OrdinalIgnoreCase);
             using var db = coinStore.Open();
             foreach (var hash in request.puzzleHashes)
             {
                 var coinRecords = coinStore.GetPage(db, hash, request.hint, request.includeSpentCoins,
                     (uint?)request.startHeight, (uint?)request.endHeight, checked((uint)peak),
                     request.pageStart ?? 0, request.pageLength ?? 100);
-                var balance = coinStore.GetBalance(db, hash, checked((uint)peak));
+                if (coinRecords.Length == 0) continue;
+                if (!balances.TryGetValue(hash, out var balance))
+                {
+                    balance = coinStore.GetBalance(db, hash, checked((uint)peak));
+                    balances.Add(hash, balance);
+                }
                 infos.Add(new CoinRecordInfo(hash, coinRecords.Select(x => x.Record).ToArray(), balance.Amount, balance));
             }
 
