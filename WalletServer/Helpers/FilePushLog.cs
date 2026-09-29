@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -9,6 +10,9 @@ namespace WalletServer.Helpers;
 /// <summary>Append-only push diagnostics; logging failure must not affect the RPC result.</summary>
 public sealed class FilePushLog
 {
+    [DllImport("libc", EntryPoint = "chmod", SetLastError = true)]
+    private static extern int Chmod(string path, int mode);
+
     private readonly string path;
     private readonly long maxBytes;
     private readonly int maxFiles;
@@ -46,8 +50,8 @@ public sealed class FilePushLog
             if (File.Exists(path) && new FileInfo(path).Length + encoded.Length > maxBytes)
                 Rotate();
             await using var file = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read);
-            if (!OperatingSystem.IsWindows())
-                File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+            if (!OperatingSystem.IsWindows() && Chmod(path, 0x180) != 0) // 0600
+                throw new IOException($"Unable to restrict push log permissions: {Marshal.GetLastWin32Error()}");
             await file.WriteAsync(encoded);
             await file.FlushAsync();
         }

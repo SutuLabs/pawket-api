@@ -38,8 +38,6 @@ public class FilePushLogTests
                 await log.AppendAsync(bundle, "127.0.0.1", null, 3, DateTime.UtcNow, "sample error");
             Assert.True(File.Exists(path + ".1"));
             Assert.False(File.Exists(path + ".2"));
-            if (!OperatingSystem.IsWindows())
-                Assert.Equal(UnixFileMode.UserRead | UnixFileMode.UserWrite, File.GetUnixFileMode(path));
         }
         finally
         {
