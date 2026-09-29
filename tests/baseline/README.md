@@ -40,5 +40,6 @@ These cases do not exercise transaction submission or offer upload.
 
 Five additional C# xUnit tests cover the currently ignored `records` height fields,
 the 301-hash limit, a missing puzzle, the legacy single-coin solution shape, and an
-unknown coin solution. The suite has 21 tests in total. See `API-MIGRATION-NOTES.md`
+unknown coin solution. A sixth test uses a newly parsed real spent coin to check
+nonempty puzzle and solution values through both endpoints. The suite has 22 tests in total. See `API-MIGRATION-NOTES.md`
 for migration scope and unresolved coverage gaps.

@@ -124,6 +124,29 @@ public class LegacyApiContractTests
         Assert.Equal(0, body.RootElement.GetProperty("coinSpends").GetArrayLength());
     }
 
+    [Fact]
+    public async Task SpentCoinHasRealPuzzleAndSolutionInBothEndpoints()
+    {
+        const string coinId = "0x4ebd64fa38da4aa0b27cd80d50b3358de6e542155bfe432fb212d1a63308c9e2";
+        const string puzzleReveal = "0xff02ffff01ff02ffff01ff02ffff03ff0bffff01ff02ffff03ffff09ff05ffff1dff0bffff1effff0bff0bffff02ff06ffff04ff02ffff04ff17ff8080808080808080ffff01ff02ff17ff2f80ffff01ff088080ff0180ffff01ff04ffff04ff04ffff04ff05ffff04ffff02ff06ffff04ff02ffff04ff17ff80808080ff80808080ffff02ff17ff2f808080ff0180ffff04ffff01ff32ff02ffff03ffff07ff0580ffff01ff0bffff0102ffff02ff06ffff04ff02ffff04ff09ff80808080ffff02ff06ffff04ff02ffff04ff0dff8080808080ffff01ff0bffff0101ff058080ff0180ff018080ffff04ffff01b08e359d29671b4fc2f3b1683bc791879c3484bf2a2adbeebaa43c0fd16d64430a3767bdb4c91aec30e437cb01f12f50b1ff018080";
+
+        var puzzleResponse = await PostJson("/Wallet/get-puzzle", new { parentCoinId = coinId });
+        Assert.Equal(200, puzzleResponse.Status);
+        using var puzzle = JsonDocument.Parse(puzzleResponse.Body);
+        Assert.Equal(coinId, puzzle.RootElement.GetProperty("parentCoinId").GetString());
+        Assert.Equal(1750000000000UL, puzzle.RootElement.GetProperty("amount").GetUInt64());
+        Assert.Equal(puzzleReveal, puzzle.RootElement.GetProperty("puzzleReveal").GetString());
+
+        var solutionResponse = await PostJson("/Wallet/get-coin-solution", new { coinIds = new[] { coinId } });
+        Assert.Equal(200, solutionResponse.Status);
+        using var solution = JsonDocument.Parse(solutionResponse.Body);
+        var spend = Assert.Single(solution.RootElement.GetProperty("coinSpends").EnumerateArray());
+        Assert.Equal(puzzleReveal, spend.GetProperty("puzzle_reveal").GetString());
+        Assert.Equal("0xff80ffff0180ff8080", spend.GetProperty("solution").GetString());
+        Assert.Equal(237759UL, spend.GetProperty("confirmed_index").GetUInt64());
+        Assert.Equal(239000UL, spend.GetProperty("spent_index").GetUInt64());
+    }
+
     private static async Task<(int Status, string Body)> PostJson(string path, object body)
     {
         using var response = await Client.PostAsJsonAsync(path.TrimStart('/'), body);
