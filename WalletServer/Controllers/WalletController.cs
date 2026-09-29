@@ -22,7 +22,7 @@ namespace WalletServer.Controllers
         private readonly ILogger<WalletController> logger;
         private readonly IMemoryCache memoryCache;
         private readonly DataAccess dataAccess;
-        private readonly PushLogHelper pushLogHelper;
+        private readonly FilePushLog pushLogHelper;
         private readonly OnlineCounter onlineCounter;
         private readonly AppSettings appSettings;
         private readonly HttpRpcClient rpcClient;
@@ -43,7 +43,7 @@ namespace WalletServer.Controllers
             ILogger<WalletController> logger,
             IMemoryCache memoryCache,
             DataAccess dataAccess,
-            PushLogHelper pushLogHelper,
+            FilePushLog pushLogHelper,
             OnlineCounter onlineCounter,
             IOptions<AppSettings> appSettings)
         {
@@ -220,13 +220,8 @@ namespace WalletServer.Controllers
             {
                 try
                 {
-                    await this.pushLogHelper.LogPushes(new PushLogEntity(
-                        JsonSerializer.SerializeToUtf8Bytes(request.bundle).Compress(),
-                        System.Net.IPAddress.Parse(remoteIpAddress),
-                        txid,
-                        status,
-                        DateTime.UtcNow,
-                        error));
+                    await this.pushLogHelper.AppendAsync(request.bundle, remoteIpAddress, txid,
+                        status, DateTime.UtcNow, error);
                 }
                 catch (Exception ex)
                 {

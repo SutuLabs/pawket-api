@@ -38,7 +38,7 @@ builder.Services.Configure<AppSettings>(builder.Configuration.GetSection(nameof(
 builder.Services.AddScoped<DataAccess>();
 builder.Services.AddScoped<NameResolvingService>();
 builder.Services.AddScoped<InscriptionCacheService>();
-builder.Services.AddScoped<PushLogHelper>();
+builder.Services.AddSingleton<FilePushLog>();
 builder.Services.AddSingleton<PriceCacheService>();
 builder.Services.AddSingleton<OnlineCounter>();
 
