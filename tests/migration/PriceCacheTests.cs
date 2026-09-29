@@ -11,6 +11,53 @@ namespace WalletBackend.MigrationTests;
 public class PriceCacheTests
 {
     [Fact]
+    public async Task FailedRefreshKeepsLastKnownPricesAndBackoffAfterRestart()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), "pawket-price-failure-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+        var listener = new TcpListener(IPAddress.Loopback, 0);
+        listener.Start();
+        var port = ((IPEndPoint)listener.LocalEndpoint).Port;
+        var received = 0;
+        var server = Task.Run(async () =>
+        {
+            using var connection = await listener.AcceptTcpClientAsync();
+            Interlocked.Increment(ref received);
+            using var stream = connection.GetStream();
+            using var reader = new StreamReader(stream, Encoding.ASCII, leaveOpen: true);
+            while (!string.IsNullOrEmpty(await reader.ReadLineAsync())) { }
+            await stream.WriteAsync(Encoding.ASCII.GetBytes(
+                "HTTP/1.1 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n"));
+        });
+        var settings = Options.Create(new AppSettings
+        {
+            PriceCachePath = Path.Combine(directory, "prices.sqlite"),
+            PriceSourceUrl = $"http://127.0.0.1:{port}/prices",
+        });
+        try
+        {
+            using (var cache = new PriceCacheService(NullLogger<PriceCacheService>.Instance, settings))
+            {
+                cache.RefreshInBackgroundIfDue();
+                await server.WaitAsync(TimeSpan.FromSeconds(5));
+                Assert.True(SpinWait.SpinUntil(() => Volatile.Read(ref received) == 1,
+                    TimeSpan.FromSeconds(5)));
+                Assert.Equal(3, cache.GetLatestPrices().Length);
+            }
+            using var reopened = new PriceCacheService(NullLogger<PriceCacheService>.Instance, settings);
+            reopened.RefreshInBackgroundIfDue();
+            await Task.Delay(100);
+            Assert.Equal(1, Volatile.Read(ref received));
+            Assert.Equal(3, reopened.GetLatestPrices().Length);
+        }
+        finally
+        {
+            listener.Stop();
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task ConcurrentRequestsStartOneExternalRefreshAndPersistIt()
     {
         var directory = Path.Combine(Path.GetTempPath(), "pawket-price-test-" + Guid.NewGuid().ToString("N"));
