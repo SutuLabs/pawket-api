@@ -44,16 +44,16 @@ public class PriceCacheTests
         {
             using (var cache = new PriceCacheService(NullLogger<PriceCacheService>.Instance, settings))
             {
-                Assert.Empty(cache.GetLatestPrices());
+                Assert.Equal(3, cache.GetLatestPrices().Length); // Production baseline seeds a cold cache.
                 Parallel.For(0, 50, _ => cache.RefreshInBackgroundIfDue());
                 await server.WaitAsync(TimeSpan.FromSeconds(5));
-                Assert.True(SpinWait.SpinUntil(() => cache.GetLatestPrices().Length == 1,
+                Assert.True(SpinWait.SpinUntil(() => cache.GetLatestPrices().Any(p => p.To == "USD" && p.Price == 12.5m),
                     TimeSpan.FromSeconds(5)));
                 Assert.Equal(1, Volatile.Read(ref received));
-                Assert.Equal(12.5m, cache.GetLatestPrices()[0].Price);
+                Assert.Equal(3, cache.GetLatestPrices().Length); // Partial refresh retains CNY and USDT.
             }
             using var reopened = new PriceCacheService(NullLogger<PriceCacheService>.Instance, settings);
-            Assert.Equal(12.5m, reopened.GetLatestPrices()[0].Price);
+            Assert.Equal(12.5m, reopened.GetLatestPrices().Single(p => p.To == "USD").Price);
         }
         finally
         {
