@@ -52,7 +52,7 @@ The old `DataAccess`, `PushLogHelper`, Name/Inscription cache services, API Npgs
 
 ## Implementation, verification, and cutover
 
-Completed in the test environment: old API on port 5057 plus PostgreSQL remains frozen; replacement API on isolated port 5058 reads Chia directly and uses a small SQLite file. The old baseline suite passes **31/31**; the replacement C# xUnit suite in `tests/migration` passes **12/12** including CAT/DID/NFT, height exclusion, puzzle/solution, blocks, prices, single-flight refresh, cache persistence, removed routes, and file-log rotation. The API-only Docker image built successfully and passed a separate prices/network smoke test on port 5059. No production process or PG volume was replaced or deleted.
+Completed in the test environment: old API on port 5057 plus PostgreSQL remains frozen; replacement API on isolated port 5058 reads Chia directly and uses a small SQLite file (44 KiB main file plus 89 KiB WAL after the sample tests). The old baseline suite passes **31/31**; the replacement C# xUnit suite in `tests/migration` passes **13/13** including CAT/DID/NFT, height exclusion, puzzle/solution, blocks, prices, single-flight refresh, stale-value preservation on upstream failure, cache persistence, removed routes, and file-log rotation. The API-only Docker image built successfully and passed a separate prices/network smoke test on port 5059. No production process or PG volume was replaced or deleted.
 
 Before production cutover:
 
