@@ -125,6 +125,52 @@ public class LegacyApiContractTests
     }
 
     [Fact]
+    public async Task HintLookupIncludesRealSeededChild()
+    {
+        const string hint = "0x1a68b05cf7e480a16283ae003d405972b95f6bd53fbb12ff5b6b09f7e12a3352";
+        var result = await PostJson("/Wallet/records", new
+        {
+            puzzleHashes = new[] { hint }, hint = true, includeSpentCoins = true,
+        });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var group = Assert.Single(body.RootElement.GetProperty("coins").EnumerateArray());
+        Assert.Contains(group.GetProperty("records").EnumerateArray(), record =>
+            record.GetProperty("coin").GetProperty("name").GetString() ==
+            "EFFC41C56DCC22D1CB3AAA60197BAE18DAAC0F521B2CE9751F91F7D543252167");
+    }
+
+    [Fact]
+    public async Task MultiplePuzzleHashesRetainPerHashGrouping()
+    {
+        const string known = "0x5e203e8472a28befa0fa47a7a27cd38ba2d4f699e008f342cd3efea1d233b9c2";
+        const string missing = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        var result = await PostJson("/Wallet/records", new
+        {
+            puzzleHashes = new[] { known, missing }, pageLength = 1,
+        });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var group = Assert.Single(body.RootElement.GetProperty("coins").EnumerateArray());
+        Assert.Equal(known, group.GetProperty("puzzleHash").GetString());
+        Assert.Single(group.GetProperty("records").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task MultipleCoinIdsOmitUnknownAndKeepUnspentShape()
+    {
+        const string unspent = "0xb8893cceeb6cdb2281a43491ded917e38ecf4c5fb742e2c2af9425f416ecc0cd";
+        const string missing = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        var result = await PostJson("/Wallet/get-coin-solution", new { coinIds = new[] { unspent, missing } });
+        Assert.Equal(200, result.Status);
+        using var body = JsonDocument.Parse(result.Body);
+        var spend = Assert.Single(body.RootElement.GetProperty("coinSpends").EnumerateArray());
+        Assert.Equal(191UL, spend.GetProperty("coin").GetProperty("amount").GetUInt64());
+        Assert.Equal("", spend.GetProperty("puzzle_reveal").GetString());
+        Assert.Equal("", spend.GetProperty("solution").GetString());
+    }
+
+    [Fact]
     public async Task SpentCoinHasRealPuzzleAndSolutionInBothEndpoints()
     {
         const string coinId = "0x4ebd64fa38da4aa0b27cd80d50b3358de6e542155bfe432fb212d1a63308c9e2";
